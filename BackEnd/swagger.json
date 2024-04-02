@@ -1,0 +1,2584 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "yarn_management",
+    "license": {
+      "name": "Apache 2.0"
+    }
+  },
+  "host": "localhost:7000",
+  "basePath": "/api",
+  "schemes": ["https", "http"],
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json", "application/file"],
+  "paths": {
+    "/signUp": {
+      "post": {
+        "description": "To create user data",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user-signup",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userSignupRequestData"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "description": "an authorization header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/signupResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid and non repeated data is required",
+            "schema": {
+              "$ref": "#/definitions/usersignUpErrorResponse"
+            }
+          }
+        },
+        "tags": ["user"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/logIn": {
+      "post": {
+        "description": "for logIn user",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "user-signup",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/userLogInRequestData"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/logInResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid login detail is required",
+            "schema": {
+              "$ref": "#/definitions/userLoginErrorResponse"
+            }
+          }
+        },
+        "tags": ["user"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/user/UserList": {
+      "get": {
+        "description": "for find All User",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of record you need",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "Number of page you want to skip",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/findUserResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid user data is required",
+            "schema": {
+              "$ref": "#/definitions/findUserErrorResponse"
+            }
+          }
+        },
+        "tags": ["user"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/user/editUserList/{token}": {
+      "put": {
+        "description": "edit user data",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create user",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/editUserRequestData"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/editUserResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid user data is required",
+            "schema": {
+              "$ref": "#/definitions/findUserErrorResponse"
+            }
+          }
+        },
+        "tags": ["user"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/user/deleteUser/{token}": {
+      "delete": {
+        "description": "delete user data",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteUserResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid user data is required",
+            "schema": {
+              "$ref": "#/definitions/findUserErrorResponse"
+            }
+          }
+        },
+        "tags": ["user"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/company/createCompany": {
+      "post": {
+        "description": "for create company",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create company",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createCompanyRequestData"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/createCompanyResponceData"
+            }
+          },
+          "400": {
+            "description": "Data can not be same as available data",
+            "schema": {
+              "$ref": "#/definitions/createCompanyErrorResponse"
+            }
+          }
+        },
+        "tags": ["company"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/company/findCompany": {
+      "get": {
+        "description": "for find All company",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of record you need",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "Number of page you want to skip",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/findCompanyResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid company data is required",
+            "schema": {
+              "$ref": "#/definitions/findCompanyErrorResponse"
+            }
+          }
+        },
+        "tags": ["company"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/company/editCompany/{token}": {
+      "put": {
+        "description": "edit company data",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create company",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createCompanyRequestData"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/editCompanyResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid company data is required",
+            "schema": {
+              "$ref": "#/definitions/findPartyErrorResponse"
+            }
+          }
+        },
+        "tags": ["company"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/company/deleteCompany/{token}": {
+      "delete": {
+        "description": "delete company data",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteCompanyResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid company data is required",
+            "schema": {
+              "$ref": "#/definitions/findCompanyErrorResponse"
+            }
+          }
+        },
+        "tags": ["company"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/party/createParty": {
+      "post": {
+        "description": "for create party",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create party",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createPartyRequestData"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/createPartyResponceData"
+            }
+          },
+          "400": {
+            "description": "Data can not be same as available data",
+            "schema": {
+              "$ref": "#/definitions/createPartyErrorResponse"
+            }
+          }
+        },
+        "tags": ["party"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/party/findParty": {
+      "get": {
+        "description": "for find All party",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of record you need",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "Number of page you want to skip",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/findPartyResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid company data is required",
+            "schema": {
+              "$ref": "#/definitions/findPartyErrorResponse"
+            }
+          }
+        },
+        "tags": ["party"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/party/editParty/{token}": {
+      "put": {
+        "description": "edit party data",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create party",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createPartyRequestData"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/editPartyResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid party data is required",
+            "schema": {
+              "$ref": "#/definitions/findPartyErrorResponse"
+            }
+          }
+        },
+        "tags": ["party"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/party/deleteParty/{token}": {
+      "delete": {
+        "description": "delete party data",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deletePartyResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid party data is required",
+            "schema": {
+              "$ref": "#/definitions/findPartyErrorResponse"
+            }
+          }
+        },
+        "tags": ["party"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/colorYarn/createColorYarn": {
+      "post": {
+        "description": "for create colorYarn",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create colorYarn",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createColorYarnRequestData"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/createColorYarnResponceData"
+            }
+          },
+          "400": {
+            "description": "Data can not be same as available data",
+            "schema": {
+              "$ref": "#/definitions/createColorYarnErrorResponse"
+            }
+          }
+        },
+        "tags": ["colorYarn"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/colorYarn/findColorYarn": {
+      "get": {
+        "description": "for find All colorYarn",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of record you need",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "Number of page you want to skip",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/findColorYarnResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid colorYarn data is required",
+            "schema": {
+              "$ref": "#/definitions/findColorYarnErrorResponse"
+            }
+          }
+        },
+        "tags": ["colorYarn"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/colorYarn/editColorYarn/{token}": {
+      "put": {
+        "description": "edit coloryarn data",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create party",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createColorYarnRequestData"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/editColorYarnResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid party data is required",
+            "schema": {
+              "$ref": "#/definitions/findColorYarnErrorResponse"
+            }
+          }
+        },
+        "tags": ["colorYarn"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/colorYarn/deleteColorYarn/{token}": {
+      "delete": {
+        "description": "delete coloryarn data",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteColorYarnResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid party data is required",
+            "schema": {
+              "$ref": "#/definitions/findColorYarnErrorResponse"
+            }
+          }
+        },
+        "tags": ["colorYarn"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/design/createDesign": {
+      "post": {
+        "description": "for create Design",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "type": "string",
+            "description": "Name of the item"
+          },
+          {
+            "name": "pick",
+            "in": "formData",
+            "type": "integer",
+            "description": "Pick value"
+          },
+          {
+            "name": "reed",
+            "in": "formData",
+            "type": "integer",
+            "description": "Reed value"
+          },
+          {
+            "name": "hook",
+            "in": "formData",
+            "type": "integer",
+            "description": "Hook value"
+          },
+          {
+            "name": "dashRepeat",
+            "in": "formData",
+            "type": "integer",
+            "description": "Dash repeat value"
+          },
+          {
+            "name": "feeder",
+            "in": "formData",
+            "type": "integer",
+            "description": "Feeder value"
+          },
+          {
+            "name": "pallu",
+            "in": "formData",
+            "type": "integer",
+            "description": "Pallu value"
+          },
+          {
+            "name": "ground",
+            "in": "formData",
+            "type": "integer",
+            "description": "Ground value"
+          },
+          {
+            "name": "finalCut",
+            "in": "formData",
+            "type": "number",
+            "format": "double",
+            "description": "Final cut value"
+          },
+          {
+            "name": "avgPick",
+            "in": "formData",
+            "type": "number",
+            "format": "double",
+            "description": "Average pick value"
+          },
+          {
+            "name": "totalCards",
+            "in": "formData",
+            "type": "number",
+            "format": "double",
+            "description": "Total cards value"
+          },
+          {
+            "name": "feeders",
+            "in": "formData",
+            "type": "string",
+            "format": "json",
+            "description": "JSON string representation of feeders array"
+          },
+          {
+            "in": "formData",
+            "name": "image",
+            "type": "file"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/createDesignResponceData"
+            }
+          },
+          "400": {
+            "description": "Data can not be same as available data",
+            "schema": {
+              "$ref": "#/definitions/createDesignErrorResponse"
+            }
+          }
+        },
+        "tags": ["Design"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/design/findDesign": {
+      "get": {
+        "description": "for find All Design",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of record you need",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "Number of page you want to skip",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/findDesignResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid colorYarn data is required",
+            "schema": {
+              "$ref": "#/definitions/findDesignErrorResponse"
+            }
+          }
+        },
+        "tags": ["Design"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/design/editDesign/{token}": {
+      "put": {
+        "description": "edit Design data",
+        "consumes": ["multipart/form-data"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "reed",
+            "in": "formData",
+            "type": "integer",
+            "description": "Reed value"
+          },
+          {
+            "name": "hook",
+            "in": "formData",
+            "type": "integer",
+            "description": "Hook value"
+          },
+          {
+            "name": "dashRepeat",
+            "in": "formData",
+            "type": "integer",
+            "description": "Dash repeat value"
+          },
+          {
+            "name": "feeder",
+            "in": "formData",
+            "type": "integer",
+            "description": "Feeder value"
+          },
+          {
+            "name": "pallu",
+            "in": "formData",
+            "type": "integer",
+            "description": "Pallu value"
+          },
+          {
+            "name": "ground",
+            "in": "formData",
+            "type": "integer",
+            "description": "Ground value"
+          },
+          {
+            "name": "finalCut",
+            "in": "formData",
+            "type": "number",
+            "format": "double",
+            "description": "Final cut value"
+          },
+          {
+            "name": "avgPick",
+            "in": "formData",
+            "type": "number",
+            "format": "double",
+            "description": "Average pick value"
+          },
+          {
+            "name": "totalCards",
+            "in": "formData",
+            "type": "number",
+            "format": "double",
+            "description": "Total cards value"
+          },
+          {
+            "name": "feeders",
+            "in": "formData",
+            "type": "string",
+            "format": "json",
+            "description": "JSON string representation of feeders array"
+          },
+          {
+            "in": "formData",
+            "name": "image",
+            "type": "file"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/editDesignResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid party data is required",
+            "schema": {
+              "$ref": "#/definitions/editDesignErrorResponse"
+            }
+          }
+        },
+        "tags": ["Design"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/machine/createMachine": {
+      "post": {
+        "description": "for create machine",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "create machine",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createMachineRequestData"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/createMachineResponceData"
+            }
+          },
+          "400": {
+            "description": "Data can not be same as available data",
+            "schema": {
+              "$ref": "#/definitions/createMachineErrorResponse"
+            }
+          }
+        },
+        "tags": ["Machine"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/machine/findMachine": {
+      "get": {
+        "description": "for find All machine",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of record you need",
+            "required": true,
+            "type": "number"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "description": "Number of page you want to skip",
+            "required": true,
+            "type": "number"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/findMachineResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid machine data is required",
+            "schema": {
+              "$ref": "#/definitions/findMachineErrorResponse"
+            }
+          }
+        },
+        "tags": ["Machine"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/machine/editMachine/{token}": {
+      "put": {
+        "description": "edit machine data",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "edit machine",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/createMachineRequestData"
+            }
+          },
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/editMachineResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid machine data is required",
+            "schema": {
+              "$ref": "#/definitions/createMachineErrorResponse"
+            }
+          }
+        },
+        "tags": ["Machine"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/machine/deleteMachine/{token}": {
+      "delete": {
+        "description": "delete machine data",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteMachineResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid machine data is required",
+            "schema": {
+              "$ref": "#/definitions/findMachineErrorResponse"
+            }
+          }
+        },
+        "tags": ["Machine"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/design/deleteDesign/{token}": {
+      "delete": {
+        "description": "delete coloryarn data",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteDesignResponceData"
+            }
+          },
+          "400": {
+            "description": "Valid design data is required",
+            "schema": {
+              "$ref": "#/definitions/findDesignErrorResponse"
+            }
+          }
+        },
+        "tags": ["Design"],
+        "x-auth-type": "Application & Application User",
+        "x-throttling-tier": "Unlimited"
+      }
+    }
+  },
+  "definitions": {
+    "userSignupRequestData": {
+      "type": "object",
+      "required": ["name", "password", "email", "phoneNumber"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Sanjay Rupareliya"
+        },
+        "password": {
+          "type": "string",
+          "example": "Hello@123"
+        },
+        "email": {
+          "type": "string",
+          "example": "Sanjay08_nr@yahoo.com"
+        },
+        "phoneNumber": {
+          "type": "number",
+          "example": 9328680111
+        },
+        "role": {
+          "type": "string",
+          "example": "Admin"
+        }
+      }
+    },
+    "userLogInRequestData": {
+      "type": "object",
+      "required": ["name", "password"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "Sanjay Rupareliya"
+        },
+        "password": {
+          "type": "string",
+          "example": "Hello@123"
+        },
+        "email": {
+          "type": "string",
+          "example": "Sanjay08_nr@yahoo.com"
+        }
+      }
+    },
+    "editUserRequestData": {
+      "type": "object",
+      "required": ["name", "password", "email", "phoneNumber"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "maulik"
+        },
+        "password": {
+          "type": "string",
+          "example": "Maulik@123"
+        },
+        "email": {
+          "type": "string",
+          "example": "maulikakbari2312@gmail.com"
+        },
+        "phoneNumber": {
+          "type": "number",
+          "example": 9090909090
+        },
+        "role": {
+          "type": "string",
+          "example": "Backend Developer"
+        }
+      }
+    },
+    "createCompanyRequestData": {
+      "type": "object",
+      "required": ["name", "password"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "varni creation"
+        },
+        "address": {
+          "type": "string",
+          "example": "b2/401, shree vinayak"
+        },
+        "mobile": {
+          "type": "number",
+          "example": 1234567891
+        }
+      }
+    },
+    "createPartyRequestData": {
+      "type": "object",
+      "required": ["name", "address", "mobile"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "example": "varni creation"
+        },
+        "address": {
+          "type": "string",
+          "example": "b2/401, shree vinayak"
+        },
+        "mobile": {
+          "type": "number",
+          "example": 1234567891
+        },
+        "type": {
+          "type": "string",
+          "example": "Debitor"
+        }
+      }
+    },
+    "createMachineRequestData": {
+      "type": "object",
+      "properties": {
+        "machine": {
+          "type": "string",
+          "example": "1"
+        },
+        "panna": {
+          "type": "string",
+          "example": "1"
+        }
+      }
+    },
+    "createColorYarnRequestData": {
+      "type": "object",
+      "required": ["colorCode", "colorQuality", "denier"],
+      "properties": {
+        "colorCode": {
+          "type": "string",
+          "example": "GOLD-150-POLY"
+        },
+        "colorQuality": {
+          "type": "string",
+          "example": "GOLD-EGAL"
+        },
+        "denier": {
+          "type": "number",
+          "example": 0.025
+        }
+      }
+    },
+    "signupResponceData": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "Sanjay Rupareliya"
+            },
+            "password": {
+              "type": "string",
+              "example": "Sanjay Rupareliya"
+            },
+            "email": {
+              "type": "string",
+              "example": "Sanjay08_nr@yahoo.com"
+            },
+            "phoneNumber": {
+              "type": "number",
+              "example": 9328680111
+            },
+            "role": {
+              "type": "string",
+              "example": "Admin"
+            },
+            "token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6IlNhbmpheSBSdXBhcmVsaXlhIiwiZW1haWwiOiJTYW5qYXkwOF9uckB5YWhvby5jb20iLCJwaG9uZU51bWJlciI6OTMyODY4MDExMSwicGFzc3dvcmQiOiJTYW5qYXlAMDA3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNjk4MzMyODUxfQ.N6N5lXEbZ9wkZHIVeSxh1l67qqQSHaO8I6R2EVBQI6A"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "a6de4910-04c4-4d24-978d-96daef447d52"
+            },
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "logInResponceData": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "properties": {
+            "message": {
+              "type": "string",
+              "example": "User has been logged in successfully"
+            },
+            "token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6Im1hdWxpayIsImVtYWlsIjoibWF1bGlrQGdtYWlsLmNvbSIsInBob25lTnVtYmVyIjoxMjM0NTY3ODkwLCJpYXQiOjE2OTg0OTI1MDB9.i6319HgGUutPqRohHeSm-dtq0H7XqojAAeVSLWmpdXo"
+            }
+          }
+        }
+      }
+    },
+    "createCompanyResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Company created successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "varni creation"
+            },
+            "address": {
+              "type": "string",
+              "example": "b2/401, shree vinayak"
+            },
+            "mobile": {
+              "type": "number",
+              "example": 7284000090
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+            },
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "createPartyResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Party created successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "varni creation"
+            },
+            "address": {
+              "type": "string",
+              "example": "b2/401, shree vinayak"
+            },
+            "mobile": {
+              "type": "number",
+              "example": 7284000090
+            },
+            "type": {
+              "type": "string",
+              "example": "Debitor"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+            },
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "createMachineResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Machine created successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "machine": {
+              "type": "string",
+              "example": "3"
+            },
+            "panna": {
+              "type": "string",
+              "example": "3"
+            },
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "createColorYarnResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "ColorYarn created successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "colorCode": {
+              "type": "string",
+              "example": "GOLD-150-POLY"
+            },
+            "colorQuality": {
+              "type": "string",
+              "example": "GOLD-EGAL"
+            },
+            "denier": {
+              "type": "number",
+              "example": 0.025
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+            },
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "createDesignResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Design Data created successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "example": "A5"
+            },
+            "pick": {
+              "type": "number",
+              "example": 32
+            },
+            "reed": {
+              "type": "number",
+              "example": 32342
+            },
+            "avgPick": {
+              "type": "number",
+              "example": 11333
+            },
+            "totalCards": {
+              "type": "number",
+              "example": 33999
+            },
+            "finalCut": {
+              "type": "number",
+              "example": 0.08
+            },
+            "ground": {
+              "type": "number",
+              "example": 3
+            },
+            "pallu": {
+              "type": "number",
+              "example": 2
+            },
+            "hook": {
+              "type": "number",
+              "example": 432
+            },
+            "dashRepeat": {
+              "type": "number",
+              "example": 3
+            },
+            "feeder": {
+              "type": "number",
+              "example": 3
+            },
+            "image": {
+              "type": "string",
+              "example": "1702096520738.jpg"
+            },
+            "feeders": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/feeders"
+              }
+            },
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "editDesignResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Design Data updated successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "654642c2fd016943d2adb896"
+            },
+            "name": {
+              "type": "string",
+              "example": "A5"
+            },
+            "pick": {
+              "type": "number",
+              "example": 32
+            },
+            "reed": {
+              "type": "number",
+              "example": 32342
+            },
+            "avgPick": {
+              "type": "number",
+              "example": 11333
+            },
+            "totalCards": {
+              "type": "number",
+              "example": 33999
+            },
+            "finalCut": {
+              "type": "number",
+              "example": 0.08
+            },
+            "ground": {
+              "type": "number",
+              "example": 3
+            },
+            "pallu": {
+              "type": "number",
+              "example": 2
+            },
+            "hook": {
+              "type": "number",
+              "example": 432
+            },
+            "dashRepeat": {
+              "type": "number",
+              "example": 3
+            },
+            "feeder": {
+              "type": "number",
+              "example": 3
+            },
+            "image": {
+              "type": "string",
+              "example": "1702096520738.jpg"
+            },
+            "feeders": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/feeders"
+              }
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "findCompanyResponceData": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "example": 1
+        },
+        "totalPages": {
+          "type": "number",
+          "example": 1
+        },
+        "itemsPerPage": {
+          "type": "number",
+          "example": 3
+        },
+        "total": {
+          "type": "number",
+          "example": 1
+        },
+        "pageItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/findCompany"
+          }
+        },
+        "message": {
+          "type": "string",
+          "example": "Total 4 companies available "
+        }
+      }
+    },
+    "findPartyResponceData": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "example": 1
+        },
+        "totalPages": {
+          "type": "number",
+          "example": 1
+        },
+        "itemsPerPage": {
+          "type": "number",
+          "example": 3
+        },
+        "total": {
+          "type": "number",
+          "example": 1
+        },
+        "pageItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/findCompany"
+          }
+        },
+        "message": {
+          "type": "string",
+          "example": "Total 4 parties available "
+        }
+      }
+    },
+    "findMachineResponceData": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "example": 1
+        },
+        "totalPages": {
+          "type": "number",
+          "example": 1
+        },
+        "itemsPerPage": {
+          "type": "number",
+          "example": 3
+        },
+        "total": {
+          "type": "number",
+          "example": 1
+        },
+        "pageItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/findMachine"
+          }
+        },
+        "message": {
+          "type": "string",
+          "example": "Total 4 parties available "
+        }
+      }
+    },
+    "findColorYarnResponceData": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "example": 1
+        },
+        "totalPages": {
+          "type": "number",
+          "example": 1
+        },
+        "itemsPerPage": {
+          "type": "number",
+          "example": 3
+        },
+        "total": {
+          "type": "number",
+          "example": 1
+        },
+        "pageItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/findColorYarn"
+          }
+        },
+        "message": {
+          "type": "string",
+          "example": "Total 4 parties available "
+        }
+      }
+    },
+    "findDesignResponceData": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "example": 1
+        },
+        "totalPages": {
+          "type": "number",
+          "example": 1
+        },
+        "itemsPerPage": {
+          "type": "number",
+          "example": 3
+        },
+        "total": {
+          "type": "number",
+          "example": 1
+        },
+        "pageItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/findDesign"
+          }
+        },
+        "message": {
+          "type": "string",
+          "example": "Total 4 parties available "
+        }
+      }
+    },
+    "findUserResponceData": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "number",
+          "example": 1
+        },
+        "totalPages": {
+          "type": "number",
+          "example": 1
+        },
+        "itemsPerPage": {
+          "type": "number",
+          "example": 3
+        },
+        "total": {
+          "type": "number",
+          "example": 1
+        },
+        "pageItems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/findUser"
+          }
+        },
+        "message": {
+          "type": "string",
+          "example": "Total 4 users available "
+        }
+      }
+    },
+    "editUserResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "User data updated successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65427391d37f2cce8447fddb"
+            },
+            "name": {
+              "type": "string",
+              "example": "abc"
+            },
+            "password": {
+              "type": "string",
+              "example": "Maulik@123"
+            },
+            "email": {
+              "type": "string",
+              "example": "maulikakbari2312@gmail.com"
+            },
+            "phoneNumber": {
+              "type": "number",
+              "example": 1234567890
+            },
+            "role": {
+              "type": "string",
+              "example": "Backend Developer"
+            },
+            "token": {
+              "type": "string",
+              "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6IlNhbmpheSBSdXBhcmVsaXlhIiwiZW1haWwiOiJTYW5qYXkwOF9uckB5YWhvby5jb20iLCJwaG9uZU51bWJlciI6OTMyODY4MDExMSwicGFzc3dvcmQiOiJTYW5qYXlAMDA3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzAwOTg0MTkzfQ.ucaTBpcDt-Np--egj3mzRU4X8T0fQbqmAAi64c_671k"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "editCompanyResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Company data updated successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65427391d37f2cce8447fddb"
+            },
+            "name": {
+              "type": "string",
+              "example": "abc"
+            },
+            "address": {
+              "type": "string",
+              "example": "surat, gujarat"
+            },
+            "mobile": {
+              "type": "number",
+              "example": 1234567891
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "editPartyResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Party data updated successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65427391d37f2cce8447fddb"
+            },
+            "name": {
+              "type": "string",
+              "example": "abc"
+            },
+            "address": {
+              "type": "string",
+              "example": "surat, gujarat"
+            },
+            "mobile": {
+              "type": "number",
+              "example": 1234567891
+            },
+            "type": {
+              "type": "string",
+              "example": "Debitor"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "editMachineResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Machine data updated successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65427391d37f2cce8447fddb"
+            },
+            "machine": {
+              "type": "string",
+              "example": "3"
+            },
+            "panna": {
+              "type": "string",
+              "example": "5"
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "editColorYarnResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "ColorYarn data updated successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "example": "65427391d37f2cce8447fddb"
+            },
+            "colorCode": {
+              "type": "string",
+              "example": "Orange-150-POLY"
+            },
+            "colorQuality": {
+              "type": "string",
+              "example": "ORANGE-EGAL"
+            },
+            "denier": {
+              "type": "number",
+              "example": 0.026
+            },
+            "tokenId": {
+              "type": "string",
+              "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+            },
+            "__v": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "deleteUserResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "User data deleted successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "example": true
+            },
+            "deletedCount": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "deleteCompanyResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Company data deleted successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "example": true
+            },
+            "deletedCount": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "deletePartyResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Party data deleted successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "example": true
+            },
+            "deletedCount": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "deleteMachineResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Machine data deleted successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "example": true
+            },
+            "deletedCount": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "deleteColorYarnResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "ColorYarn data deleted successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "example": true
+            },
+            "deletedCount": {
+              "type": "number",
+              "example": 0
+            }
+          }
+        }
+      }
+    },
+    "deleteDesignResponceData": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 200
+        },
+        "message": {
+          "type": "string",
+          "example": "Design deleted successfully"
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "example": true
+            },
+            "deletedCount": {
+              "type": "number",
+              "example": 1
+            }
+          }
+        }
+      }
+    },
+    "findUser": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65427391d37f2cce8447fddb"
+        },
+        "name": {
+          "type": "string",
+          "example": "abc"
+        },
+        "password": {
+          "type": "string",
+          "example": "Hello@123"
+        },
+        "email": {
+          "type": "string",
+          "example": "Sanjay08_nr@yahoo.com"
+        },
+        "phoneNumber": {
+          "type": "number",
+          "example": 1234567890
+        },
+        "role": {
+          "type": "string",
+          "example": "Admin"
+        },
+        "token": {
+          "type": "string",
+          "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyTmFtZSI6IlNhbmpheSBSdXBhcmVsaXlhIiwiZW1haWwiOiJTYW5qYXkwOF9uckB5YWhvby5jb20iLCJwaG9uZU51bWJlciI6OTMyODY4MDExMSwicGFzc3dvcmQiOiJTYW5qYXlAMDA3Iiwicm9sZSI6IkFkbWluIiwiaWF0IjoxNzAwOTg0MTkzfQ.ucaTBpcDt-Np--egj3mzRU4X8T0fQbqmAAi64c_671k"
+        },
+        "tokenId": {
+          "type": "string",
+          "example": "a6de4910-04c4-4d24-978d-96daef447d52"
+        },
+        "__v": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "findCompany": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65427391d37f2cce8447fddb"
+        },
+        "name": {
+          "type": "string",
+          "example": "abc"
+        },
+        "address": {
+          "type": "string",
+          "example": "surat, gujarat"
+        },
+        "mobile": {
+          "type": "number",
+          "example": 1234567891
+        },
+        "tokenId": {
+          "type": "string",
+          "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+        },
+        "__v": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "findMachine": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65427391d37f2cce8447fddb"
+        },
+        "machine": {
+          "type": "string",
+          "example": "2"
+        },
+        "panna": {
+          "type": "string",
+          "example": "3"
+        },
+        "tokenId": {
+          "type": "string",
+          "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+        },
+        "__v": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "feeders": {
+      "type": "object",
+      "properties": {
+        "card-1": {
+          "type": "string",
+          "example": "333"
+        },
+        "pick-1": {
+          "type": "string",
+          "example": "111.00"
+        }
+      }
+    },
+    "findColorYarn": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65427391d37f2cce8447fddb"
+        },
+        "colorCode": {
+          "type": "string",
+          "example": "N.Blue-150"
+        },
+        "colorQuality": {
+          "type": "string",
+          "example": "N.Blue-EGAL"
+        },
+        "denier": {
+          "type": "number",
+          "example": 0.012
+        },
+        "tokenId": {
+          "type": "string",
+          "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+        },
+        "__v": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "findDesign": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65427391d37f2cce8447fddb"
+        },
+        "name": {
+          "type": "string",
+          "example": "A5"
+        },
+        "pick": {
+          "type": "number",
+          "example": 32
+        },
+        "reed": {
+          "type": "number",
+          "example": 32342
+        },
+        "avgPick": {
+          "type": "number",
+          "example": 11333
+        },
+        "totalCards": {
+          "type": "number",
+          "example": 33999
+        },
+        "finalCut": {
+          "type": "number",
+          "example": 0.08
+        },
+        "ground": {
+          "type": "number",
+          "example": 3
+        },
+        "pallu": {
+          "type": "number",
+          "example": 2
+        },
+        "hook": {
+          "type": "number",
+          "example": 432
+        },
+        "dashRepeat": {
+          "type": "number",
+          "example": 3
+        },
+        "feeder": {
+          "type": "number",
+          "example": 3
+        },
+        "image": {
+          "type": "string",
+          "example": "1702096520738.jpg"
+        },
+        "feeders": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/feeders"
+          }
+        },
+
+        "tokenId": {
+          "type": "string",
+          "example": "90d0002e-7fd1-47e3-a668-d1ad88dc90a9"
+        },
+        "__v": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "findParty": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "example": "65427391d37f2cce8447fddb"
+        },
+        "name": {
+          "type": "string",
+          "example": "abc"
+        },
+        "address": {
+          "type": "string",
+          "example": "surat, gujarat"
+        },
+        "mobile": {
+          "type": "number",
+          "example": 1234567891
+        },
+        "type": {
+          "type": "string",
+          "example": "Debitor"
+        },
+        "tokenId": {
+          "type": "string",
+          "example": "4b0769b6-6945-458d-9f9e-8efa74b39ca2"
+        },
+        "__v": {
+          "type": "number",
+          "example": 0
+        }
+      }
+    },
+    "usersignUpErrorResponse": {
+      "type": "object",
+      "properties": {
+        "responseCode": {
+          "type": "number",
+          "example": 0
+        },
+        "responseMessage": {
+          "type": "string",
+          "example": "Invalid/Expire Token"
+        },
+        "responseData": {
+          "type": "string",
+          "example": "null"
+        }
+      }
+    },
+    "userLoginErrorResponse": {
+      "type": "object",
+      "properties": {
+        "responseCode": {
+          "type": "number",
+          "example": 0
+        },
+        "responseMessage": {
+          "type": "string",
+          "example": "User not found"
+        },
+        "responseData": {
+          "type": "string",
+          "example": "null"
+        }
+      }
+    },
+    "createCompanyErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Company name cannot be the same!"
+        }
+      }
+    },
+    "createPartyErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Party name cannot be the same!"
+        }
+      }
+    },
+    "createMachineErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Machine cannot be the same!"
+        }
+      }
+    },
+    "findMachineErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Machine not found"
+        }
+      }
+    },
+    "createColorYarnErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "ColorYarn colorCode and colorQuality cannot be the same!"
+        }
+      }
+    },
+    "createDesignErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Design name cannot be same!"
+        }
+      }
+    },
+    "findCompanyErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Company not found"
+        }
+      }
+    },
+    "findPartyErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Party not found"
+        }
+      }
+    },
+    "findColorYarnErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "ColorYArn not found"
+        }
+      }
+    },
+    "findDesignErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Design not found"
+        }
+      }
+    },
+    "editDesignErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "Image file not found"
+        }
+      }
+    },
+    "findUserErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "number",
+          "example": 400
+        },
+        "message": {
+          "type": "string",
+          "example": "User not found"
+        }
+      }
+    }
+  }
+}
