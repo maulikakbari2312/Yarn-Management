@@ -196,7 +196,7 @@ const DashboardRoutes = () => {
         layout: "/admin",
       }, {
         path: "/remaining-yarn-stock",
-        name: "Remaining Yarn Stock",
+        name: "All Yarn Stock",
         icon: <RemainingYarnIcon color='inherit' />,
         secondaryNavbar: true,
         component: RemainingYarnStock,

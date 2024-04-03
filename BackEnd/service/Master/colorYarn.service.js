@@ -11,11 +11,6 @@ exports.createColorYarnDetail = async (colorYarn) => {
           status: 400,
           message: "ColorYarn colorCode cannot be the same!",
         };
-      } else if (ele.colorQuality.toLowerCase() === colorYarn.colorQuality.toLowerCase()) {
-        return {
-          status: 400,
-          message: "ColorYarn colorQuality cannot be the same!",
-        };
       }
     }
 

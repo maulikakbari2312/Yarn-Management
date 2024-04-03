@@ -9,7 +9,7 @@ const colorYarnSchema = new mongoose.Schema({
   },
   colorQuality: {
     type: String,
-    unique: [true, "colorQuality can not be same"],
+    unique: false,
     required: [true, "ColorYarn colorQuality is required"],
   },
   denier: {
