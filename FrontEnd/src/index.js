@@ -9,8 +9,8 @@ import theme from "./theme/theme.js";
 
 import AuthLayout from "./layouts/Auth.js";
 import AdminLayout from "./layouts/Admin.js";
-import { userLogin } from "./redux/action";
-import { userRole } from "./redux/action";
+import { userLogin } from "./redux/action/index.js";
+import { userRole } from "./redux/action/index.js";
 import Cookies from 'js-cookie';
 const App = () => {
   const user = useSelector((state) => state.user);

@@ -14,7 +14,7 @@ import {
 import Card from "../../components/Card/Card.js";
 import CardBody from "../../components/Card/CardBody.js";
 import CardHeader from "../../components/Card/CardHeader.js";
-import TablesTableRow from "../../components/Tables/TablesTableRow";
+import TablesTableRow from "../../components/Tables/TablesTableRow.js";
 import React, { useState } from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
 import { InputButton } from "components/InputFiled/index.jsx";
@@ -25,7 +25,7 @@ import { InputSelectBox } from "components/InputFiled/index.jsx";
 import { InputAutoComplete } from "components/InputFiled/index.jsx";
 import { InputMultiSelect } from "components/InputFiled/index.jsx";
 import Select from 'react-select';
-import CommonTable from "../../components/CommonTable"
+import CommonTable from "../../components/CommonTable/index.jsx"
 export default function Dashboard() {
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -159,6 +159,7 @@ export default function Dashboard() {
             </Box> */}
             <Box id="multi-select">
               <Select
+                autoComplete='off'
                 className="basic-single"
                 classNamePrefix="select"
                 defaultValue="ghana"

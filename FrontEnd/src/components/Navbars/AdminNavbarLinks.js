@@ -18,7 +18,7 @@ import avatar3 from "../../assets/img/avatars/avatar3.png";
 import { ProfileIcon, SettingsIcon, LightIcon, DarkLight } from "../Icons/Icons";
 // Custom Components
 import { ItemContent } from "../Menu/ItemContent";
-import { SearchBar } from "../Navbars/SearchBar/SearchBar";
+import { SearchBar } from "./SearchBar/SearchBar";
 import React from "react";
 import { NavLink } from "react-router-dom";
 
