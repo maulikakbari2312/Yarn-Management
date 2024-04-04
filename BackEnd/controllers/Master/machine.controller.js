@@ -28,7 +28,7 @@ exports.getMachine = async (req, res) => {
       return res.status(findMachine.status).send(findMachine);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

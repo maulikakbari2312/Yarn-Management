@@ -1,9 +1,17 @@
 const message = require("../../common/error.message");
+const {
+  findUsers,
+  createUser,
+  findUserByEmail,
+  findUserWithoutPassword,
+  findUserById,
+  deleteUserInfo,
+} = require("../../DBQuery/Master/login");
 const logInDetail = require("../../model/Master/login.model");
 
 exports.loginService = async (data, userToken) => {
   try {
-    const getUser = await logInDetail.find();
+    const getUser = await findUsers();
 
     for (const ele of getUser) {
       if (ele.email.toLocaleLowerCase() === data.email.toLocaleLowerCase()) {
@@ -22,7 +30,8 @@ exports.loginService = async (data, userToken) => {
       role: data.role,
       token: userToken,
     };
-    const createSuperAdmin = new logInDetail(detail);
+
+    const createSuperAdmin = await createUser(detail);
     const createData = await createSuperAdmin.save();
     return {
       status: 200,
@@ -36,7 +45,7 @@ exports.loginService = async (data, userToken) => {
 
 exports.findUser = async (userData) => {
   try {
-    const user = await logInDetail.findOne(userData);
+    const user = await findUserByEmail(userData);
     return user;
   } catch (error) {
     throw error;
@@ -45,15 +54,14 @@ exports.findUser = async (userData) => {
 
 exports.findUserRoles = async () => {
   try {
-    const user = await logInDetail.find();
-
-    if (!user) {
+    const users = await findUserWithoutPassword();
+    if (users.length === 0) {
       return {
         status: 400,
         message: message.USER_NOT_FOUND,
       };
     }
-    return user;
+    return users;
   } catch (error) {
     throw error;
   }
@@ -61,7 +69,7 @@ exports.findUserRoles = async () => {
 
 exports.editUserDetail = async (data, token) => {
   try {
-    const getUserEmail = await logInDetail.findOne({ email: data.email });
+    const getUserEmail = await findUserByEmail({ email: data.email });
     if (
       getUserEmail &&
       getUserEmail.tokenId !== token &&
@@ -81,7 +89,7 @@ exports.editUserDetail = async (data, token) => {
       role: data.role,
     };
 
-    const userToUpdate = await logInDetail.findOne({ tokenId: token });
+    const userToUpdate = await findUserById(token);
 
     if (!userToUpdate) {
       return {
@@ -120,11 +128,9 @@ exports.editUserDetail = async (data, token) => {
   }
 };
 
-exports.deleteUserDetail = async (whereCondition) => {
+exports.deleteUserDetail = async (token) => {
   try {
-    const deleteUser = await logInDetail.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteUser = await deleteUserInfo(token);
     if (!deleteUser) {
       return {
         status: 404,

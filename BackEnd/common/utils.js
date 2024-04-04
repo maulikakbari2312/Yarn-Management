@@ -10,7 +10,6 @@ const createOneTimeToken = (user, secretKey) => {
         name: user?.name,
         email: user?.email,
         phoneNumber: user?.phoneNumber,
-        password: user?.password,
         role: user?.role,
       },
       secretKey

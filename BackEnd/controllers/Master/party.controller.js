@@ -28,7 +28,7 @@ exports.getParty = async (req, res) => {
       return res.status(findParty.status).send(findParty);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

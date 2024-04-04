@@ -32,7 +32,7 @@ exports.getProcessOrder = async (req, res) => {
       orderId
     );
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -73,7 +73,7 @@ exports.getAllProcessOrder = async (req, res) => {
       return res.status(findAllProcessOrders.status).send(findAllProcessOrders);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -120,7 +120,7 @@ exports.deleteAllProcessOrder = async (req, res) => {
       return res.status(deleteProcessorders.status).send(deleteProcessorders);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

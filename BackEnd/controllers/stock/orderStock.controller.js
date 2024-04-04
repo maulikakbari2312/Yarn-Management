@@ -8,7 +8,7 @@ exports.getOrderStock = async (req, res) => {
       return res.status(findAllOrderStock.status).send(findAllOrderStock);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -49,7 +49,7 @@ exports.getListOfOrders = async (req, res) => {
       return res.status(findListOfOrders.status).send(findListOfOrders);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -91,7 +91,7 @@ exports.getListOfOrderDesign = async (req, res) => {
       return res.status(findListOfOrderDesign.status).send(findListOfOrderDesign);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -133,7 +133,7 @@ exports.getsareeYarn = async (req, res) => {
       return res.status(sareeYarn?.pageItems.status).send(sareeYarn?.pageItems);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

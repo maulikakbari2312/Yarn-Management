@@ -88,7 +88,6 @@ async function createNewOrder(data, orderId, orderDetail, sixDigitNumber) {
       orderId: orderId,
     });
     const detail = await createOrderDetail.save();
-    console.log("===detail111111111=====", detail);
     for (const ele of detail?.orders) {
       const { pageItems, pendingOrderYarn } = await processOrderDetail(
         data,

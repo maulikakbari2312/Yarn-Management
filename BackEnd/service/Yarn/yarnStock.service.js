@@ -229,36 +229,35 @@ exports.findRemainingYarnStock = async () => {
         denierSet1.push(denierSet);
       }
     }
-
+    console.log("==denierSet1===", denierSet1);
     let mergedObjects1 = [];
+    const designArr = [];
     for (const data of pendingNewArr) {
-     
-if(data.pendingPcs > 0){
-  const findDesign = findPickByDesign.find(
-    (design) => design.name === data.design
-  );
-      if (findDesign) {
-        for (let i = 0; i < denierSet1.length; i++) {
-          const ele = denierSet1[i];
-          const result = ele.map((eleObj, index) => {
-            const getMatchingId = findMatching.find(
-              (element) => element.matchingId === eleObj.matchingId
-            );
-            if (getMatchingId && getMatchingId.name === findDesign.name ) {
-              const pickKey = `pick-${index + 1}`;
-              const pickValue = findDesign.feeders[index]
-                ? findDesign.feeders[index][pickKey]
-                : null;
-              return { ...eleObj, pick: pickValue };
-            } else {
-              return eleObj;
-            }
-          });
-          mergedObjects1.push(result);
-        }
-      }
-      } else {
-        console.error(`Design "${data.design}" not found in findPickByDesign`);
+      designArr.push(data.design);
+    }
+
+    const findDesign = findPickByDesign.find((design) =>
+      designArr.some((ele) => ele === design.name)
+    );
+
+    if (findDesign) {
+      for (let i = 0; i < denierSet1.length; i++) {
+        const ele = denierSet1[i];
+        const result = ele.map((eleObj, index) => {
+          const getMatchingId = findMatching.find(
+            (element) => element.matchingId === eleObj.matchingId
+          );
+          if (getMatchingId && getMatchingId.name === findDesign.name) {
+            const pickKey = `pick-${index + 1}`;
+            const pickValue = findDesign.feeders[index]
+              ? findDesign.feeders[index][pickKey]
+              : null;
+            return { ...eleObj, pick: pickValue };
+          } else {
+            return eleObj;
+          }
+        });
+        mergedObjects1.push(result);
       }
     }
     mergedObjects1 = mergedObjects1.flatMap((arr) =>
@@ -316,13 +315,13 @@ if(data.pendingPcs > 0){
       updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
       return updatedObj;
     });
-
+    console.log("==pageItems===", pageItems);
     let pendingOrderYarn = [];
     for (const data of pageItems) {
       for (const ele of yarnStock) {
         for (const order of pendingNewArr) {
-          const colorKey = Object.keys(data)[0]; 
-          const colorCode = data[colorKey]; 
+          const colorKey = Object.keys(data)[0];
+          const colorCode = data[colorKey];
           if (colorCode === ele.colorCode) {
             const remainYarn = {
               color: ele.colorCode,
@@ -339,7 +338,9 @@ if(data.pendingPcs > 0){
         }
       }
     }
-    const uniqueYarn = Array.from(new Set(pendingOrderYarn.map(JSON.stringify))).map(JSON.parse);
+    const uniqueYarn = Array.from(
+      new Set(pendingOrderYarn.map(JSON.stringify))
+    ).map(JSON.parse);
     return uniqueYarn;
   } catch (error) {
     console.log("error", error);

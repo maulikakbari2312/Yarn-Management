@@ -3,7 +3,16 @@ const matchingModel = require("../../model/Master/matching.model");
 const designModel = require("../../model/Master/design.model");
 const colorYarnModel = require("../../model/Master/colorYarn.model");
 const { v4: uuidv4 } = require("uuid");
-const uniqueMatchingId =  () => uuidv4();
+const {
+  findMatchings,
+  createMatching,
+  findMatchingsById,
+  updateMatching,
+  deleteMatchingInfo,
+} = require("../../DBQuery/Master/matching");
+const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
+const { findDesigns } = require("../../DBQuery/Master/design");
+const uniqueMatchingId = () => uuidv4();
 
 exports.createMatchingDetail = async (matching) => {
   try {
@@ -33,7 +42,8 @@ exports.createMatchingDetail = async (matching) => {
       feeders[`f${i}`] = matching[`f${i}`];
     }
 
-    const findMatching = await matchingModel.find();
+    const findMatching = await findMatchings();
+
     const isEqual = (obj1, obj2) =>
       JSON.stringify(obj1) === JSON.stringify(obj2);
     for (const ele of findMatching) {
@@ -48,9 +58,9 @@ exports.createMatchingDetail = async (matching) => {
     const finalMatchingData = {
       ...matchingData,
       feeders: feeders,
-      matchingId: MatchingId
+      matchingId: MatchingId,
     };
-    const createMatchingDetail = new matchingModel(finalMatchingData);
+    const createMatchingDetail = await createMatching(finalMatchingData);
     const detail = await createMatchingDetail.save();
 
     return {
@@ -59,7 +69,7 @@ exports.createMatchingDetail = async (matching) => {
       data: detail,
     };
   } catch (error) {
-    console.log("error", error);
+    console.log("==error===",error);
     return {
       status: 500,
       message: "Internal Server Error",
@@ -69,7 +79,7 @@ exports.createMatchingDetail = async (matching) => {
 
 exports.findColorMatching = async () => {
   try {
-    const getColorYarn = await colorYarnModel.find();
+    const getColorYarn = await findYarnColor();
 
     if (!getColorYarn) {
       return {
@@ -78,23 +88,24 @@ exports.findColorMatching = async () => {
       };
     }
 
-    const findYarnColor = getColorYarn
-    .map((ele) => {
-      return {
-        colorCode: ele.colorCode,
-      };
-    })
-    .filter((ele) => ele.colorCode);
+    const findColorYarn = getColorYarn
+      .map((ele) => {
+        return {
+          colorCode: ele.colorCode,
+        };
+      })
+      .filter((ele) => ele.colorCode);
 
-    return findYarnColor;
+    return findColorYarn;
   } catch (error) {
+    console.log("==error===",error);
     throw error;
   }
 };
 
 exports.findDesign = async () => {
   try {
-    const getDesign = await designModel.find();
+    const getDesign = await findDesigns();
 
     if (!getDesign) {
       return {
@@ -112,16 +123,16 @@ exports.findDesign = async () => {
       })
       .filter((ele) => ele.name && ele.pick);
 
-
     return findDesignDetail;
   } catch (error) {
+    console.log("==error===",error);
     throw error;
   }
 };
 
 exports.matchingList = async (matchingData) => {
   try {
-    const getMatching = await matchingModel.find();
+    const getMatching = await findMatchings();
 
     if (!getMatching) {
       return {
@@ -136,20 +147,20 @@ exports.matchingList = async (matchingData) => {
 
     return filteredMatching;
   } catch (error) {
+    console.log("==error===",error);
     throw error;
   }
 };
 
 exports.editMatchingDetail = async (data, token) => {
   try {
-    const getMatching = await matchingModel.find({ tokenId: token });
+    const getMatching = await findMatchingsById(token);
     const feeders = {};
 
     for (let i = 1; i <= getMatching[0].feeder; i++) {
       feeders[`f${i}`] = data[`f${i}`];
     }
-
-    const findMatching = await matchingModel.find();
+    const findMatching = await findMatchings();
     const isEqual = (obj1, obj2) =>
       JSON.stringify(obj1) === JSON.stringify(obj2);
     for (const ele of findMatching) {
@@ -160,11 +171,7 @@ exports.editMatchingDetail = async (data, token) => {
         };
       }
     }
-    const updateMatchingDetail = await matchingModel.findOneAndUpdate(
-      { tokenId: token },
-      { feeders: feeders },
-      { new: true }
-    );
+    const updateMatchingDetail = await updateMatching(token, feeders);
 
     if (!updateMatchingDetail) {
       return {
@@ -179,6 +186,7 @@ exports.editMatchingDetail = async (data, token) => {
       pageItems: updateMatchingDetail,
     };
   } catch (error) {
+    console.log("==error===",error);
     return {
       status: 500,
       message: "Internal Server Error",
@@ -186,11 +194,10 @@ exports.editMatchingDetail = async (data, token) => {
   }
 };
 
-exports.deleteMatchingDetail = async (whereCondition) => {
+exports.deleteMatchingDetail = async (token) => {
   try {
-    const deleteMatching = await matchingModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteMatching = await deleteMatchingInfo(token);
+
     if (!deleteMatching) {
       return {
         status: 404,
@@ -203,6 +210,7 @@ exports.deleteMatchingDetail = async (whereCondition) => {
       data: deleteMatching,
     };
   } catch (error) {
+    console.log("==error===",error);
     return {
       status: 500,
       message: "Internal Server Error",
@@ -212,7 +220,7 @@ exports.deleteMatchingDetail = async (whereCondition) => {
 
 exports.findGroundColor = async (design) => {
   try {
-    const getGroundColor = await matchingModel.find();
+    const getGroundColor = await findMatchings();
 
     const groundColorArr = [];
     for (let ele of getGroundColor) {

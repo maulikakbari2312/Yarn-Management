@@ -29,7 +29,7 @@ exports.getYarnSales = async (req, res) => {
       return res.status(findYarnSales.status).send(findYarnSales);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

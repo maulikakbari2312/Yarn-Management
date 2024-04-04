@@ -69,7 +69,7 @@ exports.findOrderById = async (req, res) => {
       return res.status(findByOrderId.status).send(findByOrderId);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -208,7 +208,7 @@ exports.findMatching = async (req, res) => {
       return res.status(findMatchingByDesign.status).send(findMatchingByDesign);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

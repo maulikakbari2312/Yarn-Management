@@ -1,11 +1,18 @@
 const message = require("../../common/error.message");
-const designModel = require("../../model/Master/design.model");
+const {
+  findDesigns,
+  createDesign,
+  findParticularDesign,
+  updateDesign,
+  deleteDesignInfo,
+  findDesignById,
+} = require("../../DBQuery/Master/design");
 const fs = require("fs").promises;
 const path = require("path");
 
 exports.createDesignDetail = async (design) => {
   try {
-    const getDesign = await designModel.find();
+    const getDesign = await findDesigns();
 
     for (const ele of getDesign) {
       if (ele.name.toLocaleLowerCase() === design.name.toLocaleLowerCase()) {
@@ -16,7 +23,7 @@ exports.createDesignDetail = async (design) => {
       }
     }
 
-    const createDesignDetail = new designModel(design);
+    const createDesignDetail = await createDesign(design);
     const detail = await createDesignDetail.save();
     return {
       status: 200,
@@ -34,7 +41,7 @@ exports.createDesignDetail = async (design) => {
 
 exports.findDesign = async () => {
   try {
-    const getDesign = await designModel.find();
+    const getDesign = await findDesigns();
     if (!getDesign) {
       return {
         status: 404,
@@ -49,9 +56,7 @@ exports.findDesign = async () => {
 
 exports.editDesignDetail = async (data, token) => {
   try {
-    const getDesign = await designModel.findOne({
-      name: { $regex: new RegExp(data.name, "i") },
-    });
+    const getDesign = await findParticularDesign(data);
 
     if (
       getDesign &&
@@ -67,7 +72,7 @@ exports.editDesignDetail = async (data, token) => {
     const newImage = data.image;
 
     if (newImage) {
-      const existingDesign = await designModel.findOne({ tokenId: token });
+      const existingDesign = await findDesignById(token);
 
       if (!existingDesign) {
         return {
@@ -98,11 +103,7 @@ exports.editDesignDetail = async (data, token) => {
       }
     }
 
-    const editDesign = await designModel.findOneAndUpdate(
-      { tokenId: token },
-      data,
-      { new: true }
-    );
+    const editDesign = await updateDesign(token, data);
 
     if (!editDesign) {
       return {
@@ -133,9 +134,7 @@ exports.editDesignDetail = async (data, token) => {
 
 exports.deleteDesignDetail = async (whereCondition) => {
   try {
-    const findImage = await designModel.findOne({
-      tokenId: whereCondition,
-    });
+    const findImage = await findDesignById(whereCondition);
 
     if (!findImage) {
       return {
@@ -144,9 +143,7 @@ exports.deleteDesignDetail = async (whereCondition) => {
       };
     }
 
-    const deleteDesign = await designModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteDesign = await deleteDesignInfo(whereCondition);
 
     if (deleteDesign.deletedCount === 0) {
       return {

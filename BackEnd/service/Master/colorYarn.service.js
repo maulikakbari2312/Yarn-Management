@@ -1,9 +1,15 @@
 const message = require("../../common/error.message");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
+const {
+  findYarnColor,
+  updateColorYarn,
+  deleteYarnColor,
+  findParticularYarnColor,
+  createYarnColor,
+} = require("../../DBQuery/Master/colorYarn");
 
 exports.createColorYarnDetail = async (colorYarn) => {
   try {
-    const getColorYarn = await colorYarnModel.find();
+    const getColorYarn = await findYarnColor();
 
     for (const ele of getColorYarn) {
       if (ele.colorCode.toLowerCase() === colorYarn.colorCode.toLowerCase()) {
@@ -19,7 +25,7 @@ exports.createColorYarnDetail = async (colorYarn) => {
       colorQuality: colorYarn.colorQuality,
       denier: colorYarn.denier,
     };
-    const createColorYarnDetail = new colorYarnModel(colorYarnData);
+    const createColorYarnDetail = await createYarnColor(colorYarnData);
     const detail = await createColorYarnDetail.save();
 
     return {
@@ -37,7 +43,7 @@ exports.createColorYarnDetail = async (colorYarn) => {
 
 exports.findColorYarn = async () => {
   try {
-    const getColorYarn = await colorYarnModel.find();
+    const getColorYarn = await findYarnColor();
     if (!getColorYarn || getColorYarn.length === 0) {
       return {
         status: 404,
@@ -45,13 +51,13 @@ exports.findColorYarn = async () => {
       };
     }
 
-    const renamedColorYarn = getColorYarn.map(yarn => ({
+    const renamedColorYarn = getColorYarn.map((yarn) => ({
       _id: yarn._id,
       colorCode: yarn.colorCode,
       colorQuality: yarn.colorQuality,
       denier: yarn.denier,
       tokenId: yarn.tokenId,
-      __v: yarn.__v
+      __v: yarn.__v,
     }));
 
     return renamedColorYarn;
@@ -62,10 +68,7 @@ exports.findColorYarn = async () => {
 
 exports.editColorYarnDetail = async (data, token) => {
   try {
-    const existingColorCode = await colorYarnModel.findOne({
-      colorCode: { $regex: new RegExp(data.colorCode, "i") },
-    });
-
+    const existingColorCode = await findParticularYarnColor(data);
     if (
       existingColorCode &&
       existingColorCode.tokenId !== token &&
@@ -97,11 +100,7 @@ exports.editColorYarnDetail = async (data, token) => {
       colorQuality: data.colorQuality,
     };
 
-    const editColorYarn = await colorYarnModel.findOneAndUpdate(
-      { tokenId: token },
-      colorYarnData,
-      { new: true }
-    );
+    const editColorYarn = await updateColorYarn(token, colorYarnData);
 
     if (!editColorYarn) {
       return {
@@ -125,9 +124,7 @@ exports.editColorYarnDetail = async (data, token) => {
 
 exports.deleteColorYarnDetail = async (whereCondition) => {
   try {
-    const deleteColorYarn = await colorYarnModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteColorYarn = await deleteYarnColor(whereCondition);
     if (!deleteColorYarn) {
       return {
         status: 404,
@@ -149,8 +146,7 @@ exports.deleteColorYarnDetail = async (whereCondition) => {
 
 exports.findColorCode = async (data) => {
   try {
-    const getColorYarn = await colorYarnModel.find();
-
+    const getColorYarn = await findYarnColor();
     if (!getColorYarn || getColorYarn.length === 0) {
       return {
         status: 404,
@@ -159,7 +155,6 @@ exports.findColorCode = async (data) => {
     }
 
     const codeDetail = getColorYarn.find((ele) => ele.colorCode === data);
-
     if (codeDetail) {
       return {
         status: 200,

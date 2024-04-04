@@ -1,9 +1,9 @@
 const message = require("../../common/error.message");
-const machineModel = require("../../model/Master/machine.model");
+const { findMachines, createMachine, findMachineById, updateMachine, deleteMachineById } = require("../../DBQuery/Master/machine");
 
 exports.createMachineDetail = async (machine) => {
   try {
-    const getMachine = await machineModel.find();
+    const getMachine = await findMachines();
 
     for (const ele of getMachine) {
       if (ele.machine === machine.machine) {
@@ -13,12 +13,11 @@ exports.createMachineDetail = async (machine) => {
         };
       }
     }
-
     const machineData = {
       machine: machine.machine,
       panna: machine.panna,
     };
-    const createMachineDetail = new machineModel(machineData);
+    const createMachineDetail = await createMachine(machineData);
     const detail = await createMachineDetail.save();
 
     return {
@@ -36,7 +35,7 @@ exports.createMachineDetail = async (machine) => {
 
 exports.findMachine = async () => {
   try {
-    const getMachine = await machineModel.find();
+    const getMachine = await findMachines();
     if (!getMachine) {
       return {
         status: 404,
@@ -51,7 +50,7 @@ exports.findMachine = async () => {
 
 exports.editMachineDetail = async (data, token) => {
   try {
-    const getMachine = await machineModel.findOne({ machine: data.machine });
+    const getMachine = await findMachineById({ machine: data.machine });
     if (getMachine && getMachine.tokenId !== token) {
       return {
         status: 400,
@@ -77,11 +76,7 @@ exports.editMachineDetail = async (data, token) => {
         message: message.MACHINE_NOT_FOUND,
       };
     }
-    const editMachine = await machineModel.findOneAndUpdate(
-      { tokenId: token },
-      machineData,
-      { new: true }
-    );
+    const editMachine = await updateMachine(token,machineData)
 
     if (!editMachine) {
       return {
@@ -103,11 +98,10 @@ exports.editMachineDetail = async (data, token) => {
   }
 };
 
-exports.deleteMachineDetail = async (whereCondition) => {
+exports.deleteMachineDetail = async (token) => {
   try {
-    const deleteMachine = await machineModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteMachine = await deleteMachineById(token);
+  
     if (!deleteMachine) {
       return {
         status: 404,

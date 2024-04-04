@@ -8,7 +8,7 @@ exports.getSareeStock = async (req, res) => {
       return res.status(findAllSareeStock.status).send(findAllSareeStock);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

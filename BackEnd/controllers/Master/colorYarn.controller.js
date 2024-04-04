@@ -30,7 +30,7 @@ exports.getColorYarn = async (req, res) => {
       return res.status(findColorYarn.status).send(findColorYarn);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;

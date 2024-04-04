@@ -1,10 +1,15 @@
 const message = require("../../common/error.message");
-const partyModel = require("../../model/Master/party.model");
+const {
+  createParty,
+  findParticularParty,
+  updatePartyInfo,
+  deletePartyInfo,
+  findParties,
+} = require("../../DBQuery/Master/party");
 
 exports.createPartyDetail = async (party) => {
   try {
-    const getParty = await partyModel.find();
-
+    const getParty = await findParties();
     for (const ele of getParty) {
       if (
         ele.name.toLowerCase() === party.name.toLowerCase() &&
@@ -23,7 +28,7 @@ exports.createPartyDetail = async (party) => {
       mobile: party.mobile,
       type: party.type,
     };
-    const createPartyDetail = new partyModel(partyData);
+    const createPartyDetail = await createParty(partyData);
     const detail = await createPartyDetail.save();
 
     return {
@@ -41,7 +46,7 @@ exports.createPartyDetail = async (party) => {
 
 exports.findParty = async () => {
   try {
-    const getParty = await partyModel.find();
+    const getParty = await findParties();
     if (!getParty) {
       return {
         status: 404,
@@ -56,15 +61,13 @@ exports.findParty = async () => {
 
 exports.editPartyDetail = async (data, token) => {
   try {
-    const getPartyName = await partyModel.findOne({
-      name: { $regex: new RegExp(data.name, "i") },
-    });
+    const getPartyName = await findParticularParty(data);
 
     if (
       getPartyName &&
       getPartyName.tokenId !== token &&
       getPartyName.name.toLowerCase() === data.name.toLowerCase() &&
-      getPartyName.type.toLowerCase()  === data.type.toLowerCase() 
+      getPartyName.type.toLowerCase() === data.type.toLowerCase()
     ) {
       return {
         status: 400,
@@ -97,11 +100,7 @@ exports.editPartyDetail = async (data, token) => {
       type: data.type,
     };
 
-    const editParty = await partyModel.findOneAndUpdate(
-      { tokenId: token },
-      partyData,
-      { new: true }
-    );
+    const editParty = await updatePartyInfo(token, partyData);
 
     if (!editParty) {
       return {
@@ -123,11 +122,10 @@ exports.editPartyDetail = async (data, token) => {
   }
 };
 
-exports.deletePartyDetail = async (whereCondition) => {
+exports.deletePartyDetail = async (token) => {
   try {
-    const deleteParty = await partyModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteParty = await deletePartyInfo(token);
+
     if (!deleteParty) {
       return {
         status: 404,

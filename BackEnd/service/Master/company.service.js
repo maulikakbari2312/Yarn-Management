@@ -1,10 +1,15 @@
 const message = require("../../common/error.message");
-const companyModel = require("../../model/Master/company.model");
+const {
+  findCompanies,
+  createCompany,
+  findParticularCompany,
+  updateCompany,
+  deleteCompanyInfo,
+} = require("../../DBQuery/Master/company");
 
 exports.createCompanyDetail = async (company) => {
   try {
-    const getCompany = await companyModel.find();
-
+    const getCompany = await findCompanies();
     for (const ele of getCompany) {
       if (ele.name.toLowerCase() === company.name.toLowerCase()) {
         return {
@@ -19,7 +24,7 @@ exports.createCompanyDetail = async (company) => {
       address: company.address,
       mobile: company.mobile,
     };
-    const createCompanyDetail = new companyModel(companyData);
+    const createCompanyDetail = await createCompany(companyData);
     const detail = await createCompanyDetail.save();
 
     return {
@@ -37,7 +42,7 @@ exports.createCompanyDetail = async (company) => {
 
 exports.findCompany = async () => {
   try {
-    const getCompany = await companyModel.find();
+    const getCompany = await findCompanies();
     if (!getCompany) {
       return {
         status: 404,
@@ -52,10 +57,7 @@ exports.findCompany = async () => {
 
 exports.editCompanyDetail = async (data, token) => {
   try {
-    const existingCompany = await companyModel.findOne({
-      name: { $regex: new RegExp(data.name, "i") },
-    });
-
+    const existingCompany = await findParticularCompany(data);
     if (
       existingCompany &&
       existingCompany.tokenId !== token &&
@@ -73,11 +75,7 @@ exports.editCompanyDetail = async (data, token) => {
       mobile: data.mobile,
     };
 
-    const editCompany = await companyModel.findOneAndUpdate(
-      { tokenId: token },
-      companyData,
-      { new: true }
-    );
+    const editCompany = await updateCompany(token,companyData);
 
     if (!editCompany) {
       return {
@@ -102,9 +100,8 @@ exports.editCompanyDetail = async (data, token) => {
 
 exports.deleteCompanyDetail = async (whereCondition) => {
   try {
-    const deleteCompany = await companyModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteCompany = await deleteCompanyInfo(whereCondition);
+    
     if (!deleteCompany) {
       return {
         status: 404,
