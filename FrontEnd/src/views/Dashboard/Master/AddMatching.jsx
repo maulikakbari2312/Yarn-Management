@@ -75,7 +75,7 @@ function AddMatching({ setIsAddPage, setIsFetch, colorCode, setColorCode }) {
 
     const fetchData = async () => {
         try {
-            const url = `${process.env.REACT_APP_HOST}/api/matching/listOfMatching?limit=${pagination?.pageSize}&offset=${pagination?.currentPage - 1}`;
+            const url = `${process.env.REACT_APP_HOST}/api/matching/listOfMatching`;
             const body = {
                 name: selected?.selectData?.user?.name,
                 pick: selected?.selectData?.user?.pick
