@@ -50,10 +50,11 @@ const Company = () => {
                 name: "Email",
                 type: "email",
             },
-            // {
-            //     name: "Password",
-            //     type: "text",
-            // },
+            {
+                name: "Password",
+                type: "text",
+                displayNone: 'none'
+            },
             {
                 name: "Phone Number",
                 type: "number",

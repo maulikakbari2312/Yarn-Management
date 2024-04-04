@@ -247,14 +247,14 @@ const DashboardRoutes = () => {
       state: "pageCollapse",
       icon: <CompanyIcon color='inherit' />,
       views: [
-        {
-          path: "/profile",
-          name: "Profile",
-          icon: <PersonIcon color='inherit' />,
-          secondaryNavbar: true,
-          component: Profile,
-          layout: "/admin",
-        },
+        // {
+        //   path: "/profile",
+        //   name: "Profile",
+        //   icon: <PersonIcon color='inherit' />,
+        //   secondaryNavbar: true,
+        //   component: Profile,
+        //   layout: "/admin",
+        // },
         isAdminCookie === "true" && {
           path: "/addAdmin",
           name: "Create Admin",
