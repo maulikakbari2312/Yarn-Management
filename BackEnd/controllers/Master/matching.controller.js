@@ -28,7 +28,7 @@ exports.getColorMatching = async (req, res) => {
       return res.status(findColorYarn.status).send(findColorYarn);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -69,7 +69,7 @@ exports.getDesignMatching = async (req, res) => {
       return res.status(findDesign.status).send(findDesign);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -113,7 +113,7 @@ exports.matchingList = async (req, res) => {
       return res.status(findMatching.status).send(findMatching);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
@@ -194,7 +194,7 @@ exports.findGroundColor = async (req, res) => {
       return res.status(findColorYarn.status).send(findColorYarn);
     }
 
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 1000 ;
     const offset = parseInt(req.query.offset) || 0;
 
     const startIndex = offset * limit;
