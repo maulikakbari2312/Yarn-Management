@@ -244,7 +244,7 @@ exports.findMatchingFeeder = async (orderId) => {
       }
     }
 
-let mergedObjects1 = [];
+    let mergedObjects1 = [];
 
     for (const data of result) {
       let findDesign = findPickByDesign.find((ele) => ele.name === data.design);
@@ -261,7 +261,8 @@ let mergedObjects1 = [];
               const pickValue = findDesign.feeders[index]
                 ? findDesign.feeders[index][pickKey]
                 : null;
-              return { ...eleObj, pick: pickValue };
+              const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+              return { ...eleObj, pick: pickValue, finalCut: finalCut };
             } else {
               return eleObj;
             }
@@ -271,10 +272,10 @@ let mergedObjects1 = [];
       } else {
         console.error(`Design "${data.design}" not found in findPickByDesign`);
       }
-  
-      mergedObjects1 = mergedObjects1.flatMap((arr) =>
-        arr.filter((obj) => obj.hasOwnProperty("pick"))
-      );
+      console.log("===mergedObjects1===", mergedObjects1);
+      mergedObjects1 = mergedObjects1
+        .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+        .filter((obj) => obj.hasOwnProperty("pick"));
     }
 
     let totalWeight = 0;
@@ -284,8 +285,8 @@ let mergedObjects1 = [];
       return rest;
     });
 
-    const calculateSareeWeight = (denier, pick) =>
-      (denier * pick * 52 * 1) / 9000000;
+    const calculateSareeWeight = (denier, pick, finalCut) =>
+      (denier * pick * finalCut * 52 * 1) / 9000000;
 
     const mergedObjects = {};
 
@@ -316,11 +317,15 @@ let mergedObjects1 = [];
     const obj = {};
     for (const data of mergedObjects1) {
       const arrayWeight = 0;
-        const totalSareeWeight =
-          arrayWeight +
-          calculateSareeWeight(Number(data?.denier), Number(data?.pick));
-        totalWeight += totalSareeWeight;
-        obj[data?.matchingId] = totalWeight;
+      const totalSareeWeight =
+        arrayWeight +
+        calculateSareeWeight(
+          Number(data?.denier),
+          Number(data?.pick),
+          Number(data?.finalCut)
+        );
+      totalWeight += totalSareeWeight;
+      obj[data?.matchingId] = totalWeight;
     }
     const matchingSareeWeight = obj;
     const matchingArra = [];
@@ -420,7 +425,7 @@ exports.findOrderById = async () => {
         _id: ele._id,
         party: ele.orders[0]?.party,
         design: ele.orders[0]?.design,
-        matching: `${result.length} matchings`,
+        matching: `matchings`,
         date: ele.orders[0]?.date,
         rate: ele.orders[0]?.rate,
         orderNo: ele.orders[0]?.orderNo,
@@ -817,7 +822,8 @@ async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId) {
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]
               : null;
-            return { ...eleObj, pick: pickValue };
+            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+            return { ...eleObj, pick: pickValue, finalCut: finalCut };
           } else {
             return eleObj;
           }
@@ -832,15 +838,20 @@ async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId) {
       arr.filter((obj) => obj.hasOwnProperty("pick"))
     );
 
-    const calculatYarnWeight = (denier, pick, order) =>
-      (denier * pick * order * 52 * 1) / 9000000;
+    const calculatYarnWeight = (denier, pick, order, finalCut) =>
+      (denier * pick * order * finalCut * 52 * 1) / 9000000;
 
     const resultArray = [];
     for (const item of mergedObjects1) {
       const arrayWeight = 0;
       const totalWeight =
         arrayWeight +
-        calculatYarnWeight(Number(item?.denier), Number(item?.pick), data.pcs);
+        calculatYarnWeight(
+          Number(item?.denier),
+          Number(item?.pick),
+          data.pcs,
+          Number(item?.finalCut)
+        );
       const calculatedObj = {
         ...item,
         weight: totalWeight,
@@ -1024,50 +1035,52 @@ async function editProcessOrderDetail(data, tokenId) {
 
     let findDesign = findPickByDesign.find((ele) => ele.name === data.design);
     let mergedObjects1 = [];
-      if (findDesign) {
-        for (let i = 0; i < denierSet1.length; i++) {
-          const ele = denierSet1[i];
-          const result = ele.map((eleObj, index) => {
-            const getMatchingId = findMatching.find(
-              (element) => element.matchingId === eleObj.matchingId
-            );
-            if (getMatchingId && getMatchingId.name === findDesign.name) {
-              const pickKey = `pick-${index + 1}`;
-              const pickValue = findDesign.feeders[index]
-                ? findDesign.feeders[index][pickKey]
-                : null;
-              return { ...eleObj, pick: pickValue };
-            } else {
-              return eleObj;
-            }
-          });
-          mergedObjects1.push(result);
-        }
-      } else {
-        console.error(`Design "${data.design}" not found in findPickByDesign`);
+    if (findDesign) {
+      for (let i = 0; i < denierSet1.length; i++) {
+        const ele = denierSet1[i];
+        const result = ele.map((eleObj, index) => {
+          const getMatchingId = findMatching.find(
+            (element) => element.matchingId === eleObj.matchingId
+          );
+          if (getMatchingId && getMatchingId.name === findDesign.name) {
+            const pickKey = `pick-${index + 1}`;
+            const pickValue = findDesign.feeders[index]
+              ? findDesign.feeders[index][pickKey]
+              : null;
+            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+            return { ...eleObj, pick: pickValue, finalCut:finalCut };
+          } else {
+            return eleObj;
+          }
+        });
+        mergedObjects1.push(result);
       }
-    
+    } else {
+      console.error(`Design "${data.design}" not found in findPickByDesign`);
+    }
+
     mergedObjects1 = mergedObjects1.flatMap((arr) =>
       arr.filter((obj) => obj.hasOwnProperty("pick"))
     );
-    const calculatYarnWeight = (denier, pick, order) =>
-      (denier * pick * order * 52 * 1) / 9000000;
+    const calculatYarnWeight = (denier, pick, order, finalCut) =>
+      (denier * pick * order * finalCut * 52 * 1) / 9000000;
 
     const resultArray = [];
     for (const item of mergedObjects1) {
       const arrayWeight = 0;
-        const totalWeight =
-          arrayWeight +
-          calculatYarnWeight(
-            Number(item?.denier),
-            Number(item?.pick),
-            data.pcs
-          );
-        const calculatedObj = {
-          ...item,
-          weight: totalWeight,
-        };
-        resultArray.push(calculatedObj);
+      const totalWeight =
+        arrayWeight +
+        calculatYarnWeight(
+          Number(item?.denier),
+          Number(item?.pick),
+          data.pcs,
+          Number(item?.finalCut)
+        );
+      const calculatedObj = {
+        ...item,
+        weight: totalWeight,
+      };
+      resultArray.push(calculatedObj);
     }
     const newArray = resultArray.map((obj) => {
       const { denier, matchingId, pick, ...rest } = obj;
@@ -1100,7 +1113,7 @@ async function editProcessOrderDetail(data, tokenId) {
     let pendingOrderYarn = [];
 
     for (const item of pageItems) {
-      console.log("==pageItems===",pageItems);
+      console.log("==pageItems===", pageItems);
       const { feeders, weight } = item;
       const correspondingSalesDetail = salesDetails.find(
         (detail) => detail?.colorCode === feeders

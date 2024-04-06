@@ -252,7 +252,8 @@ exports.findRemainingYarnStock = async () => {
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]
               : null;
-            return { ...eleObj, pick: pickValue };
+            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+            return { ...eleObj, pick: pickValue, finalCut: finalCut };
           } else {
             return eleObj;
           }
@@ -260,13 +261,17 @@ exports.findRemainingYarnStock = async () => {
         mergedObjects1.push(result);
       }
     }
-    mergedObjects1 = mergedObjects1.flatMap((arr) =>
-      arr.filter((obj) => obj.hasOwnProperty("pick"))
-    );
+    // mergedObjects1 = mergedObjects1.flatMap((arr) =>
+    //   arr.filter((obj) => obj.hasOwnProperty("pick"))
+    // );
 
-    const calculatYarnWeight = (denier, pick, order) =>
-      (denier * pick * order * 52 * 1) / 9000000;
+    mergedObjects1 = mergedObjects1
+        .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+        .filter((obj) => obj.hasOwnProperty("pick"));
 
+    const calculatYarnWeight = (denier, pick, order, finalCut) =>
+      (denier * pick * order * finalCut * 52 * 1) / 9000000;
+    console.log("===mergedObjects1===", mergedObjects1);
     const resultArray = [];
     for (const data of mergedObjects1) {
       const arrayWeight = 0;
@@ -278,12 +283,14 @@ exports.findRemainingYarnStock = async () => {
         calculatYarnWeight(
           Number(data?.denier),
           Number(data?.pick),
-          findOrder.pendingPcs
+          findOrder.pendingPcs,
+          Number(data?.finalCut)
         );
       const calculatedObj = {
         ...data,
         weight: totalWeight,
       };
+      console.log("==calculatedObj===",calculatedObj);
       resultArray.push(calculatedObj);
     }
     const newArray = resultArray.map((obj) => {

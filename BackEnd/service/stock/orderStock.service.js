@@ -322,7 +322,8 @@ exports.getsareeYarn = async (orderNo, design) => {
               const pickValue = findDesign.feeders[index]
                 ? findDesign.feeders[index][pickKey]
                 : null;
-              return { ...eleObj, pick: pickValue };
+              const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+              return { ...eleObj, pick: pickValue, finalCut:finalCut };
             } else {
               return eleObj;
             }
@@ -333,12 +334,16 @@ exports.getsareeYarn = async (orderNo, design) => {
         console.error(`Design "${data.design}" not found in findPickByDesign`);
       }
     
-    mergedObjects1 = mergedObjects1.flatMap((arr) =>
-      arr.filter((obj) => obj.hasOwnProperty("pick"))
-    );
+    // mergedObjects1 = mergedObjects1.flatMap((arr) =>
+    //   arr.filter((obj) => obj.hasOwnProperty("pick"))
+    // );
 
-    const calculatYarnWeight = (denier, pick, order) =>
-      (denier * pick * order * 52 * 1) / 9000000;
+    mergedObjects1 = mergedObjects1
+        .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+        .filter((obj) => obj.hasOwnProperty("pick"));
+
+    const calculatYarnWeight = (denier, pick, order, finalCut) =>
+      (denier * pick * order *finalCut* 52 * 1) / 9000000;
 
     let totalWeight = 0;
     const resultArray = [];
@@ -350,7 +355,8 @@ exports.getsareeYarn = async (orderNo, design) => {
         const totalYarnWeight = arrayWeight + calculatYarnWeight(
           Number(data?.denier),
           Number(data?.pick),
-          findOrder.pendingPcs
+          findOrder.pendingPcs,
+          Number(data?.finalCut)
         );
         const calculatedObj = {
           ...data,
@@ -359,12 +365,12 @@ exports.getsareeYarn = async (orderNo, design) => {
         resultArray.push(calculatedObj);
     }
     const newArray = resultArray.map((obj) => {
-      const { denier, matchingId, pick, ...rest } = obj;
+      const { denier, matchingId, pick,finalCut, ...rest } = obj;
       return rest;
     });
 
-    const calculateSareeWeight = (denier, pick) =>
-      (denier * pick * 52 * 1) / 9000000;
+    const calculateSareeWeight = (denier, pick, finalCut) =>
+      (denier * pick * finalCut * 52 * 1) / 9000000;
 
     const mergedObjects = {};
 
@@ -420,7 +426,8 @@ exports.getsareeYarn = async (orderNo, design) => {
       const arrayWeight = 0;
         const totalSareeWeight = arrayWeight + calculateSareeWeight(
           Number(data?.denier),
-          Number(data?.pick)
+          Number(data?.pick),
+          Number(data?.finalCut)
         );
         totalWeight += totalSareeWeight;
         obj[data?.matchingId] = totalWeight;
