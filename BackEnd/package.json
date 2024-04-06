@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node build.js",
+    "build": "echo \"No build steps needed\"",
     "predev": "npm run build",
     "prestart": "npm run build",
     "start": "nodemon index.js"
-  },
+  },  
   "keywords": [],
   "author": "",
   "license": "ISC",
