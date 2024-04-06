@@ -7,8 +7,8 @@ WORKDIR /user/src/app
 #copy package.json
 COPY package*.json ./
 
-# npm package install
-RUN npm install
+# Install npm dependencies
+RUN npm install --verbose
 
 #Bundle app source
 COPY . .
