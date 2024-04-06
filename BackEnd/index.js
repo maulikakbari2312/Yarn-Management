@@ -10,7 +10,7 @@ app.use(cors());
 app.use("/Images", express.static("./Images"))
 
 function routeSetup() {
-  const routes = require("../BackEnd/Route/route");
+  const routes = require("./Route/route");
   routes.setUp(app)
 }
 routeSetup();
