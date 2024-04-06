@@ -13,5 +13,8 @@ RUN npm install
 #Bundle app source
 COPY . .
 
+# Expose the port 
+EXPOSE 3002
+
 # Defined command to run the app
 CMD [ "npm", "run", "start"]
