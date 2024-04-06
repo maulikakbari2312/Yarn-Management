@@ -7,8 +7,8 @@ WORKDIR /user/src/app
 #copy package.json
 COPY package*.json ./
 
-# Install npm dependencies
-RUN npm install --verbose
+# Install npm dependencies, trying different resolution strategies
+RUN npm install --verbose --legacy-peer-deps
 
 #Bundle app source
 COPY . .
