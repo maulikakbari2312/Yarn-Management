@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "predev":"run-s build",
-    "prestart": "run-s build",
+    "build": "node build.js",
+    "predev": "npm run build",
+    "prestart": "npm run build",
     "start": "nodemon index.js"
   },
   "keywords": [],
