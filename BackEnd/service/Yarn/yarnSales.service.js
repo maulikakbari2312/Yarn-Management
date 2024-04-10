@@ -2,6 +2,7 @@ const message = require("../../common/error.message");
 const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
 const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 var moment = require("moment");
+const YarnPartySalesDetail = require("../../model/Yarn/yarnPartySales");
 
 exports.createYarnSales = async (yarnSales) => {
   try {
@@ -117,6 +118,10 @@ exports.createYarnSales = async (yarnSales) => {
     const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
     const detail = await createYarnSalesDetail.save();
 
+    yarnSalesData["tokenId"] = createYarnSalesDetail.tokenId
+    const createYarnPartySalesDetail = new YarnPartySalesDetail(yarnSalesData);
+    await createYarnPartySalesDetail.save();
+    
     return {
       status: 200,
       message: message.YARN_SALES_CREATED,
@@ -133,7 +138,7 @@ exports.createYarnSales = async (yarnSales) => {
 
 exports.findYarnSales = async () => {
   try {
-    const salesDetails = await yarnSalesModel.find();
+    const salesDetails = await YarnPartySalesDetail.find();
     if (!salesDetails) {
       return {
         status: 404,
@@ -152,27 +157,27 @@ exports.editYarnSalesDetail = async (data, token) => {
     const salesDetails = await yarnSalesModel.find();
     const purchaseDetails = await yarnPurchaseModel.find();
 
-    const existingSalesInvoice = await yarnSalesModel.findOne({
-      invoiceNo: data.invoiceNo,
-    });
+    // const existingSalesInvoice = await yarnSalesModel.findOne({
+    //   invoiceNo: data.invoiceNo,
+    // });
 
-    if (existingSalesInvoice && existingSalesInvoice.tokenId !== token) {
-      return {
-        status: 400,
-        message: "YarnSales invoiceNo cannot be the same!",
-      };
-    }
+    // if (existingSalesInvoice && existingSalesInvoice.tokenId !== token) {
+    //   return {
+    //     status: 400,
+    //     message: "YarnSales invoiceNo cannot be the same!",
+    //   };
+    // }
 
-    const existingSalesLotNo = await yarnSalesModel.findOne({
-      lotNo: data.lotNo,
-    });
+    // const existingSalesLotNo = await yarnSalesModel.findOne({
+    //   lotNo: data.lotNo,
+    // });
 
-    if (existingSalesLotNo && existingSalesLotNo.tokenId !== token) {
-      return {
-        status: 400,
-        message: "YarnSales lotNo cannot be the same!",
-      };
-    }
+    // if (existingSalesLotNo && existingSalesLotNo.tokenId !== token) {
+    //   return {
+    //     status: 400,
+    //     message: "YarnSales lotNo cannot be the same!",
+    //   };
+    // }
 
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -244,16 +249,17 @@ exports.editYarnSalesDetail = async (data, token) => {
       };
     });
 
-  for (const ele of result) {
-  if (ele.colorCode === data.colorCode && ele.colorQuality === data.colorQuality) {
-    if (ele.weight < data.weight) {
-      return {
-        status: 400,
-        message: message.WEIGHT_DIFFERENCE,
-      };
-    }
-  }
-}
+//   for (const ele of result) {
+//   if (ele.colorCode === data.colorCode && ele.colorQuality === data.colorQuality) {
+//     if (ele.weight < data.weight) {
+//       return {
+//         status: 400,
+//         message: message.WEIGHT_DIFFERENCE,
+//       };
+//     }
+//   }
+// }
+
     const YarnSalesData = {
       invoiceNo: data.invoiceNo,
       lotNo: data.lotNo,
@@ -272,6 +278,12 @@ exports.editYarnSalesDetail = async (data, token) => {
       { new: true }
     );
 
+    await YarnPartySalesDetail.findOneAndUpdate(
+      { tokenId: token },
+      YarnSalesData,
+      { new: true }
+    );
+    
     if (!editYarnSales) {
       return {
         status: 404,

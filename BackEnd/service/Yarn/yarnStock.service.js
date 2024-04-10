@@ -72,11 +72,10 @@ exports.findYarnStock = async () => {
       return {
         colorCode: purchaseItem.colorCode,
         colorQuality: purchaseItem.colorQuality,
-        weight: purchaseItem.weight - salesItem.weight,
+        weight: purchaseItem.weight.toFixed(4) - salesItem.weight.toFixed(4),
         denier: purchaseItem.denier,
       };
     });
-
     return result;
   } catch (error) {
     console.log("error", error);

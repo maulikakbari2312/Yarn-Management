@@ -153,3 +153,28 @@ exports.deleteAllProcessOrder = async (req, res) => {
     }
   }
 };
+
+exports.editAllProcessOrder = async (req, res) => {
+  try {
+    const { orderId, tokenId, machineId } = req.params;
+    const body = req.body;
+    const editProcessorders =
+      await processOrdersService.editAllProcessOrder(
+        orderId,
+        tokenId,
+        machineId,
+        body?.pcsOnMachine
+      );
+
+    res.status(editProcessorders.status).send(editProcessorders);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const errorMessages = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      res.status(400).json({ errorMessages });
+    } else {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+};

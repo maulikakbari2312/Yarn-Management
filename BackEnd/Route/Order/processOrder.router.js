@@ -6,6 +6,7 @@ router.post("/createProcessOrder/:orderId/:tokenId",processOrdersController.crea
 router.get("/getProcessOrder/:orderId",processOrdersController.getProcessOrder);
 router.get("/getAllProcessOrder",processOrdersController.getAllProcessOrder);
 router.delete("/deleteProcessOrder/:orderId/:tokenId/:machineId",processOrdersController.deleteAllProcessOrder);
+router.put("/editProcessOrder/:orderId/:tokenId/:machineId",processOrdersController.editAllProcessOrder);
 
 
 

@@ -127,12 +127,7 @@ exports.editOrders = async (req, res) => {
       orderId,
       token
     );
-    utils.responseWithJsonBody(
-      res,
-      editOrdersData.status,
-      editOrdersData,
-      req.headers
-    );
+    res.status(editOrdersData.status).send(editOrdersData);
   } catch (error) {
     if (error.name === "ValidationError") {
       const errorMessages = Object.values(error.errors).map(

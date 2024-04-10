@@ -88,12 +88,15 @@ async function createNewOrder(data, orderId, orderDetail, sixDigitNumber) {
       orderId: orderId,
     });
     const detail = await createOrderDetail.save();
+    const findOrderById = await ordersModel.find({ orderId: orderId });
     for (const ele of detail?.orders) {
+    const findMyOrder = findOrderById[0].orders.find((item)=> item?.tokenId === ele?.tokenId);
       const { pageItems, pendingOrderYarn } = await processOrderDetail(
         data,
         orderDetail,
         sixDigitNumber,
-        ele?.tokenId
+        ele?.tokenId,
+        findMyOrder
       );
       return {
         status: 200,
@@ -123,20 +126,18 @@ async function updateExistingOrder(
       findOrder.orders[0]?.party === orderDetail.party &&
       findOrder.orders[0]?.date === orderDetail.date
     ) {
-      console.log("==orderDetail===", orderDetail);
       findOrder.orders.push(orderDetail);
       const detail = await findOrder.save();
-      console.log("==detail===", detail);
 
       const latestOrderIndex = detail.orders.length - 1;
       const latestOrder = detail.orders[latestOrderIndex];
-
       for (const ele of detail?.orders) {
         const { pageItems, pendingOrderYarn } = await processOrderDetail(
           data,
           orderDetail,
           sixDigitNumber,
-          latestOrder.tokenId
+          latestOrder?.tokenId,
+          latestOrder
         );
 
         return {
@@ -496,7 +497,7 @@ exports.findOrders = async (orderId) => {
   }
 };
 
-exports.editOrdersDetail = async (data, orderId, tokenId) => {
+exports. editOrdersDetail = async (data, orderId, tokenId) => {
   try {
     const findOrders = await ordersModel.findOne({ orderId: orderId });
 
@@ -539,7 +540,7 @@ exports.editOrdersDetail = async (data, orderId, tokenId) => {
 
     const salesDetails = await yarnSalesModel.find();
     console.log("===salesDetails===", salesDetails);
-    await editProcessOrderDetail(data, tokenId);
+    await editProcessOrderDetail(data, tokenId, findOrder);
 
     return {
       status: 200,
@@ -687,7 +688,7 @@ exports.findMatching = async (design) => {
   }
 };
 
-async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId) {
+async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId, findMyOrder) {
   try {
     const findMatching = await matchingModel.find();
     let colorYarn = [];
@@ -849,7 +850,7 @@ async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId) {
         calculatYarnWeight(
           Number(item?.denier),
           Number(item?.pick),
-          data.pcs,
+          findMyOrder?.pcsOnMachine,
           Number(item?.finalCut)
         );
       const calculatedObj = {
@@ -916,91 +917,91 @@ async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId) {
   }
 }
 
-async function editProcessOrderDetail(data, tokenId) {
+async function editProcessOrderDetail(data, tokenId, findOrder) {
   try {
-    const findMatching = await matchingModel.find();
-    let colorYarn = [];
-    for (const ele of findMatching) {
-      if (ele.matchingId === data.matchingId) {
-        colorYarn.push(ele.feeders);
-      }
-    }
-    const uniqueValues = new Set();
+    // const findMatching = await matchingModel.find();
+    // let colorYarn = [];
+    // for (const ele of findMatching) {
+    //   if (ele.matchingId === data.matchingId) {
+    //     colorYarn.push(ele.feeders);
+    //   }
+    // }
+    // const uniqueValues = new Set();
 
-    colorYarn.forEach((obj) => {
-      Object.values(obj).forEach((value) => {
-        uniqueValues.add(value);
-      });
-    });
+    // colorYarn.forEach((obj) => {
+    //   Object.values(obj).forEach((value) => {
+    //     uniqueValues.add(value);
+    //   });
+    // });
 
-    const purchaseDetails = await yarnPurchaseModel.find();
+    // const purchaseDetails = await yarnPurchaseModel.find();
     const salesDetails = await yarnSalesModel.find();
 
-    const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
-      const key = `${detail.colorCode}:${detail.colorQuality}`;
-      if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
-      }
+    // const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
+    //   const key = `${detail.colorCode}:${detail.colorQuality}`;
+    //   if (!map[key]) {
+    //     map[key] = { weight: 0, denier: detail.denier };
+    //   }
 
-      map[key].weight += detail.weight;
-      return map;
-    }, {});
-    const purchaseResult = Object.entries(purchaseAggregationMap).map(
-      ([key, values]) => {
-        const [colorCode, colorQuality] = key.split(":");
-        return {
-          Color: colorCode,
-          colorQuality,
-          weight: values.weight,
-          denier: values.denier,
-        };
-      }
-    );
+    //   map[key].weight += detail.weight;
+    //   return map;
+    // }, {});
+    // const purchaseResult = Object.entries(purchaseAggregationMap).map(
+    //   ([key, values]) => {
+    //     const [colorCode, colorQuality] = key.split(":");
+    //     return {
+    //       Color: colorCode,
+    //       colorQuality,
+    //       weight: values.weight,
+    //       denier: values.denier,
+    //     };
+    //   }
+    // );
 
-    const salesAggregationMap = salesDetails.reduce((map, detail) => {
-      const key = `${detail.colorCode}:${detail.colorQuality}`;
-      if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
-      }
+    // const salesAggregationMap = salesDetails.reduce((map, detail) => {
+    //   const key = `${detail.colorCode}:${detail.colorQuality}`;
+    //   if (!map[key]) {
+    //     map[key] = { weight: 0, denier: detail.denier };
+    //   }
 
-      map[key].weight += detail.weight;
+    //   map[key].weight += detail.weight;
 
-      return map;
-    }, {});
-    const salesResult = Object.entries(salesAggregationMap).map(
-      ([key, values]) => {
-        const [colorCode, colorQuality] = key.split(":");
-        return {
-          Color: colorCode,
-          colorQuality,
-          weight: values.weight,
-          denier: values.denier,
-        };
-      }
-    );
+    //   return map;
+    // }, {});
+    // const salesResult = Object.entries(salesAggregationMap).map(
+    //   ([key, values]) => {
+    //     const [colorCode, colorQuality] = key.split(":");
+    //     return {
+    //       Color: colorCode,
+    //       colorQuality,
+    //       weight: values.weight,
+    //       denier: values.denier,
+    //     };
+    //   }
+    // );
 
-    const purchaseDictionary = purchaseResult.reduce((dict, item) => {
-      const key = `${item.Color}-${item.colorQuality}`;
-      dict[key] = item;
-      return dict;
-    }, {});
-    const salesDictionary = salesResult.reduce((dict, item) => {
-      const key = `${item.Color}-${item.colorQuality}`;
-      dict[key] = item;
-      return dict;
-    }, {});
+    // const purchaseDictionary = purchaseResult.reduce((dict, item) => {
+    //   const key = `${item.Color}-${item.colorQuality}`;
+    //   dict[key] = item;
+    //   return dict;
+    // }, {});
+    // const salesDictionary = salesResult.reduce((dict, item) => {
+    //   const key = `${item.Color}-${item.colorQuality}`;
+    //   dict[key] = item;
+    //   return dict;
+    // }, {});
 
-    const yarnStock = Object.keys(purchaseDictionary).map((key) => {
-      const purchaseItem = purchaseDictionary[key] || { weight: 0 };
-      const salesItem = salesDictionary[key] || { weight: 0 };
+    // const yarnStock = Object.keys(purchaseDictionary).map((key) => {
+    //   const purchaseItem = purchaseDictionary[key] || { weight: 0 };
+    //   const salesItem = salesDictionary[key] || { weight: 0 };
 
-      return {
-        colorCode: purchaseItem.Color,
-        colorQuality: purchaseItem.colorQuality,
-        weight: purchaseItem.weight - salesItem.weight,
-        denier: purchaseItem.denier,
-      };
-    });
+    //   return {
+    //     colorCode: purchaseItem.Color,
+    //     colorQuality: purchaseItem.colorQuality,
+    //     weight: purchaseItem.weight - salesItem.weight,
+    //     denier: purchaseItem.denier,
+    //   };
+    // });
     const listOfOrders = [];
     const findMatchings = await matchingModel.find();
     for (const ele of findMatchings) {
@@ -1033,13 +1034,13 @@ async function editProcessOrderDetail(data, tokenId) {
       }
     }
 
-    let findDesign = findPickByDesign.find((ele) => ele.name === data.design);
+    let findDesign = findPickByDesign.find((ele) => ele.name === data?.design);
     let mergedObjects1 = [];
     if (findDesign) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
+          const getMatchingId = findMatchings.find(
             (element) => element.matchingId === eleObj.matchingId
           );
           if (getMatchingId && getMatchingId.name === findDesign.name) {
@@ -1056,7 +1057,7 @@ async function editProcessOrderDetail(data, tokenId) {
         mergedObjects1.push(result);
       }
     } else {
-      console.error(`Design "${data.design}" not found in findPickByDesign`);
+      console.error(`Design "${data?.design}" not found in findPickByDesign`);
     }
 
     mergedObjects1 = mergedObjects1.flatMap((arr) =>
@@ -1064,7 +1065,6 @@ async function editProcessOrderDetail(data, tokenId) {
     );
     const calculatYarnWeight = (denier, pick, order, finalCut) =>
       (denier * pick * order * finalCut * 52 * 1) / 9000000;
-
     const resultArray = [];
     for (const item of mergedObjects1) {
       const arrayWeight = 0;
@@ -1073,12 +1073,12 @@ async function editProcessOrderDetail(data, tokenId) {
         calculatYarnWeight(
           Number(item?.denier),
           Number(item?.pick),
-          data.pcs,
+          findOrder?.pcsOnMachine,
           Number(item?.finalCut)
         );
       const calculatedObj = {
         ...item,
-        weight: totalWeight,
+        weight: Number(totalWeight),
       };
       resultArray.push(calculatedObj);
     }
@@ -1096,7 +1096,6 @@ async function editProcessOrderDetail(data, tokenId) {
         mergedObjects[key] = obj;
       }
     });
-
     let pageItems = Object.values(mergedObjects);
     pageItems = pageItems.map((obj) => {
       const keys = Object.keys(obj);
@@ -1111,18 +1110,14 @@ async function editProcessOrderDetail(data, tokenId) {
       return updatedObj;
     });
     let pendingOrderYarn = [];
-
     for (const item of pageItems) {
-      console.log("==pageItems===", pageItems);
       const { feeders, weight } = item;
-      const correspondingSalesDetail = salesDetails.find(
-        (detail) => detail?.colorCode === feeders
-      );
-      if (correspondingSalesDetail) {
-        correspondingSalesDetail.colorCode = feeders;
-        correspondingSalesDetail.weight = weight;
-
-        await correspondingSalesDetail.save();
+      for (let detail of salesDetails) {
+        if (detail.orderToken === tokenId && detail.colorCode === feeders) {
+          detail.colorCode = feeders;
+          detail.weight = weight;
+          await detail.save();
+        }
       }
     }
 

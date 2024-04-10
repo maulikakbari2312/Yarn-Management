@@ -139,6 +139,10 @@ function AddOrders({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAddOr
                 {
                     name: "pcs",
                     type: "number",
+                },
+                {
+                    name: "Pending Pcs",
+                    type: "number",
                 }
             ]
         }

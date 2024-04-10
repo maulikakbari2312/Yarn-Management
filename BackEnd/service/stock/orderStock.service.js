@@ -373,7 +373,6 @@ exports.getsareeYarn = async (orderNo, design) => {
       (denier * pick * finalCut * 52 * 1) / 9000000;
 
     const mergedObjects = {};
-
     newArray.forEach((obj) => {
       const key = Object.values(obj)[0];
       if (mergedObjects[key]) {
@@ -384,7 +383,6 @@ exports.getsareeYarn = async (orderNo, design) => {
     });
 
     let pageItems = Object.values(mergedObjects);
-
     pageItems = pageItems.map((obj) => {
       const keys = Object.keys(obj);
       const firstKey = keys[0];
@@ -397,7 +395,6 @@ exports.getsareeYarn = async (orderNo, design) => {
       updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
       return updatedObj;
     });
-    
     let pendingOrderYarn = [];
     for (const data of pageItems) {
       for (const ele of yarnStock) {
