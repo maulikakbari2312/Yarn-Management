@@ -83,7 +83,7 @@ exports.createYarnSales = async (yarnSales) => {
     const result = Object.keys(purchaseDictionary).map((key) => {
       const purchaseItem = purchaseDictionary[key] || { weight: 0, denier: 0 };
       const salesItem = salesDictionary[key] || { weight: 0, denier: 0 };
-    
+
       return {
         colorCode: purchaseItem.colorCode,
         colorQuality: purchaseItem.colorQuality,
@@ -92,16 +92,19 @@ exports.createYarnSales = async (yarnSales) => {
       };
     });
 
-  for (const ele of result) {
-  if (ele.colorCode === yarnSales.colorCode && ele.colorQuality === yarnSales.colorQuality) {
-    if (ele.weight < yarnSales.weight) {
-      return {
-        status: 400,
-        message: message.WEIGHT_DIFFERENCE,
-      };
+    for (const ele of result) {
+      if (
+        ele.colorCode === yarnSales.colorCode &&
+        ele.colorQuality === yarnSales.colorQuality
+      ) {
+        if (ele.weight < yarnSales.weight) {
+          return {
+            status: 400,
+            message: message.WEIGHT_DIFFERENCE,
+          };
+        }
+      }
     }
-  }
-}
 
     const yarnSalesData = {
       invoiceNo: yarnSales.invoiceNo,
@@ -118,10 +121,10 @@ exports.createYarnSales = async (yarnSales) => {
     const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
     const detail = await createYarnSalesDetail.save();
 
-    yarnSalesData["tokenId"] = createYarnSalesDetail.tokenId
+    yarnSalesData["tokenId"] = createYarnSalesDetail.tokenId;
     const createYarnPartySalesDetail = new YarnPartySalesDetail(yarnSalesData);
     await createYarnPartySalesDetail.save();
-    
+
     return {
       status: 200,
       message: message.YARN_SALES_CREATED,
@@ -153,7 +156,6 @@ exports.findYarnSales = async () => {
 
 exports.editYarnSalesDetail = async (data, token) => {
   try {
-
     const salesDetails = await yarnSalesModel.find();
     const purchaseDetails = await yarnPurchaseModel.find();
 
@@ -240,7 +242,7 @@ exports.editYarnSalesDetail = async (data, token) => {
     const result = Object.keys(purchaseDictionary).map((key) => {
       const purchaseItem = purchaseDictionary[key] || { weight: 0, denier: 0 };
       const salesItem = salesDictionary[key] || { weight: 0, denier: 0 };
-    
+
       return {
         colorCode: purchaseItem.colorCode,
         colorQuality: purchaseItem.colorQuality,
@@ -249,16 +251,16 @@ exports.editYarnSalesDetail = async (data, token) => {
       };
     });
 
-//   for (const ele of result) {
-//   if (ele.colorCode === data.colorCode && ele.colorQuality === data.colorQuality) {
-//     if (ele.weight < data.weight) {
-//       return {
-//         status: 400,
-//         message: message.WEIGHT_DIFFERENCE,
-//       };
-//     }
-//   }
-// }
+    //   for (const ele of result) {
+    //   if (ele.colorCode === data.colorCode && ele.colorQuality === data.colorQuality) {
+    //     if (ele.weight < data.weight) {
+    //       return {
+    //         status: 400,
+    //         message: message.WEIGHT_DIFFERENCE,
+    //       };
+    //     }
+    //   }
+    // }
 
     const YarnSalesData = {
       invoiceNo: data.invoiceNo,
@@ -269,7 +271,7 @@ exports.editYarnSalesDetail = async (data, token) => {
       date: moment(data.date, "DD/MM/YYYY").format("DD/MM/YYYY"),
       weight: data.weight,
       denier: data.denier,
-      price: data.price
+      price: data.price,
     };
 
     const editYarnSales = await yarnSalesModel.findOneAndUpdate(
@@ -283,7 +285,7 @@ exports.editYarnSalesDetail = async (data, token) => {
       YarnSalesData,
       { new: true }
     );
-    
+
     if (!editYarnSales) {
       return {
         status: 404,
@@ -310,6 +312,16 @@ exports.deleteYarnSalesDetail = async (whereCondition) => {
       tokenId: whereCondition,
     });
     if (!deleteYarnSales) {
+      return {
+        status: 404,
+        message: "Unable to delete YarnSales",
+      };
+    }
+    const deletePartyYarnSales = await YarnPartySalesDetail.deleteOne({
+      tokenId: whereCondition,
+    });
+
+    if (!deletePartyYarnSales) {
       return {
         status: 404,
         message: "Unable to delete YarnSales",
