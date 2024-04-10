@@ -76,7 +76,13 @@ exports.findYarnStock = async () => {
         denier: purchaseItem.denier,
       };
     });
-    return result;
+
+    const formattedData = result.map(item => ({
+      ...item,
+      weight: parseFloat(item.weight.toFixed(4))
+    }));
+
+    return formattedData;
   } catch (error) {
     console.log("error", error);
     throw error;
