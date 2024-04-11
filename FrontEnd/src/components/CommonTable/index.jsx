@@ -15,7 +15,7 @@ import { useApi } from "network/api";
 import { parentSelectedData } from "redux/action/index.js";
 import { currentPageState } from "redux/action/index.js";
 import { pageSize } from "redux/action/index.js";
-const Filtering = ({ error, isError, isLoading, data, page, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
+const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProcess, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
     const { getApi, putApi, deleteApi, postApi } = useApi();
     const [filterText, setFilterText] = useState("");
     const textColor = useColorModeValue("gray.500", "white");
@@ -47,7 +47,7 @@ const Filtering = ({ error, isError, isLoading, data, page, tableTitle, url, set
 
     if (isError) return <h1>{error?.message}</h1>;
     const handleEdit = (row, handleType = "") => {
-        if (modelData?.page !== "Design" && modelData?.page !== "Matching" && modelData?.page !== "Orders" && modelData?.page !== "EditOrder") {
+        if (modelData?.page !== "Design" && modelData?.page !== "Matching" && modelData?.page !== "ProcessOrder" && modelData?.page !== "Orders" && modelData?.page !== "EditOrder") {
             setIsDialogOpen(true);
             dispatch(modelEdit(true));
             dispatch(modelDelete(false));
@@ -74,6 +74,11 @@ const Filtering = ({ error, isError, isLoading, data, page, tableTitle, url, set
                 setIsAddPage(true);
                 dispatch(modelEdit(false));
                 dispatch(parentSelectedData(row));
+            } else if (modelData?.page === "ProcessOrder") {
+                dispatch(modelEdit(true));
+                dispatch(selectData(row));
+                dispatch(modelDelete(false));
+                setIsDialogOpenProcess(true);
             } else {
                 setIsAddPage(true);
             }
@@ -208,6 +213,11 @@ const Filtering = ({ error, isError, isLoading, data, page, tableTitle, url, set
             {
                 name: 'Complete',
                 cell: (row) => <button onClick={() => handleComplete(row)}>Complete</button>,
+            },
+            {
+                name: 'Edit',
+                cell: (row) => <button onClick={() => handleEdit(row)}>Edit</button>,
+                id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             },
             {
                 name: 'Delete',

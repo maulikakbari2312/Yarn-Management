@@ -103,7 +103,7 @@
   min-width: 160px;
 }
 
-.ProcessOrder-wrapper .common-table [role="row"] > *:nth-last-child(2) {
+.ProcessOrder-wrapper .common-table [role="row"] > *:nth-last-child(3) {
   min-width: 183px;
 }
 
