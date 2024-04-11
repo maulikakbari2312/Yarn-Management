@@ -537,9 +537,6 @@ exports. editOrdersDetail = async (data, orderId, tokenId) => {
     }
 
     const updatedOrder = await findOrders.save();
-
-    const salesDetails = await yarnSalesModel.find();
-    console.log("===salesDetails===", salesDetails);
     await editProcessOrderDetail(data, tokenId, findOrder);
 
     return {
@@ -566,6 +563,15 @@ exports.deleteOrder = async (orderId, tokenId) => {
       };
     }
 
+    for (const ele of findOrders?.orders) {
+      if(ele?.pcs !== ele?.pendingPcs){
+        return {
+          status: 422,
+          message: "Order already in process. You cannot delete this order. you can edit it.",
+        };
+      }
+    }
+
     const updatedOrders = findOrders.orders.filter(
       (ele) => ele.tokenId !== tokenId
     );
@@ -575,9 +581,9 @@ exports.deleteOrder = async (orderId, tokenId) => {
 
     await yarnSalesModel.deleteMany({ orderToken: tokenId });
 
-    await pcsOnMachineModel.deleteMany({
-      tokenId: tokenId,
-    });
+    // await pcsOnMachineModel.deleteMany({
+    //   tokenId: tokenId,
+    // });
     return {
       status: 200,
       message: message.ORDERD_DELETE,
@@ -593,9 +599,15 @@ exports.deleteOrder = async (orderId, tokenId) => {
 };
 
 exports.deleteWholeOrder = async (orderId) => {
-  try {
+  try { 
     const findOrders = await ordersModel.findOne({ orderId: orderId });
     for (const ele of findOrders?.orders) {
+      if(ele?.pcs !== ele?.pendingPcs){
+        return {
+          status: 422,
+          message: "Order already in process. You cannot delete this order. you can edit it.",
+        };
+      }
       await yarnSalesModel.deleteMany({ orderToken: ele?.tokenId });
     }
 
@@ -609,16 +621,16 @@ exports.deleteWholeOrder = async (orderId) => {
         message: "Order is not found",
       };
     }
-    const deletepcsOnMachine = await pcsOnMachineModel.deleteMany({
-      orderId: orderId,
-    });
+    // const deletepcsOnMachine = await pcsOnMachineModel.deleteMany({
+    //   orderId: orderId,
+    // });
 
-    if (!deletepcsOnMachine) {
-      return {
-        status: 404,
-        message: "Order In Process is not found",
-      };
-    }
+    // if (!deletepcsOnMachine) {
+    //   return {
+    //     status: 404,
+    //     message: "Order In Process is not found",
+    //   };
+    // }
 
     return {
       status: 200,

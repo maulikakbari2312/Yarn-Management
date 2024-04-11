@@ -404,16 +404,16 @@ exports.getAllProcessOrder = async () => {
               ele.tokenId === detail.tokenId
             ) {
               const response = {
-                orderNo: ele.orderNo,
-                date: ele.date,
-                party: ele.party,
-                design: ele.design,
-                machineNo: machineData.machineNo,
-                groundColor: ele.groundColor,
-                pcsOnMachine: machineData.pcsOnMachine,
-                tokenId: ele.tokenId,
-                orderId: order.orderId,
-                machineId: machineData.machineId,
+                orderNo: ele?.orderNo,
+                date: ele?.date,
+                party: ele?.party,
+                design: ele?.design,
+                machineNo: machineData?.machineNo,
+                groundColor: ele?.groundColor,
+                pcsOnMachine: machineData?.pcsOnMachine,
+                tokenId: ele?.tokenId,
+                orderId: order?.orderId,
+                machineId: machineData?.machineId,
               };
               processOrderArr.push(response);
             }
@@ -510,6 +510,153 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
     );
 
     await findOrders.save();
+    const pendingOrderArr = [];
+    for (const order of findOrders?.orders) {
+      pendingOrderArr.push(order);
+    }
+    const pendingNewArr = [];
+    for (const ele of pendingOrderArr) {
+      if (ele.pcsOnMachine >= 0) {
+        pendingNewArr.push(ele);
+      }
+    }
+
+    const findMatching = await matchingModel.find();
+    const salesDetails = await YarnSalesDetail.find();
+
+    const listOfOrders = [];
+    const findMatchings = await matchingModel.find();
+    for (const ele of findMatchings) {
+      for (const data of pendingNewArr) {
+        if (ele?.matchingId === data?.matchingId) {
+          listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
+        }
+      }
+    }
+
+    const findFeeders = listOfOrders;
+    const findColorYarn = await colorYarnModel.find();
+    const findPickByDesign = await designModel.find();
+    const denierSet1 = [];
+
+    for (const feeder of findFeeders) {
+      const denierSet = [];
+      for (const [key, colorCode] of Object.entries(feeder)) {
+        const matchingColorYarn = findColorYarn.find(
+          (yarn) => yarn.colorCode === colorCode
+        );
+        if (matchingColorYarn) {
+          const feederDenierInfo = {};
+          feederDenierInfo[key] = colorCode;
+          feederDenierInfo["denier"] = matchingColorYarn.denier;
+          feederDenierInfo["matchingId"] = feeder.matchingId;
+          denierSet.push(feederDenierInfo);
+        }
+      }
+      if (denierSet.length > 0) {
+        denierSet1.push(denierSet);
+      }
+    }
+    let mergedObjects1 = [];
+    const designArr = [];
+    for (const data of pendingNewArr) {
+      designArr.push(data.design);
+    }
+
+    const findDesign = findPickByDesign.find((design) =>
+      designArr.some((ele) => ele === design.name)
+    );
+
+    if (findDesign) {
+      for (let i = 0; i < denierSet1.length; i++) {
+        const ele = denierSet1[i];
+        const result = ele.map((eleObj, index) => {
+          const getMatchingId = findMatching.find(
+            (element) => element.matchingId === eleObj.matchingId
+          );
+          if (getMatchingId && getMatchingId.name === findDesign.name) {
+            const pickKey = `pick-${index + 1}`;
+            const pickValue = findDesign.feeders[index]
+              ? findDesign.feeders[index][pickKey]
+              : null;
+            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+            return { ...eleObj, pick: pickValue, finalCut: finalCut };
+          } else {
+            return eleObj;
+          }
+        });
+        mergedObjects1.push(result);
+      }
+    }
+
+    mergedObjects1 = mergedObjects1
+      .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+      .filter((obj) => obj.hasOwnProperty("pick"));
+
+    const calculatYarnWeight = (denier, pick, order, finalCut) =>
+      (denier * pick * order * finalCut * 52 * 1) / 9000000;
+    const resultArray = [];
+    for (const data of mergedObjects1) {
+      const arrayWeight = 0;
+      const findOrder = pendingNewArr.find(
+        (order) => order.tokenId === tokenId
+      );
+      const totalWeight =
+        arrayWeight +
+        calculatYarnWeight(
+          Number(data?.denier),
+          Number(data?.pick),
+          findOrder?.pcsOnMachine,
+          Number(data?.finalCut)
+        );
+      const calculatedObj = {
+        ...data,
+        weight: totalWeight,
+      };
+      resultArray.push(calculatedObj);
+    }
+    console.log("==resultArray==",resultArray);
+    const newArray = resultArray.map((obj) => {
+      const { denier, matchingId, pick, ...rest } = obj;
+      return rest;
+    });
+
+    const mergedObjects = {};
+
+    newArray.forEach((obj) => {
+      const key = Object.values(obj)[0];
+      if (mergedObjects[key]) {
+        mergedObjects[key].weight += obj?.weight;
+      } else {
+        mergedObjects[key] = obj;
+      }
+    });
+
+    let pageItems = Object.values(mergedObjects);
+    pageItems = pageItems.map((obj) => {
+      const keys = Object.keys(obj);
+      const firstKey = keys[0];
+      const updatedObj = {};
+      const feederNumber = firstKey.replace(/f\d+/, "feeders");
+      updatedObj[feederNumber] = obj[firstKey];
+      keys.slice(1).forEach((key) => {
+        updatedObj[key] = obj[key];
+      });
+      updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
+      return updatedObj;
+    });
+    console.log("==pageItems===",pageItems);
+    for (const item of pageItems) {
+      const { feeders, weight } = item;
+      for (let detail of salesDetails) {
+        if (detail.orderToken === tokenId && detail.colorCode === feeders) {
+          detail.colorCode = feeders;
+          detail.weight = weight;
+          await detail.save();
+        }
+      }
+    }
+
     return pendingProcessPcs;
   } catch (error) {
     console.error("Error:", error);
