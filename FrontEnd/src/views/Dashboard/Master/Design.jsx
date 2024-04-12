@@ -77,10 +77,10 @@ function Design() {
                 name: "Hook",
                 type: "text",
             },
-            {
-                name: "Dash Repeat",
-                type: "text",
-            },
+            // {
+            //     name: "Dash Repeat",
+            //     type: "text",
+            // },
             {
                 name: "Feeder",
                 type: "text",
@@ -97,10 +97,10 @@ function Design() {
                 name: "Avg Pick",
                 type: "text",
             },
-            {
-                name: "Total Cards",
-                type: "text",
-            },
+            // {
+            //     name: "Total Cards",
+            //     type: "text",
+            // },
         ],
     };
 
@@ -257,8 +257,8 @@ function Design() {
                         name={`pallu`}
                         render={({ field, form }) => (
                             <FormControl
-                                isInvalid={form?.errors["pallu"] && form?.touched["pallu"]}
-                                {...controlStyles}
+                                // isInvalid={form?.errors["pallu"] && form?.touched["pallu"]}
+                                // {...controlStyles}
                             >
                                 <Box
                                     style={form.values.pallu !== row ? btnColor : btnSelected}
@@ -337,7 +337,6 @@ function Design() {
         "hook",
         "dash Repeat",
         "feeder",
-        "pallu",
         "ground",
         "image",
         "final Cut",
@@ -495,8 +494,10 @@ function Design() {
     };
 
     const handleGroundPallu = (form, name, row) => {
-        if (form.values.ground !== row && form.values.pallu !== row) {
-            form.setFieldValue(name, row);
+        if (form.values[name] === row) {
+            form.setFieldValue(name, ''); // Deselect
+        } else if(form.values.ground !== row && form.values.pallu !== row){
+            form.setFieldValue(name, row); // Select
         }
     };
 

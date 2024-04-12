@@ -15,7 +15,7 @@ exports.createDesign = async (req, res) => {
       totalCards: req.body.totalCards,
       finalCut: req.body.finalCut,
       ground: req.body.ground,
-      pallu: req.body.pallu,
+      pallu: req.body.pallu? req.body.pallu : 0,
       feeders: JSON.parse(req.body.feeders),
     };
         const designData = await designService.createDesignDetail(designDetails);

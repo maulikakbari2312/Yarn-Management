@@ -12,7 +12,7 @@ const matchingSchema = new mongoose.Schema({
   },
   pallu: {
     type: String,
-    required: [true, "Design pallu is required"],
+    required: false,
   },
   ground: {
     type: String,
