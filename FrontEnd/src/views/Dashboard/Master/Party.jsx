@@ -45,7 +45,7 @@ const Party = () => {
             {
                 name: "Type",
                 type: "select",
-                option: ['Debitor', 'Creditor'],
+                option: ['Debitor', 'Creditor', 'Manufacturer'],
             }
         ]
     };
@@ -125,6 +125,9 @@ const Party = () => {
                             </Button>
                             <Button onClick={() => filterData('Creditor')} colorScheme={filterType === 'Creditor' ? 'blue' : 'gray'}>
                                 Creditor
+                            </Button>
+                            <Button onClick={() => filterData('Manufacturer')} colorScheme={filterType === 'Manufacturer' ? 'blue' : 'gray'}>
+                            Manufacturer
                             </Button>
                         </Flex>
                     </Flex>
