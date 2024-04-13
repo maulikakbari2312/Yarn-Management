@@ -399,7 +399,7 @@ const Orders = () => {
                                 setIsProcess={setIsProcess}
                             />}
                     <ToastContainer autoClose={2000} />
-                    <Modal isOpen={isMatchingTable} onClose={handleDialogClose} size="4xl">
+                    <Modal isOpen={isMatchingTable} onClose={handleDialogClose} size="6xl">
                         <ModalOverlay />
                         <ModalContent >
                             <Card

@@ -275,6 +275,7 @@ function AddOrders({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAddOr
                                         const groundColor = colorData.filter((item) => item.matchingId === row?.user?.matchingId)
                                         form.setFieldValue('groundColor', groundColor[0]?.ground);
                                         form.setFieldValue('palluColor', groundColor[0]?.pallu);
+                                        setIsMatchingTable(false);
                                     }}
                                 >
                                     Matching
@@ -743,7 +744,7 @@ function AddOrders({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAddOr
                                         </Box>
                                     </Box>
                                 </Flex>
-                                <Modal isOpen={isMatchingTable} onClose={handleDialogClose} size="4xl">
+                                <Modal isOpen={isMatchingTable} onClose={handleDialogClose} size="6xl">
                                     <Box className='matching-table'>
                                         <ModalOverlay />
                                         <ModalContent >
