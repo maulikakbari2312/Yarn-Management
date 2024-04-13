@@ -54,12 +54,7 @@ const SaleYarn = () => {
                         type: "date",
                     },
                     {
-                        name: "Sale Party",
-                        type: "select",
-                        option: extractedParty,
-                    },
-                    {
-                        name: "Buy Party",
+                        name: "Party",
                         type: "select",
                         option: extractedParty,
                     },

@@ -906,8 +906,7 @@ async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId, fi
           const yarnSalesData = {
             invoiceNo: `${sixDigitNumber}`,
             lotNo: `${sixDigitNumber}`,
-            saleParty: `${data.party}`,
-            buyParty: `${data.party}`,
+            party: `${data.party}`,
             colorCode: ele?.colorCode,
             colorQuality: ele?.colorQuality,
             date: moment().format("DD/MM/YYYY"),

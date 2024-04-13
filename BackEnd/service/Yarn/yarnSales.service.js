@@ -109,8 +109,7 @@ exports.createYarnSales = async (yarnSales) => {
     const yarnSalesData = {
       invoiceNo: yarnSales.invoiceNo,
       lotNo: yarnSales.lotNo,
-      saleParty: yarnSales.saleParty,
-      buyParty: yarnSales.buyParty,
+      party: yarnSales.party,
       colorCode: yarnSales.colorCode,
       colorQuality: yarnSales.colorQuality,
       date: moment(yarnSales.date, "DD/MM/YYYY").format("DD/MM/YYYY"),

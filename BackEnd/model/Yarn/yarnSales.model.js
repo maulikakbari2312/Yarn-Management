@@ -10,11 +10,7 @@ const yarnSalesSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  saleParty: {
-    type: String,
-    required: false,
-  },
-  buyParty: {
+  party: {
     type: String,
     required: false,
   },

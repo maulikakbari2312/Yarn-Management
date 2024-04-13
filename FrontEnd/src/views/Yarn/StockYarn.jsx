@@ -53,13 +53,7 @@ const StockYarn = () => {
                         displayNone: true,
                     },
                     {
-                        name: "Sale Party",
-                        type: "select",
-                        option: extractedParty,
-                        displayNone: true,
-                    },
-                    {
-                        name: "Buy Party",
+                        name: "Party",
                         type: "select",
                         option: extractedParty,
                         displayNone: true,
