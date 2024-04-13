@@ -435,7 +435,7 @@ const Orders = () => {
                             </Card>
                         </ModalContent>
                     </Modal>
-                    <Modal isOpen={isStatusTable} onClose={handleDialogClose} size="4xl">
+                    <Modal isOpen={isStatusTable} onClose={handleDialogClose} size="6xl">
                         <ModalOverlay />
                         <ModalContent >
                             <Card
