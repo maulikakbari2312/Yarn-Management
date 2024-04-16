@@ -90,7 +90,9 @@ async function createNewOrder(data, orderId, orderDetail, sixDigitNumber) {
     const detail = await createOrderDetail.save();
     const findOrderById = await ordersModel.find({ orderId: orderId });
     for (const ele of detail?.orders) {
-    const findMyOrder = findOrderById[0].orders.find((item)=> item?.tokenId === ele?.tokenId);
+      const findMyOrder = findOrderById[0].orders.find(
+        (item) => item?.tokenId === ele?.tokenId
+      );
       const { pageItems, pendingOrderYarn } = await processOrderDetail(
         data,
         orderDetail,
@@ -201,6 +203,7 @@ exports.findMatchingFeeder = async (orderId) => {
       const resultArray = Array.from(uniqueObjects, JSON.parse);
       return resultArray;
     }
+    console.log("==result===", result);
     const pendingOrderArr = [];
 
     for (const ele of order?.orders) {
@@ -273,10 +276,13 @@ exports.findMatchingFeeder = async (orderId) => {
       } else {
         console.error(`Design "${data.design}" not found in findPickByDesign`);
       }
-      console.log("===mergedObjects1===", mergedObjects1);
-      mergedObjects1 = mergedObjects1
-        .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-        .filter((obj) => obj.hasOwnProperty("pick"));
+      //   mergedObjects1 = mergedObjects1
+      //     .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+      //     .filter((obj) => obj.hasOwnProperty("pick"));
+      mergedObjects1 = Array.from(
+        new Set(mergedObjects1.map(JSON.stringify)),
+        JSON.parse
+      );
     }
 
     let totalWeight = 0;
@@ -314,34 +320,34 @@ exports.findMatchingFeeder = async (orderId) => {
       updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
       return updatedObj;
     });
-
+    console.log("==pageItems===", pageItems);
     const obj = {};
-    for (const data of mergedObjects1) {
-      const arrayWeight = 0;
-      const totalSareeWeight =
-        arrayWeight +
-        calculateSareeWeight(
+    for (const arr of mergedObjects1) {
+      for (const data of arr) {
+        const totalSareeWeight = calculateSareeWeight(
           Number(data?.denier),
           Number(data?.pick),
           Number(data?.finalCut)
         );
-      totalWeight += totalSareeWeight;
-      obj[data?.matchingId] = totalWeight;
+        if (!obj[data.matchingId]) {
+          obj[data.matchingId] = 0;
+        }
+        obj[data.matchingId] += totalSareeWeight;
+      }
     }
     const matchingSareeWeight = obj;
     const matchingArra = [];
     for (const [key, value] of Object.entries(matchingSareeWeight)) {
       for (const ele of result) {
         if (ele.matchingId === key.toString()) {
-          const hello = {
+          const match = {
             ...ele,
             weight: value.toFixed(4),
           };
-          matchingArra.push(hello);
+          matchingArra.push(match);
         }
       }
     }
-
     const responce = {
       status: 200,
       message: message.MATCHING_FEEDER_SUCCESS,
@@ -497,7 +503,7 @@ exports.findOrders = async (orderId) => {
   }
 };
 
-exports. editOrdersDetail = async (data, orderId, tokenId) => {
+exports.editOrdersDetail = async (data, orderId, tokenId) => {
   try {
     const findOrders = await ordersModel.findOne({ orderId: orderId });
 
@@ -564,10 +570,11 @@ exports.deleteOrder = async (orderId, tokenId) => {
     }
 
     for (const ele of findOrders?.orders) {
-      if(ele?.pcs !== ele?.pendingPcs){
+      if (ele?.pcs !== ele?.pendingPcs) {
         return {
           status: 422,
-          message: "Order already in process. You cannot delete this order. you can edit it.",
+          message:
+            "Order already in process. You cannot delete this order. you can edit it.",
         };
       }
     }
@@ -599,13 +606,14 @@ exports.deleteOrder = async (orderId, tokenId) => {
 };
 
 exports.deleteWholeOrder = async (orderId) => {
-  try { 
+  try {
     const findOrders = await ordersModel.findOne({ orderId: orderId });
     for (const ele of findOrders?.orders) {
-      if(ele?.pcs !== ele?.pendingPcs){
+      if (ele?.pcs !== ele?.pendingPcs) {
         return {
           status: 422,
-          message: "Order already in process. You cannot delete this order. you can edit it.",
+          message:
+            "Order already in process. You cannot delete this order. you can edit it.",
         };
       }
       await yarnSalesModel.deleteMany({ orderToken: ele?.tokenId });
@@ -700,7 +708,13 @@ exports.findMatching = async (design) => {
   }
 };
 
-async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId, findMyOrder) {
+async function processOrderDetail(
+  data,
+  orderDetail,
+  sixDigitNumber,
+  tokenId,
+  findMyOrder
+) {
   try {
     const findMatching = await matchingModel.find();
     let colorYarn = [];
@@ -902,7 +916,12 @@ async function processOrderDetail(data, orderDetail, sixDigitNumber, tokenId, fi
     let pendingOrderYarn = [];
     for (const item of pageItems) {
       for (const ele of yarnStock) {
-        if (item.feeders === ele.colorCode) {
+        if (item.feeders !== ele.colorCode) {
+          return {
+            status: 404,
+            message: `${item.feeders} Color Yarn not in stock`,
+          };
+        } else {
           const yarnSalesData = {
             invoiceNo: `${sixDigitNumber}`,
             lotNo: `${sixDigitNumber}`,
@@ -1060,7 +1079,7 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
               ? findDesign.feeders[index][pickKey]
               : null;
             const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            return { ...eleObj, pick: pickValue, finalCut:finalCut };
+            return { ...eleObj, pick: pickValue, finalCut: finalCut };
           } else {
             return eleObj;
           }
