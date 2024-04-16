@@ -954,7 +954,7 @@ async function processOrderDetail(
                 : "ABCD",
               date: moment().format("DD/MM/YYYY"),
               weight: 0,
-              denier: 0,
+              denier: findColorYarn.denier ? findColorYarn.denier : 0,
             };
             const createYarnPurchaseDetail = new yarnPurchaseModel(
               yarnPurchaseData
@@ -966,11 +966,11 @@ async function processOrderDetail(
               party: data.party,
               colorCode: `${item.feeders}`,
               colorQuality: findColorYarn.colorQuality
-              ? findColorYarn.colorQuality
-              : "ABCD",
+                ? findColorYarn.colorQuality
+                : "ABCD",
               date: moment().format("DD/MM/YYYY"),
               weight: item.weight,
-              denier: 0,
+              denier: findColorYarn.denier ? findColorYarn.denier : 0,
               price: 0,
               orderToken: tokenId,
             };
