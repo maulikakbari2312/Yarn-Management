@@ -9,6 +9,7 @@ const colorYarnModel = require("../../model/Master/colorYarn.model");
 const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
 const moment = require("moment");
+const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
 
 exports.createOrderId = async () => {
   try {
@@ -915,28 +916,67 @@ async function processOrderDetail(
     });
     let pendingOrderYarn = [];
     for (const item of pageItems) {
+      let colorFound = false;
       for (const ele of yarnStock) {
-        if (item.feeders !== ele.colorCode) {
-          return {
-            status: 404,
-            message: `${item.feeders} Color Yarn not in stock`,
-          };
-        } else {
+        if (item.feeders === ele.colorCode) {
+          colorFound = true;
           const yarnSalesData = {
-            invoiceNo: `${sixDigitNumber}`,
-            lotNo: `${sixDigitNumber}`,
-            party: `${data.party}`,
-            colorCode: ele?.colorCode,
-            colorQuality: ele?.colorQuality,
+            invoiceNo: sixDigitNumber,
+            lotNo: sixDigitNumber,
+            party: data.party,
+            colorCode: ele.colorCode,
+            colorQuality: ele.colorQuality,
             date: moment().format("DD/MM/YYYY"),
-            weight: `${item?.weight}`,
-            denier: ele?.denier,
+            weight: item.weight,
+            denier: ele.denier,
             price: 0,
             orderToken: tokenId,
           };
-
           const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
           await createYarnSalesDetail.save();
+        }
+      }
+      if (!colorFound) {
+        const getYarnPurchase = await yarnPurchaseModel.find();
+        const getColorYarn = await findYarnColor();
+        const findColorYarn = getColorYarn.find(
+          (ele) => ele.colorCode === `${item.feeders}`
+        );
+        for (const data of getYarnPurchase) {
+          if (data.colorCode !== item.feeders) {
+            const yarnPurchaseData = {
+              invoiceNo: "ABCD",
+              lotNo: "ABCD",
+              party: "ABCD",
+              colorCode: `${item.feeders}`,
+              colorQuality: findColorYarn.colorQuality
+                ? findColorYarn.colorQuality
+                : "ABCD",
+              date: moment().format("DD/MM/YYYY"),
+              weight: 0,
+              denier: 0,
+            };
+            const createYarnPurchaseDetail = new yarnPurchaseModel(
+              yarnPurchaseData
+            );
+            await createYarnPurchaseDetail.save();
+            const yarnSalesData = {
+              invoiceNo: sixDigitNumber,
+              lotNo: sixDigitNumber,
+              party: data.party,
+              colorCode: `${item.feeders}`,
+              colorQuality: findColorYarn.colorQuality
+              ? findColorYarn.colorQuality
+              : "ABCD",
+              date: moment().format("DD/MM/YYYY"),
+              weight: item.weight,
+              denier: 0,
+              price: 0,
+              orderToken: tokenId,
+            };
+            const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
+            await createYarnSalesDetail.save();
+          }
         }
       }
     }
