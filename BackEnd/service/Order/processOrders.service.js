@@ -45,12 +45,12 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
             };
           }
 
-          if (findOrder.tokenId !== tokenId) {
-            return {
-              status: 404,
-              message: "Another ground color order is inProcess.",
-            };
-          }
+          // if (findOrder.tokenId !== tokenId) {
+          //   return {
+          //     status: 404,
+          //     message: "Another ground color order is inProcess.",
+          //   };
+          // }
           if (detail.orderId !== orderId && detail.tokenId !== tokenId) {
             return {
               status: 404,
@@ -264,7 +264,6 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
     const findDesign = findPickByDesign.find((design) =>
       designArr.some((ele) => ele === design.name)
     );
-
     if (findDesign) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
@@ -272,13 +271,24 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
           const getMatchingId = findMatching.find(
             (element) => element.matchingId === eleObj.matchingId
           );
-          if (getMatchingId && getMatchingId.name === findDesign.name) {
+          const findOrderToken = pendingNewArr.find(
+            (ele) => ele.matchingId === eleObj.matchingId
+          );
+          if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]
               : null;
             const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            return { ...eleObj, pick: pickValue, finalCut: finalCut };
+            const orderMatchingToken = findOrderToken.tokenId
+              ? findOrderToken.tokenId
+              : null;
+            return {
+              ...eleObj,
+              pick: pickValue,
+              finalCut: finalCut,
+              orderMatchingToken: orderMatchingToken,
+            };
           } else {
             return eleObj;
           }
@@ -290,7 +300,6 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
     mergedObjects1 = mergedObjects1
       .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
       .filter((obj) => obj.hasOwnProperty("pick"));
-
     const calculatYarnWeight = (denier, pick, order, finalCut) =>
       (denier * pick * order * finalCut * 52 * 1) / 9000000;
     const resultArray = [];
@@ -313,39 +322,65 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
       };
       resultArray.push(calculatedObj);
     }
-    const newArray = resultArray.map((obj) => {
-      const { denier, matchingId, pick, ...rest } = obj;
-      return rest;
-    });
+    console.log("===resultArray===", resultArray);
+    // const newArray = resultArray.map((obj) => {
+    //   const { denier, matchingId, pick, ...rest } = obj;
+    //   return rest;
+    // });
 
-    const mergedObjects = {};
+    //     const mergedObjects = {};
 
-    newArray.forEach((obj) => {
-      const key = Object.values(obj)[0];
-      if (mergedObjects[key]) {
-        mergedObjects[key].weight += obj?.weight;
-      } else {
-        mergedObjects[key] = obj;
-      }
-    });
+    // newArray.forEach(obj => {
+    //   const key = Object.values(obj)[0];
+    //   if (mergedObjects[key]) {
+    //     mergedObjects[key].push(obj);
+    //   } else {
+    //     mergedObjects[key] = [obj];
+    //   }
+    // });
 
-    let pageItems = Object.values(mergedObjects);
-    pageItems = pageItems.map((obj) => {
+    // const mergedObjects = {};
+    // console.log("==newArray==", newArray);
+    // newArray.forEach((obj) => {
+    //   const key = Object.values(obj)[0];
+    //     mergedObjects[key] = obj;
+    // });
+    // console.log("===mergedObjects===", mergedObjects);
+    // let pageItems = Object.values(mergedObjects);
+    // pageItems = pageItems.map((obj) => {
+    //   const keys = Object.keys(obj);
+    //   const firstKey = keys[0];
+    //   const updatedObj = {};
+    //   const feederNumber = firstKey.replace(/f\d+/, "feeders");
+    //   updatedObj[feederNumber] = obj[firstKey];
+    //   keys.slice(1).forEach((key) => {
+    //     updatedObj[key] = obj[key];
+    //   });
+    //   updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
+    //   return updatedObj;
+    // });
+    // console.log("==pageItems===", pageItems);
+
+    const pageItems = resultArray.map((obj) => {
       const keys = Object.keys(obj);
       const firstKey = keys[0];
-      const updatedObj = {};
-      const feederNumber = firstKey.replace(/f\d+/, "feeders");
-      updatedObj[feederNumber] = obj[firstKey];
+      const feeders = firstKey.replace(/f\d+/, "feeders");
+      const newObj = { [feeders]: obj[firstKey] };
+
       keys.slice(1).forEach((key) => {
-        updatedObj[key] = obj[key];
+        newObj[key] = obj[key];
       });
-      updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-      return updatedObj;
+
+      return newObj;
     });
+    console.log("==pageItems===", pageItems);
     for (const item of pageItems) {
-      const { feeders, weight } = item;
+      const { feeders, weight, orderMatchingToken } = item;
       for (let detail of salesDetails) {
-        if (detail.orderToken === tokenId && detail.colorCode === feeders) {
+        if (
+          detail.orderToken === orderMatchingToken &&
+          detail.colorCode === feeders
+        ) {
           detail.colorCode = feeders;
           detail.weight = weight;
           await detail.save();
@@ -574,13 +609,24 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
           const getMatchingId = findMatching.find(
             (element) => element.matchingId === eleObj.matchingId
           );
-          if (getMatchingId && getMatchingId.name === findDesign.name) {
+          const findOrderToken = pendingNewArr.find(
+            (ele) => ele.matchingId === eleObj.matchingId
+          );
+          if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]
               : null;
             const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            return { ...eleObj, pick: pickValue, finalCut: finalCut };
+            const orderMatchingToken = findOrderToken.tokenId
+              ? findOrderToken.tokenId
+              : null;
+            return {
+              ...eleObj,
+              pick: pickValue,
+              finalCut: finalCut,
+              orderMatchingToken: orderMatchingToken,
+            };
           } else {
             return eleObj;
           }
@@ -615,41 +661,55 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
       };
       resultArray.push(calculatedObj);
     }
-    console.log("==resultArray==",resultArray);
-    const newArray = resultArray.map((obj) => {
-      const { denier, matchingId, pick, ...rest } = obj;
-      return rest;
-    });
+    console.log("==resultArray==", resultArray);
+    // const newArray = resultArray.map((obj) => {
+    //   const { denier, matchingId, pick, ...rest } = obj;
+    //   return rest;
+    // });
 
-    const mergedObjects = {};
+    // const mergedObjects = {};
 
-    newArray.forEach((obj) => {
-      const key = Object.values(obj)[0];
-      if (mergedObjects[key]) {
-        mergedObjects[key].weight += obj?.weight;
-      } else {
-        mergedObjects[key] = obj;
-      }
-    });
+    // newArray.forEach((obj) => {
+    //   const key = Object.values(obj)[0];
+    //   if (mergedObjects[key]) {
+    //     mergedObjects[key].weight += obj?.weight;
+    //   } else {
+    //     mergedObjects[key] = obj;
+    //   }
+    // });
 
-    let pageItems = Object.values(mergedObjects);
-    pageItems = pageItems.map((obj) => {
+    // let pageItems = Object.values(mergedObjects);
+    // pageItems = pageItems.map((obj) => {
+    //   const keys = Object.keys(obj);
+    //   const firstKey = keys[0];
+    //   const updatedObj = {};
+    //   const feederNumber = firstKey.replace(/f\d+/, "feeders");
+    //   updatedObj[feederNumber] = obj[firstKey];
+    //   keys.slice(1).forEach((key) => {
+    //     updatedObj[key] = obj[key];
+    //   });
+    //   updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
+    //   return updatedObj;
+    // });
+    // console.log("==pageItems===", pageItems);
+
+    const pageItems = resultArray.map((obj) => {
       const keys = Object.keys(obj);
       const firstKey = keys[0];
-      const updatedObj = {};
-      const feederNumber = firstKey.replace(/f\d+/, "feeders");
-      updatedObj[feederNumber] = obj[firstKey];
+      const feeders = firstKey.replace(/f\d+/, "feeders");
+      const newObj = { [feeders]: obj[firstKey] };
+
       keys.slice(1).forEach((key) => {
-        updatedObj[key] = obj[key];
+        newObj[key] = obj[key];
       });
-      updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-      return updatedObj;
+
+      return newObj;
     });
-    console.log("==pageItems===",pageItems);
+    console.log("==pageItems===", pageItems);
     for (const item of pageItems) {
-      const { feeders, weight } = item;
+      const { feeders, weight, orderMatchingToken } = item;
       for (let detail of salesDetails) {
-        if (detail.orderToken === tokenId && detail.colorCode === feeders) {
+        if (detail.orderToken === orderMatchingToken && detail.colorCode === feeders) {
           detail.colorCode = feeders;
           detail.weight = weight;
           await detail.save();
@@ -864,13 +924,24 @@ exports.editAllProcessOrder = async (
           const getMatchingId = findMatching.find(
             (element) => element.matchingId === eleObj.matchingId
           );
+          const findOrderToken = pendingNewArr.find(
+            (ele) => ele.matchingId === eleObj.matchingId
+          );
           if (getMatchingId && getMatchingId.name === findDesign.name) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]
               : null;
             const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            return { ...eleObj, pick: pickValue, finalCut: finalCut };
+            const orderMatchingToken = findOrderToken.tokenId
+            ? findOrderToken.tokenId
+            : null;
+          return {
+            ...eleObj,
+            pick: pickValue,
+            finalCut: finalCut,
+            orderMatchingToken: orderMatchingToken,
+          };
           } else {
             return eleObj;
           }
@@ -905,39 +976,54 @@ exports.editAllProcessOrder = async (
       };
       resultArray.push(calculatedObj);
     }
-    const newArray = resultArray.map((obj) => {
-      const { denier, matchingId, pick, ...rest } = obj;
-      return rest;
-    });
+    // const newArray = resultArray.map((obj) => {
+    //   const { denier, matchingId, pick, ...rest } = obj;
+    //   return rest;
+    // });
 
-    const mergedObjects = {};
+    // const mergedObjects = {};
 
-    newArray.forEach((obj) => {
-      const key = Object.values(obj)[0];
-      if (mergedObjects[key]) {
-        mergedObjects[key].weight += obj?.weight;
-      } else {
-        mergedObjects[key] = obj;
-      }
-    });
+    // newArray.forEach((obj) => {
+    //   const key = Object.values(obj)[0];
+    //   if (mergedObjects[key]) {
+    //     mergedObjects[key].weight += obj?.weight;
+    //   } else {
+    //     mergedObjects[key] = obj;
+    //   }
+    // });
 
-    let pageItems = Object.values(mergedObjects);
-    pageItems = pageItems.map((obj) => {
+    // let pageItems = Object.values(mergedObjects);
+    // pageItems = pageItems.map((obj) => {
+    //   const keys = Object.keys(obj);
+    //   const firstKey = keys[0];
+    //   const updatedObj = {};
+    //   const feederNumber = firstKey.replace(/f\d+/, "feeders");
+    //   updatedObj[feederNumber] = obj[firstKey];
+    //   keys.slice(1).forEach((key) => {
+    //     updatedObj[key] = obj[key];
+    //   });
+    //   updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
+    //   return updatedObj;
+    // });
+
+    const pageItems = resultArray.map((obj) => {
       const keys = Object.keys(obj);
       const firstKey = keys[0];
-      const updatedObj = {};
-      const feederNumber = firstKey.replace(/f\d+/, "feeders");
-      updatedObj[feederNumber] = obj[firstKey];
+      const feeders = firstKey.replace(/f\d+/, "feeders");
+      const newObj = { [feeders]: obj[firstKey] };
+
       keys.slice(1).forEach((key) => {
-        updatedObj[key] = obj[key];
+        newObj[key] = obj[key];
       });
-      updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-      return updatedObj;
+
+      return newObj;
     });
+    console.log("==pageItems===", pageItems);
+
     for (const item of pageItems) {
-      const { feeders, weight } = item;
+      const { feeders, weight, orderMatchingToken } = item;
       for (let detail of salesDetails) {
-        if (detail.orderToken === tokenId && detail.colorCode === feeders) {
+        if (detail.orderToken === orderMatchingToken && detail.colorCode === feeders) {
           detail.colorCode = feeders;
           detail.weight = weight;
           await detail.save();

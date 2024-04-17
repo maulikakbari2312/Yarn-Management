@@ -317,7 +317,7 @@ exports.getsareeYarn = async (orderNo, design) => {
             const getMatchingId = findMatching.find(
               (element) => element.matchingId === eleObj.matchingId
             );
-            if (getMatchingId && getMatchingId.name === findDesign.name) {
+            if (getMatchingId) {
               const pickKey = `pick-${index + 1}`;
               const pickValue = findDesign.feeders[index]
                 ? findDesign.feeders[index][pickKey]

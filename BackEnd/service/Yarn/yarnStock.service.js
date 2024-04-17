@@ -115,7 +115,6 @@ exports.findRemainingYarnStock = async () => {
     const matchingArray = Array.from(matchingId);
 
     const findMatching = await matchingModel.find();
-
     let colorYarn = [];
     for (const ele of findMatching) {
       for (const matching of matchingArray) {
@@ -244,7 +243,6 @@ exports.findRemainingYarnStock = async () => {
     const findDesign = findPickByDesign.find((design) =>
       designArr.some((ele) => ele === design.name)
     );
-
     if (findDesign) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
@@ -252,7 +250,7 @@ exports.findRemainingYarnStock = async () => {
           const getMatchingId = findMatching.find(
             (element) => element.matchingId === eleObj.matchingId
           );
-          if (getMatchingId && getMatchingId.name === findDesign.name) {
+          if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]

@@ -232,7 +232,7 @@ exports.findGroundColor = async (design) => {
     if (!groundColorArr.length) {
       return {
         status: 404,
-        message: message.COLORYARN_NOT_FOUND,
+        message: message.MATCHING_NOT_AVAILABLE,
       };
     }
 
