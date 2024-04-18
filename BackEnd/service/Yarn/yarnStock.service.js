@@ -238,18 +238,14 @@ exports.findRemainingYarnStock = async () => {
     const designArr = [];
     for (const data of pendingNewArr) {
       designArr.push(data.design);
-    }
-
-    const findDesign = findPickByDesign.find((design) =>
-      designArr.some((ele) => ele === design.name)
-    );
-    if (findDesign) {
+    }    
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
           const getMatchingId = findMatching.find(
             (element) => element.matchingId === eleObj.matchingId
           );
+          const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
           if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
@@ -263,7 +259,6 @@ exports.findRemainingYarnStock = async () => {
         });
         mergedObjects1.push(result);
       }
-    }
     // mergedObjects1 = mergedObjects1.flatMap((arr) =>
     //   arr.filter((obj) => obj.hasOwnProperty("pick"))
     // );

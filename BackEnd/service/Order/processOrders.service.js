@@ -261,10 +261,6 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
       designArr.push(data.design);
     }
 
-    const findDesign = findPickByDesign.find((design) =>
-      designArr.some((ele) => ele === design.name)
-    );
-    if (findDesign) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
@@ -274,6 +270,7 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
           const findOrderToken = pendingNewArr.find(
             (ele) => ele.matchingId === eleObj.matchingId
           );
+          const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
           if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
@@ -295,7 +292,6 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
         });
         mergedObjects1.push(result);
       }
-    }
 
     mergedObjects1 = mergedObjects1
       .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
@@ -598,11 +594,6 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
       designArr.push(data.design);
     }
 
-    const findDesign = findPickByDesign.find((design) =>
-      designArr.some((ele) => ele === design.name)
-    );
-
-    if (findDesign) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
@@ -612,6 +603,7 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
           const findOrderToken = pendingNewArr.find(
             (ele) => ele.matchingId === eleObj.matchingId
           );
+          const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
           if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
@@ -633,7 +625,6 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
         });
         mergedObjects1.push(result);
       }
-    }
 
     mergedObjects1 = mergedObjects1
       .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
@@ -913,11 +904,6 @@ exports.editAllProcessOrder = async (
       designArr.push(data.design);
     }
 
-    const findDesign = findPickByDesign.find((design) =>
-      designArr.some((ele) => ele === design.name)
-    );
-
-    if (findDesign) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
@@ -927,7 +913,8 @@ exports.editAllProcessOrder = async (
           const findOrderToken = pendingNewArr.find(
             (ele) => ele.matchingId === eleObj.matchingId
           );
-          if (getMatchingId && getMatchingId.name === findDesign.name) {
+          const findDesign = findPickByDesign.find((design) =>design.name === getMatchingId.name);
+          if (getMatchingId) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
               ? findDesign.feeders[index][pickKey]
@@ -948,7 +935,6 @@ exports.editAllProcessOrder = async (
         });
         mergedObjects1.push(result);
       }
-    }
 
     mergedObjects1 = mergedObjects1
       .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
