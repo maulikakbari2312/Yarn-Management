@@ -98,6 +98,10 @@ const Orders = () => {
             {
                 name: "Dispatch",
                 type: "number",
+            },
+            {
+                name: "Settle Pcs",
+                type: "number",
             }
         ]
     }

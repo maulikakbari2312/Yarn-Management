@@ -3,7 +3,6 @@ const ordersModel = require("../../model/Order/orders.model");
 const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
 const matchingModel = require("../../model/Master/matching.model");
 const YarnSalesDetail = require("../../model/Yarn/yarnSales.model");
-// const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 const designModel = require("../../model/Master/design.model");
 const colorYarnModel = require("../../model/Master/colorYarn.model");
 
@@ -121,268 +120,146 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
       }
       await findOrderInProcess.save();
     }
+    YarnWeightCalculation(orderId);
+    // const pendingOrderArr = [];
+    // for (const order of findByOrderId?.orders) {
+    //   pendingOrderArr.push(order);
+    // }
+    // const pendingNewArr = [];
+    // for (const ele of pendingOrderArr) {
+    //   if (ele.pcsOnMachine > 0) {
+    //     pendingNewArr.push(ele);
+    //   }
+    // }
 
-    const pendingOrderArr = [];
-    for (const order of findByOrderId?.orders) {
-      pendingOrderArr.push(order);
-    }
-    const pendingNewArr = [];
-    for (const ele of pendingOrderArr) {
-      if (ele.pcsOnMachine > 0) {
-        pendingNewArr.push(ele);
-      }
-    }
-    // const matchingId = new Set(pendingNewArr.map((ele) => ele.matchingId));
-    // const matchingArray = Array.from(matchingId);
+    // const findMatching = await matchingModel.find();
 
-    const findMatching = await matchingModel.find();
+    // const salesDetails = await YarnSalesDetail.find();
 
-    // let colorYarn = [];
-    // for (const ele of findMatching) {
-    //   for (const matching of matchingArray) {
-    //     if (ele.matchingId === matching) {
-    //       colorYarn.push(ele.feeders);
+    // const listOfOrders = [];
+    // const findMatchings = await matchingModel.find();
+    // for (const ele of findMatchings) {
+    //   for (const data of pendingNewArr) {
+    //     if (ele?.matchingId === data?.matchingId) {
+    //       listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
     //     }
     //   }
     // }
-    // const uniqueValues = new Set();
 
-    // colorYarn.forEach((obj) => {
-    //   Object.values(obj).forEach((value) => {
-    //     uniqueValues.add(value);
-    //   });
-    // });
+    // const findFeeders = listOfOrders;
+    // const findColorYarn = await colorYarnModel.find();
+    // const findPickByDesign = await designModel.find();
+    // const denierSet1 = [];
 
-    // const uniqueArray = [...uniqueValues];
-    // const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await YarnSalesDetail.find();
+    // for (const feeder of findFeeders) {
+    //   const denierSet = [];
+    //   for (const [key, colorCode] of Object.entries(feeder)) {
+    //     const matchingColorYarn = findColorYarn.find(
+    //       (yarn) => yarn.colorCode === colorCode
+    //     );
+    //     if (matchingColorYarn) {
+    //       const feederDenierInfo = {};
+    //       feederDenierInfo[key] = colorCode;
+    //       feederDenierInfo["denier"] = matchingColorYarn.denier;
+    //       feederDenierInfo["matchingId"] = feeder.matchingId;
+    //       denierSet.push(feederDenierInfo);
+    //     }
+    //   }
+    //   if (denierSet.length > 0) {
+    //     denierSet1.push(denierSet);
+    //   }
+    // }
+    // let mergedObjects1 = [];
+    // const designArr = [];
+    // for (const data of pendingNewArr) {
+    //   designArr.push(data.design);
+    // }
 
-    // const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
-    //   const key = `${detail.colorCode}:${detail.colorQuality}`;
-    //   if (!map[key]) {
-    //     map[key] = { weight: 0, denier: detail.denier };
+    //   for (let i = 0; i < denierSet1.length; i++) {
+    //     const ele = denierSet1[i];
+    //     const result = ele.map((eleObj, index) => {
+    //       const getMatchingId = findMatching.find(
+    //         (element) => element.matchingId === eleObj.matchingId
+    //       );
+    //       const findOrderToken = pendingNewArr.find(
+    //         (ele) => ele.matchingId === eleObj.matchingId
+    //       );
+    //       const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
+    //       if (getMatchingId) {
+    //         const pickKey = `pick-${index + 1}`;
+    //         const pickValue = findDesign.feeders[index]
+    //           ? findDesign.feeders[index][pickKey]
+    //           : null;
+    //         const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+    //         const orderMatchingToken = findOrderToken.tokenId
+    //           ? findOrderToken.tokenId
+    //           : null;
+    //         return {
+    //           ...eleObj,
+    //           pick: pickValue,
+    //           finalCut: finalCut,
+    //           orderMatchingToken: orderMatchingToken,
+    //         };
+    //       } else {
+    //         return eleObj;
+    //       }
+    //     });
+    //     mergedObjects1.push(result);
     //   }
 
-    //   map[key].weight += detail.weight;
-    //   return map;
-    // }, {});
-    // const purchaseResult = Object.entries(purchaseAggregationMap).map(
-    //   ([key, values]) => {
-    //     const [colorCode, colorQuality] = key.split(":");
-    //     return {
-    //       Color: colorCode,
-    //       colorQuality,
-    //       weight: values.weight,
-    //       denier: values.denier,
-    //     };
-    //   }
-    // );
-
-    // const salesAggregationMap = salesDetails.reduce((map, detail) => {
-    //   const key = `${detail.colorCode}:${detail.colorQuality}`;
-    //   if (!map[key]) {
-    //     map[key] = { weight: 0, denier: detail.denier };
-    //   }
-
-    //   map[key].weight += detail.weight;
-
-    //   return map;
-    // }, {});
-    // const salesResult = Object.entries(salesAggregationMap).map(
-    //   ([key, values]) => {
-    //     const [colorCode, colorQuality] = key.split(":");
-    //     return {
-    //       Color: colorCode,
-    //       colorQuality,
-    //       weight: values.weight,
-    //       denier: values.denier,
-    //     };
-    //   }
-    // );
-
-    // const purchaseDictionary = purchaseResult.reduce((dict, item) => {
-    //   const key = `${item.Color}-${item.colorQuality}`;
-    //   dict[key] = item;
-    //   return dict;
-    // }, {});
-    // const salesDictionary = salesResult.reduce((dict, item) => {
-    //   const key = `${item.Color}-${item.colorQuality}`;
-    //   dict[key] = item;
-    //   return dict;
-    // }, {});
-
-    // const yarnStock = Object.keys(purchaseDictionary).map((key) => {
-    //   const purchaseItem = purchaseDictionary[key] || { weight: 0 };
-    //   const salesItem = salesDictionary[key] || { weight: 0 };
-
-    //   return {
-    //     colorCode: purchaseItem.Color,
-    //     colorQuality: purchaseItem.colorQuality,
-    //     weight: purchaseItem.weight - salesItem.weight,
-    //     denier: purchaseItem.denier,
+    // mergedObjects1 = mergedObjects1
+    //   .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+    //   .filter((obj) => obj.hasOwnProperty("pick"));
+    // const calculatYarnWeight = (denier, pick, order, finalCut) =>
+    //   (denier * pick * order * finalCut * 52 * 1) / 9000000;
+    // const resultArray = [];
+    // for (const data of mergedObjects1) {
+    //   const arrayWeight = 0;
+    //   const findOrder = pendingNewArr.find(
+    //     (order) => order.matchingId === data?.matchingId
+    //   );
+    //   const totalWeight =
+    //     arrayWeight +
+    //     calculatYarnWeight(
+    //       Number(data?.denier),
+    //       Number(data?.pick),
+    //       findOrder.pcsOnMachine,
+    //       Number(data?.finalCut)
+    //     );
+    //   const calculatedObj = {
+    //     ...data,
+    //     weight: totalWeight,
     //   };
-    // });
-    const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
-    for (const ele of findMatchings) {
-      for (const data of pendingNewArr) {
-        if (ele?.matchingId === data?.matchingId) {
-          listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
-        }
-      }
-    }
+    //   resultArray.push(calculatedObj);
+    // }
+    // console.log("===resultArray===", resultArray);
 
-    const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
-    const denierSet1 = [];
-
-    for (const feeder of findFeeders) {
-      const denierSet = [];
-      for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
-        if (matchingColorYarn) {
-          const feederDenierInfo = {};
-          feederDenierInfo[key] = colorCode;
-          feederDenierInfo["denier"] = matchingColorYarn.denier;
-          feederDenierInfo["matchingId"] = feeder.matchingId;
-          denierSet.push(feederDenierInfo);
-        }
-      }
-      if (denierSet.length > 0) {
-        denierSet1.push(denierSet);
-      }
-    }
-    let mergedObjects1 = [];
-    const designArr = [];
-    for (const data of pendingNewArr) {
-      designArr.push(data.design);
-    }
-
-      for (let i = 0; i < denierSet1.length; i++) {
-        const ele = denierSet1[i];
-        const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
-          const findOrderToken = pendingNewArr.find(
-            (ele) => ele.matchingId === eleObj.matchingId
-          );
-          const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
-          if (getMatchingId) {
-            const pickKey = `pick-${index + 1}`;
-            const pickValue = findDesign.feeders[index]
-              ? findDesign.feeders[index][pickKey]
-              : null;
-            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            const orderMatchingToken = findOrderToken.tokenId
-              ? findOrderToken.tokenId
-              : null;
-            return {
-              ...eleObj,
-              pick: pickValue,
-              finalCut: finalCut,
-              orderMatchingToken: orderMatchingToken,
-            };
-          } else {
-            return eleObj;
-          }
-        });
-        mergedObjects1.push(result);
-      }
-
-    mergedObjects1 = mergedObjects1
-      .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-      .filter((obj) => obj.hasOwnProperty("pick"));
-    const calculatYarnWeight = (denier, pick, order, finalCut) =>
-      (denier * pick * order * finalCut * 52 * 1) / 9000000;
-    const resultArray = [];
-    for (const data of mergedObjects1) {
-      const arrayWeight = 0;
-      const findOrder = pendingNewArr.find(
-        (order) => order.matchingId === data?.matchingId
-      );
-      const totalWeight =
-        arrayWeight +
-        calculatYarnWeight(
-          Number(data?.denier),
-          Number(data?.pick),
-          findOrder.pcsOnMachine,
-          Number(data?.finalCut)
-        );
-      const calculatedObj = {
-        ...data,
-        weight: totalWeight,
-      };
-      resultArray.push(calculatedObj);
-    }
-    console.log("===resultArray===", resultArray);
-    // const newArray = resultArray.map((obj) => {
-    //   const { denier, matchingId, pick, ...rest } = obj;
-    //   return rest;
-    // });
-
-    //     const mergedObjects = {};
-
-    // newArray.forEach(obj => {
-    //   const key = Object.values(obj)[0];
-    //   if (mergedObjects[key]) {
-    //     mergedObjects[key].push(obj);
-    //   } else {
-    //     mergedObjects[key] = [obj];
-    //   }
-    // });
-
-    // const mergedObjects = {};
-    // console.log("==newArray==", newArray);
-    // newArray.forEach((obj) => {
-    //   const key = Object.values(obj)[0];
-    //     mergedObjects[key] = obj;
-    // });
-    // console.log("===mergedObjects===", mergedObjects);
-    // let pageItems = Object.values(mergedObjects);
-    // pageItems = pageItems.map((obj) => {
+    // const pageItems = resultArray.map((obj) => {
     //   const keys = Object.keys(obj);
     //   const firstKey = keys[0];
-    //   const updatedObj = {};
-    //   const feederNumber = firstKey.replace(/f\d+/, "feeders");
-    //   updatedObj[feederNumber] = obj[firstKey];
+    //   const feeders = firstKey.replace(/f\d+/, "feeders");
+    //   const newObj = { [feeders]: obj[firstKey] };
+
     //   keys.slice(1).forEach((key) => {
-    //     updatedObj[key] = obj[key];
+    //     newObj[key] = obj[key];
     //   });
-    //   updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-    //   return updatedObj;
+
+    //   return newObj;
     // });
     // console.log("==pageItems===", pageItems);
-
-    const pageItems = resultArray.map((obj) => {
-      const keys = Object.keys(obj);
-      const firstKey = keys[0];
-      const feeders = firstKey.replace(/f\d+/, "feeders");
-      const newObj = { [feeders]: obj[firstKey] };
-
-      keys.slice(1).forEach((key) => {
-        newObj[key] = obj[key];
-      });
-
-      return newObj;
-    });
-    console.log("==pageItems===", pageItems);
-    for (const item of pageItems) {
-      const { feeders, weight, orderMatchingToken } = item;
-      for (let detail of salesDetails) {
-        if (
-          detail.orderToken === orderMatchingToken &&
-          detail.colorCode === feeders
-        ) {
-          detail.colorCode = feeders;
-          detail.weight = weight;
-          await detail.save();
-        }
-      }
-    }
+    // for (const item of pageItems) {
+    //   const { feeders, weight, orderMatchingToken } = item;
+    //   for (let detail of salesDetails) {
+    //     if (
+    //       detail.orderToken === orderMatchingToken &&
+    //       detail.colorCode === feeders
+    //     ) {
+    //       detail.colorCode = feeders;
+    //       detail.weight = weight;
+    //       await detail.save();
+    //     }
+    //   }
+    // }
     return {
       status: 200,
       message: message.PROCESS_ORDER_SUCESS,
@@ -541,172 +418,143 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
     );
 
     await findOrders.save();
-    const pendingOrderArr = [];
-    for (const order of findOrders?.orders) {
-      pendingOrderArr.push(order);
-    }
-    const pendingNewArr = [];
-    for (const ele of pendingOrderArr) {
-      if (ele.pcsOnMachine >= 0) {
-        pendingNewArr.push(ele);
-      }
-    }
-
-    const findMatching = await matchingModel.find();
-    const salesDetails = await YarnSalesDetail.find();
-
-    const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
-    for (const ele of findMatchings) {
-      for (const data of pendingNewArr) {
-        if (ele?.matchingId === data?.matchingId) {
-          listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
-        }
-      }
-    }
-
-    const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
-    const denierSet1 = [];
-
-    for (const feeder of findFeeders) {
-      const denierSet = [];
-      for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
-        if (matchingColorYarn) {
-          const feederDenierInfo = {};
-          feederDenierInfo[key] = colorCode;
-          feederDenierInfo["denier"] = matchingColorYarn.denier;
-          feederDenierInfo["matchingId"] = feeder.matchingId;
-          denierSet.push(feederDenierInfo);
-        }
-      }
-      if (denierSet.length > 0) {
-        denierSet1.push(denierSet);
-      }
-    }
-    let mergedObjects1 = [];
-    const designArr = [];
-    for (const data of pendingNewArr) {
-      designArr.push(data.design);
-    }
-
-      for (let i = 0; i < denierSet1.length; i++) {
-        const ele = denierSet1[i];
-        const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
-          const findOrderToken = pendingNewArr.find(
-            (ele) => ele.matchingId === eleObj.matchingId
-          );
-          const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
-          if (getMatchingId) {
-            const pickKey = `pick-${index + 1}`;
-            const pickValue = findDesign.feeders[index]
-              ? findDesign.feeders[index][pickKey]
-              : null;
-            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            const orderMatchingToken = findOrderToken.tokenId
-              ? findOrderToken.tokenId
-              : null;
-            return {
-              ...eleObj,
-              pick: pickValue,
-              finalCut: finalCut,
-              orderMatchingToken: orderMatchingToken,
-            };
-          } else {
-            return eleObj;
-          }
-        });
-        mergedObjects1.push(result);
-      }
-
-    mergedObjects1 = mergedObjects1
-      .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-      .filter((obj) => obj.hasOwnProperty("pick"));
-
-    const calculatYarnWeight = (denier, pick, order, finalCut) =>
-      (denier * pick * order * finalCut * 52 * 1) / 9000000;
-    const resultArray = [];
-    for (const data of mergedObjects1) {
-      const arrayWeight = 0;
-      const findOrder = pendingNewArr.find(
-        (order) => order.tokenId === tokenId
-      );
-      const totalWeight =
-        arrayWeight +
-        calculatYarnWeight(
-          Number(data?.denier),
-          Number(data?.pick),
-          findOrder?.pcsOnMachine,
-          Number(data?.finalCut)
-        );
-      const calculatedObj = {
-        ...data,
-        weight: totalWeight,
-      };
-      resultArray.push(calculatedObj);
-    }
-    console.log("==resultArray==", resultArray);
-    // const newArray = resultArray.map((obj) => {
-    //   const { denier, matchingId, pick, ...rest } = obj;
-    //   return rest;
-    // });
-
-    // const mergedObjects = {};
-
-    // newArray.forEach((obj) => {
-    //   const key = Object.values(obj)[0];
-    //   if (mergedObjects[key]) {
-    //     mergedObjects[key].weight += obj?.weight;
-    //   } else {
-    //     mergedObjects[key] = obj;
+    YarnWeightCalculation(orderId);
+    // const pendingOrderArr = [];
+    // for (const order of findOrders?.orders) {
+    //   pendingOrderArr.push(order);
+    // }
+    // const pendingNewArr = [];
+    // for (const ele of pendingOrderArr) {
+    //   if (ele.pcsOnMachine >= 0) {
+    //     pendingNewArr.push(ele);
     //   }
-    // });
+    // }
 
-    // let pageItems = Object.values(mergedObjects);
-    // pageItems = pageItems.map((obj) => {
+    // const findMatching = await matchingModel.find();
+    // const salesDetails = await YarnSalesDetail.find();
+
+    // const listOfOrders = [];
+    // const findMatchings = await matchingModel.find();
+    // for (const ele of findMatchings) {
+    //   for (const data of pendingNewArr) {
+    //     if (ele?.matchingId === data?.matchingId) {
+    //       listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
+    //     }
+    //   }
+    // }
+
+    // const findFeeders = listOfOrders;
+    // const findColorYarn = await colorYarnModel.find();
+    // const findPickByDesign = await designModel.find();
+    // const denierSet1 = [];
+
+    // for (const feeder of findFeeders) {
+    //   const denierSet = [];
+    //   for (const [key, colorCode] of Object.entries(feeder)) {
+    //     const matchingColorYarn = findColorYarn.find(
+    //       (yarn) => yarn.colorCode === colorCode
+    //     );
+    //     if (matchingColorYarn) {
+    //       const feederDenierInfo = {};
+    //       feederDenierInfo[key] = colorCode;
+    //       feederDenierInfo["denier"] = matchingColorYarn.denier;
+    //       feederDenierInfo["matchingId"] = feeder.matchingId;
+    //       denierSet.push(feederDenierInfo);
+    //     }
+    //   }
+    //   if (denierSet.length > 0) {
+    //     denierSet1.push(denierSet);
+    //   }
+    // }
+    // let mergedObjects1 = [];
+    // const designArr = [];
+    // for (const data of pendingNewArr) {
+    //   designArr.push(data.design);
+    // }
+
+    //   for (let i = 0; i < denierSet1.length; i++) {
+    //     const ele = denierSet1[i];
+    //     const result = ele.map((eleObj, index) => {
+    //       const getMatchingId = findMatching.find(
+    //         (element) => element.matchingId === eleObj.matchingId
+    //       );
+    //       const findOrderToken = pendingNewArr.find(
+    //         (ele) => ele.matchingId === eleObj.matchingId
+    //       );
+    //       const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
+    //       if (getMatchingId) {
+    //         const pickKey = `pick-${index + 1}`;
+    //         const pickValue = findDesign.feeders[index]
+    //           ? findDesign.feeders[index][pickKey]
+    //           : null;
+    //         const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+    //         const orderMatchingToken = findOrderToken.tokenId
+    //           ? findOrderToken.tokenId
+    //           : null;
+    //         return {
+    //           ...eleObj,
+    //           pick: pickValue,
+    //           finalCut: finalCut,
+    //           orderMatchingToken: orderMatchingToken,
+    //         };
+    //       } else {
+    //         return eleObj;
+    //       }
+    //     });
+    //     mergedObjects1.push(result);
+    //   }
+
+    // mergedObjects1 = mergedObjects1
+    //   .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+    //   .filter((obj) => obj.hasOwnProperty("pick"));
+
+    // const calculatYarnWeight = (denier, pick, order, finalCut) =>
+    //   (denier * pick * order * finalCut * 52 * 1) / 9000000;
+    // const resultArray = [];
+    // for (const data of mergedObjects1) {
+    //   const arrayWeight = 0;
+    //   const findOrder = pendingNewArr.find(
+    //     (order) => order.tokenId === tokenId
+    //   );
+    //   const totalWeight =
+    //     arrayWeight +
+    //     calculatYarnWeight(
+    //       Number(data?.denier),
+    //       Number(data?.pick),
+    //       Number(findOrder.pcsOnMachine) + Number(findOrder.completePcs) + Number(findOrder.dispatch) + Number(findOrder.settlePcs),
+    //       Number(data?.finalCut)
+    //     );
+    //   const calculatedObj = {
+    //     ...data,
+    //     weight: totalWeight,
+    //   };
+    //   resultArray.push(calculatedObj);
+    // }
+    // console.log("==resultArray==", resultArray);
+
+    // const pageItems = resultArray.map((obj) => {
     //   const keys = Object.keys(obj);
     //   const firstKey = keys[0];
-    //   const updatedObj = {};
-    //   const feederNumber = firstKey.replace(/f\d+/, "feeders");
-    //   updatedObj[feederNumber] = obj[firstKey];
+    //   const feeders = firstKey.replace(/f\d+/, "feeders");
+    //   const newObj = { [feeders]: obj[firstKey] };
+
     //   keys.slice(1).forEach((key) => {
-    //     updatedObj[key] = obj[key];
+    //     newObj[key] = obj[key];
     //   });
-    //   updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-    //   return updatedObj;
+
+    //   return newObj;
     // });
     // console.log("==pageItems===", pageItems);
-
-    const pageItems = resultArray.map((obj) => {
-      const keys = Object.keys(obj);
-      const firstKey = keys[0];
-      const feeders = firstKey.replace(/f\d+/, "feeders");
-      const newObj = { [feeders]: obj[firstKey] };
-
-      keys.slice(1).forEach((key) => {
-        newObj[key] = obj[key];
-      });
-
-      return newObj;
-    });
-    console.log("==pageItems===", pageItems);
-    for (const item of pageItems) {
-      const { feeders, weight, orderMatchingToken } = item;
-      for (let detail of salesDetails) {
-        if (detail.orderToken === orderMatchingToken && detail.colorCode === feeders) {
-          detail.colorCode = feeders;
-          detail.weight = weight;
-          await detail.save();
-        }
-      }
-    }
+    // for (const item of pageItems) {
+    //   const { feeders, weight, orderMatchingToken } = item;
+    //   for (let detail of salesDetails) {
+    //     if (detail.orderToken === orderMatchingToken && detail.colorCode === feeders) {
+    //       detail.colorCode = feeders;
+    //       detail.weight = weight;
+    //       await detail.save();
+    //     }
+    //   }
+    // }
 
     return pendingProcessPcs;
   } catch (error) {
@@ -764,258 +612,143 @@ exports.editAllProcessOrder = async (
 
     await findOrders.save();
     await findOrderOnMachine.save();
+    YarnWeightCalculation(orderId);
+    // const pendingOrderArr = [];
+    // for (const order of findOrders?.orders) {
+    //   pendingOrderArr.push(order);
+    // }
+    // const pendingNewArr = [];
+    // for (const ele of pendingOrderArr) {
+    //   if (ele.pcsOnMachine > 0) {
+    //     pendingNewArr.push(ele);
+    //   }
+    // }
 
-    const pendingOrderArr = [];
-    for (const order of findOrders?.orders) {
-      pendingOrderArr.push(order);
-    }
-    const pendingNewArr = [];
-    for (const ele of pendingOrderArr) {
-      if (ele.pcsOnMachine > 0) {
-        pendingNewArr.push(ele);
-      }
-    }
-    // const matchingId = new Set(pendingNewArr.map((ele) => ele.matchingId));
-    // const matchingArray = Array.from(matchingId);
+    // const findMatching = await matchingModel.find();
+    // const salesDetails = await YarnSalesDetail.find();
 
-    const findMatching = await matchingModel.find();
-
-    // let colorYarn = [];
-    // for (const ele of findMatching) {
-    //   for (const matching of matchingArray) {
-    //     if (ele.matchingId === matching) {
-    //       colorYarn.push(ele.feeders);
+    // const listOfOrders = [];
+    // const findMatchings = await matchingModel.find();
+    // for (const ele of findMatchings) {
+    //   for (const data of pendingNewArr) {
+    //     if (ele?.matchingId === data?.matchingId) {
+    //       listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
     //     }
     //   }
     // }
-    // const uniqueValues = new Set();
 
-    // colorYarn.forEach((obj) => {
-    //   Object.values(obj).forEach((value) => {
-    //     uniqueValues.add(value);
-    //   });
-    // });
+    // const findFeeders = listOfOrders;
+    // const findColorYarn = await colorYarnModel.find();
+    // const findPickByDesign = await designModel.find();
+    // const denierSet1 = [];
 
-    // const uniqueArray = [...uniqueValues];
-    // const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await YarnSalesDetail.find();
+    // for (const feeder of findFeeders) {
+    //   const denierSet = [];
+    //   for (const [key, colorCode] of Object.entries(feeder)) {
+    //     const matchingColorYarn = findColorYarn.find(
+    //       (yarn) => yarn.colorCode === colorCode
+    //     );
+    //     if (matchingColorYarn) {
+    //       const feederDenierInfo = {};
+    //       feederDenierInfo[key] = colorCode;
+    //       feederDenierInfo["denier"] = matchingColorYarn.denier;
+    //       feederDenierInfo["matchingId"] = feeder.matchingId;
+    //       denierSet.push(feederDenierInfo);
+    //     }
+    //   }
+    //   if (denierSet.length > 0) {
+    //     denierSet1.push(denierSet);
+    //   }
+    // }
+    // let mergedObjects1 = [];
+    // const designArr = [];
+    // for (const data of pendingNewArr) {
+    //   designArr.push(data.design);
+    // }
 
-    // const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
-    //   const key = `${detail.colorCode}:${detail.colorQuality}`;
-    //   if (!map[key]) {
-    //     map[key] = { weight: 0, denier: detail.denier };
+    //   for (let i = 0; i < denierSet1.length; i++) {
+    //     const ele = denierSet1[i];
+    //     const result = ele.map((eleObj, index) => {
+    //       const getMatchingId = findMatching.find(
+    //         (element) => element.matchingId === eleObj.matchingId
+    //       );
+    //       const findOrderToken = pendingNewArr.find(
+    //         (ele) => ele.matchingId === eleObj.matchingId
+    //       );
+    //       const findDesign = findPickByDesign.find((design) =>design.name === getMatchingId.name);
+    //       if (getMatchingId) {
+    //         const pickKey = `pick-${index + 1}`;
+    //         const pickValue = findDesign.feeders[index]
+    //           ? findDesign.feeders[index][pickKey]
+    //           : null;
+    //         const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+    //         const orderMatchingToken = findOrderToken.tokenId
+    //         ? findOrderToken.tokenId
+    //         : null;
+    //       return {
+    //         ...eleObj,
+    //         pick: pickValue,
+    //         finalCut: finalCut,
+    //         orderMatchingToken: orderMatchingToken,
+    //       };
+    //       } else {
+    //         return eleObj;
+    //       }
+    //     });
+    //     mergedObjects1.push(result);
     //   }
 
-    //   map[key].weight += detail.weight;
-    //   return map;
-    // }, {});
-    // const purchaseResult = Object.entries(purchaseAggregationMap).map(
-    //   ([key, values]) => {
-    //     const [colorCode, colorQuality] = key.split(":");
-    //     return {
-    //       Color: colorCode,
-    //       colorQuality,
-    //       weight: values.weight,
-    //       denier: values.denier,
-    //     };
-    //   }
-    // );
+    // mergedObjects1 = mergedObjects1
+    //   .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+    //   .filter((obj) => obj.hasOwnProperty("pick"));
 
-    // const salesAggregationMap = salesDetails.reduce((map, detail) => {
-    //   const key = `${detail.colorCode}:${detail.colorQuality}`;
-    //   if (!map[key]) {
-    //     map[key] = { weight: 0, denier: detail.denier };
-    //   }
-
-    //   map[key].weight += detail.weight;
-
-    //   return map;
-    // }, {});
-    // const salesResult = Object.entries(salesAggregationMap).map(
-    //   ([key, values]) => {
-    //     const [colorCode, colorQuality] = key.split(":");
-    //     return {
-    //       Color: colorCode,
-    //       colorQuality,
-    //       weight: values.weight,
-    //       denier: values.denier,
-    //     };
-    //   }
-    // );
-
-    // const purchaseDictionary = purchaseResult.reduce((dict, item) => {
-    //   const key = `${item.Color}-${item.colorQuality}`;
-    //   dict[key] = item;
-    //   return dict;
-    // }, {});
-    // const salesDictionary = salesResult.reduce((dict, item) => {
-    //   const key = `${item.Color}-${item.colorQuality}`;
-    //   dict[key] = item;
-    //   return dict;
-    // }, {});
-
-    // const yarnStock = Object.keys(purchaseDictionary).map((key) => {
-    //   const purchaseItem = purchaseDictionary[key] || { weight: 0 };
-    //   const salesItem = salesDictionary[key] || { weight: 0 };
-
-    //   return {
-    //     colorCode: purchaseItem.Color,
-    //     colorQuality: purchaseItem.colorQuality,
-    //     weight: purchaseItem.weight - salesItem.weight,
-    //     denier: purchaseItem.denier,
+    // const calculatYarnWeight = (denier, pick, order, finalCut) =>
+    //   (denier * pick * order * finalCut * 52 * 1) / 9000000;
+    // const resultArray = [];
+    // for (const data of mergedObjects1) {
+    //   const arrayWeight = 0;
+    //   const findOrder = pendingNewArr.find(
+    //     (order) => order.matchingId === data?.matchingId
+    //   );
+    //   const totalWeight =
+    //     arrayWeight +
+    //     calculatYarnWeight(
+    //       Number(data?.denier),
+    //       Number(data?.pick),
+    //       Number(findOrder.pcsOnMachine) + Number(findOrder.completePcs) + Number(findOrder.dispatch) + Number(findOrder.settlePcs),
+    //       Number(data?.finalCut)
+    //     );
+    //   const calculatedObj = {
+    //     ...data,
+    //     weight: totalWeight,
     //   };
-    // });
-    const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
-    for (const ele of findMatchings) {
-      for (const data of pendingNewArr) {
-        if (ele?.matchingId === data?.matchingId) {
-          listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
-        }
-      }
-    }
+    //   resultArray.push(calculatedObj);
+    // }
 
-    const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
-    const denierSet1 = [];
-
-    for (const feeder of findFeeders) {
-      const denierSet = [];
-      for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
-        if (matchingColorYarn) {
-          const feederDenierInfo = {};
-          feederDenierInfo[key] = colorCode;
-          feederDenierInfo["denier"] = matchingColorYarn.denier;
-          feederDenierInfo["matchingId"] = feeder.matchingId;
-          denierSet.push(feederDenierInfo);
-        }
-      }
-      if (denierSet.length > 0) {
-        denierSet1.push(denierSet);
-      }
-    }
-    let mergedObjects1 = [];
-    const designArr = [];
-    for (const data of pendingNewArr) {
-      designArr.push(data.design);
-    }
-
-      for (let i = 0; i < denierSet1.length; i++) {
-        const ele = denierSet1[i];
-        const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
-          const findOrderToken = pendingNewArr.find(
-            (ele) => ele.matchingId === eleObj.matchingId
-          );
-          const findDesign = findPickByDesign.find((design) =>design.name === getMatchingId.name);
-          if (getMatchingId) {
-            const pickKey = `pick-${index + 1}`;
-            const pickValue = findDesign.feeders[index]
-              ? findDesign.feeders[index][pickKey]
-              : null;
-            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            const orderMatchingToken = findOrderToken.tokenId
-            ? findOrderToken.tokenId
-            : null;
-          return {
-            ...eleObj,
-            pick: pickValue,
-            finalCut: finalCut,
-            orderMatchingToken: orderMatchingToken,
-          };
-          } else {
-            return eleObj;
-          }
-        });
-        mergedObjects1.push(result);
-      }
-
-    mergedObjects1 = mergedObjects1
-      .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-      .filter((obj) => obj.hasOwnProperty("pick"));
-
-    const calculatYarnWeight = (denier, pick, order, finalCut) =>
-      (denier * pick * order * finalCut * 52 * 1) / 9000000;
-    const resultArray = [];
-    for (const data of mergedObjects1) {
-      const arrayWeight = 0;
-      const findOrder = pendingNewArr.find(
-        (order) => order.matchingId === data?.matchingId
-      );
-      const totalWeight =
-        arrayWeight +
-        calculatYarnWeight(
-          Number(data?.denier),
-          Number(data?.pick),
-          findOrder?.pcsOnMachine,
-          Number(data?.finalCut)
-        );
-      const calculatedObj = {
-        ...data,
-        weight: totalWeight,
-      };
-      resultArray.push(calculatedObj);
-    }
-    // const newArray = resultArray.map((obj) => {
-    //   const { denier, matchingId, pick, ...rest } = obj;
-    //   return rest;
-    // });
-
-    // const mergedObjects = {};
-
-    // newArray.forEach((obj) => {
-    //   const key = Object.values(obj)[0];
-    //   if (mergedObjects[key]) {
-    //     mergedObjects[key].weight += obj?.weight;
-    //   } else {
-    //     mergedObjects[key] = obj;
-    //   }
-    // });
-
-    // let pageItems = Object.values(mergedObjects);
-    // pageItems = pageItems.map((obj) => {
+    // const pageItems = resultArray.map((obj) => {
     //   const keys = Object.keys(obj);
     //   const firstKey = keys[0];
-    //   const updatedObj = {};
-    //   const feederNumber = firstKey.replace(/f\d+/, "feeders");
-    //   updatedObj[feederNumber] = obj[firstKey];
+    //   const feeders = firstKey.replace(/f\d+/, "feeders");
+    //   const newObj = { [feeders]: obj[firstKey] };
+
     //   keys.slice(1).forEach((key) => {
-    //     updatedObj[key] = obj[key];
+    //     newObj[key] = obj[key];
     //   });
-    //   updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-    //   return updatedObj;
+
+    //   return newObj;
     // });
+    // console.log("==pageItems===", pageItems);
 
-    const pageItems = resultArray.map((obj) => {
-      const keys = Object.keys(obj);
-      const firstKey = keys[0];
-      const feeders = firstKey.replace(/f\d+/, "feeders");
-      const newObj = { [feeders]: obj[firstKey] };
-
-      keys.slice(1).forEach((key) => {
-        newObj[key] = obj[key];
-      });
-
-      return newObj;
-    });
-    console.log("==pageItems===", pageItems);
-
-    for (const item of pageItems) {
-      const { feeders, weight, orderMatchingToken } = item;
-      for (let detail of salesDetails) {
-        if (detail.orderToken === orderMatchingToken && detail.colorCode === feeders) {
-          detail.colorCode = feeders;
-          detail.weight = weight;
-          await detail.save();
-        }
-      }
-    }
+    // for (const item of pageItems) {
+    //   const { feeders, weight, orderMatchingToken } = item;
+    //   for (let detail of salesDetails) {
+    //     if (detail.orderToken === orderMatchingToken && detail.colorCode === feeders) {
+    //       detail.colorCode = feeders;
+    //       detail.weight = weight;
+    //       await detail.save();
+    //     }
+    //   }
+    // }
     return {
       status: 200,
       message: "Process order updated successfully.",
@@ -1025,3 +758,151 @@ exports.editAllProcessOrder = async (
     throw error;
   }
 };
+
+async function YarnWeightCalculation(orderId) {
+  const findByOrderId = await ordersModel.findOne({ orderId: orderId });
+  const pendingOrderArr = [];
+  for (const order of findByOrderId?.orders) {
+    pendingOrderArr.push(order);
+  }
+  const pendingNewArr = [];
+  for (const ele of pendingOrderArr) {
+    if (ele.completePcs > 0 || ele.pcsOnMachine > 0 || ele.dispatch > 0 || ele.settlePcs > 0) {
+      pendingNewArr.push(ele);
+    }
+  }
+
+  const findMatching = await matchingModel.find();
+
+  const salesDetails = await YarnSalesDetail.find();
+
+  const listOfOrders = [];
+  const findMatchings = await matchingModel.find();
+  for (const ele of findMatchings) {
+    for (const data of pendingNewArr) {
+      if (ele?.matchingId === data?.matchingId) {
+        listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
+      }
+    }
+  }
+
+  const findFeeders = listOfOrders;
+  const findColorYarn = await colorYarnModel.find();
+  const findPickByDesign = await designModel.find();
+  const denierSet1 = [];
+
+  for (const feeder of findFeeders) {
+    const denierSet = [];
+    for (const [key, colorCode] of Object.entries(feeder)) {
+      const matchingColorYarn = findColorYarn.find(
+        (yarn) => yarn.colorCode === colorCode
+      );
+      if (matchingColorYarn) {
+        const feederDenierInfo = {};
+        feederDenierInfo[key] = colorCode;
+        feederDenierInfo["denier"] = matchingColorYarn.denier;
+        feederDenierInfo["matchingId"] = feeder.matchingId;
+        denierSet.push(feederDenierInfo);
+      }
+    }
+    if (denierSet.length > 0) {
+      denierSet1.push(denierSet);
+    }
+  }
+  let mergedObjects1 = [];
+  const designArr = [];
+  for (const data of pendingNewArr) {
+    designArr.push(data.design);
+  }
+
+  for (let i = 0; i < denierSet1.length; i++) {
+    const ele = denierSet1[i];
+    const result = ele.map((eleObj, index) => {
+      const getMatchingId = findMatching.find(
+        (element) => element.matchingId === eleObj.matchingId
+      );
+      const findOrderToken = pendingNewArr.find(
+        (ele) => ele.matchingId === eleObj.matchingId
+      );
+      const findDesign = findPickByDesign.find(
+        (design) => design.name === getMatchingId.name
+      );
+      if (getMatchingId) {
+        const pickKey = `pick-${index + 1}`;
+        const pickValue = findDesign.feeders[index]
+          ? findDesign.feeders[index][pickKey]
+          : null;
+        const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+        const orderMatchingToken = findOrderToken.tokenId
+          ? findOrderToken.tokenId
+          : null;
+        return {
+          ...eleObj,
+          pick: pickValue,
+          finalCut: finalCut,
+          orderMatchingToken: orderMatchingToken,
+        };
+      } else {
+        return eleObj;
+      }
+    });
+    mergedObjects1.push(result);
+  }
+
+  mergedObjects1 = mergedObjects1
+    .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+    .filter((obj) => obj.hasOwnProperty("pick"));
+  const calculatYarnWeight = (denier, pick, order, finalCut) =>
+    (denier * pick * order * finalCut * 52 * 1) / 9000000;
+  const resultArray = [];
+  for (const data of mergedObjects1) {
+    const arrayWeight = 0;
+    const findOrder = pendingNewArr.find(
+      (order) => order.matchingId === data?.matchingId
+    );
+    const totalWeight =
+      arrayWeight +
+      calculatYarnWeight(
+        Number(data?.denier),
+        Number(data?.pick),
+        Number(findOrder.pcsOnMachine) +
+          Number(findOrder.completePcs) +
+          Number(findOrder.dispatch) +
+          Number(findOrder.settlePcs),
+        Number(data?.finalCut)
+      );
+    const calculatedObj = {
+      ...data,
+      weight: totalWeight,
+    };
+    resultArray.push(calculatedObj);
+  }
+  console.log("===resultArray===", resultArray);
+
+  const pageItems = resultArray.map((obj) => {
+    const keys = Object.keys(obj);
+    const firstKey = keys[0];
+    const feeders = firstKey.replace(/f\d+/, "feeders");
+    const newObj = { [feeders]: obj[firstKey] };
+
+    keys.slice(1).forEach((key) => {
+      newObj[key] = obj[key];
+    });
+
+    return newObj;
+  });
+  console.log("==pageItems===", pageItems);
+  for (const item of pageItems) {
+    const { feeders, weight, orderMatchingToken } = item;
+    for (let detail of salesDetails) {
+      if (
+        detail.orderToken === orderMatchingToken &&
+        detail.colorCode === feeders
+      ) {
+        detail.colorCode = feeders;
+        detail.weight = weight;
+        await detail.save();
+      }
+    }
+  }
+}

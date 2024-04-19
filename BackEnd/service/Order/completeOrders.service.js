@@ -1,6 +1,15 @@
 const message = require("../../common/error.message");
+const {
+  findOrderByOrderId,
+  findMachinePcs,
+  findAllOrders,
+} = require("../../DBQuery/Order/completeOrder");
 const ordersModel = require("../../model/Order/orders.model");
 const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
+const matchingModel = require("../../model/Master/matching.model");
+const YarnSalesDetail = require("../../model/Yarn/yarnSales.model");
+const designModel = require("../../model/Master/design.model");
+const colorYarnModel = require("../../model/Master/colorYarn.model");
 
 exports.completeProcessOrder = async (
   orderId,
@@ -9,8 +18,8 @@ exports.completeProcessOrder = async (
   complete
 ) => {
   try {
-    const findByOrderId = await ordersModel.findOne({ orderId: orderId });
-    const findOrderOnMachine = await pcsOnMachineModel.find();
+    const findByOrderId = await findOrderByOrderId(orderId);
+    const findOrderOnMachine = await findMachinePcs();
 
     if (!findByOrderId) {
       return {
@@ -77,6 +86,7 @@ exports.completeProcessOrder = async (
       }
 
       await findByOrderId.save();
+      await YarnWeightCalculation(orderId);
       return {
         status: 200,
         message: message.PROCESS_ORDER_SUCESS,
@@ -91,7 +101,7 @@ exports.completeProcessOrder = async (
 
 exports.getCompleteOrder = async (orderId) => {
   try {
-    const findByOrderId = await ordersModel.findOne({ orderId: orderId });
+    const findByOrderId = await findOrderByOrderId(orderId);
 
     if (!findByOrderId) {
       return {
@@ -116,7 +126,7 @@ exports.getCompleteOrder = async (orderId) => {
 
 exports.createCompleteOrder = async (orderId, tokenId, body) => {
   try {
-    const findByOrderId = await ordersModel.findOne({ orderId });
+    const findByOrderId = await findOrderByOrderId(orderId);
 
     if (!findByOrderId) {
       return {
@@ -159,6 +169,8 @@ exports.createCompleteOrder = async (orderId, tokenId, body) => {
         }
         orderToUpdate.completePcs = orderToUpdate.completePcs - body.dispatch;
         const dispatchOrder = await findByOrderId.save();
+        await YarnWeightCalculation(orderId);
+
         return {
           status: 200,
           message: message.COMPLETE_ORDER_SUCESS,
@@ -186,6 +198,8 @@ exports.createCompleteOrder = async (orderId, tokenId, body) => {
         }
         orderToUpdate.completePcs = orderToUpdate.completePcs - body.settle;
         const settleOrder = await findByOrderId.save();
+        await YarnWeightCalculation(orderId);
+
         return {
           status: 200,
           message: message.COMPLETE_ORDER_SUCESS,
@@ -199,7 +213,6 @@ exports.createCompleteOrder = async (orderId, tokenId, body) => {
           message: "Invalid operation",
         };
     }
-
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -208,7 +221,7 @@ exports.createCompleteOrder = async (orderId, tokenId, body) => {
 
 exports.getDeliveredOrder = async () => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
 
     if (!findOrders) {
       return {
@@ -267,7 +280,7 @@ exports.getDeliveredOrder = async () => {
           dispatchObject[key].dispatch + ele.dispatch;
       }
     });
-    
+
     const dispatchArray = Object.values(dispatchObject);
 
     const settleObject = {};
@@ -282,7 +295,7 @@ exports.getDeliveredOrder = async () => {
         settleObject[key].dispatch = settleObject[key].dispatch + ele.dispatch;
       }
     });
-    const settleArray = Object.values(settleObject); 
+    const settleArray = Object.values(settleObject);
     const commonObj = [...dispatchArray, ...settleArray];
 
     const uniqueOrdersSet = new Set();
@@ -305,7 +318,7 @@ exports.getDeliveredOrder = async () => {
 
 exports.getAllCompleteOrder = async () => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     const processOrderArr = [];
 
     for (const order of findOrders) {
@@ -333,3 +346,156 @@ exports.getAllCompleteOrder = async () => {
     throw error;
   }
 };
+
+async function YarnWeightCalculation(orderId) {
+  const findByOrderId = await ordersModel.findOne({ orderId: orderId });
+  const pendingOrderArr = [];
+  for (const order of findByOrderId?.orders) {
+    pendingOrderArr.push(order);
+  }
+  const pendingNewArr = [];
+  for (const ele of pendingOrderArr) {
+    if (
+      ele.completePcs > 0 ||
+      ele.pcsOnMachine > 0 ||
+      ele.dispatch > 0 ||
+      ele.settlePcs > 0
+    ) {
+      pendingNewArr.push(ele);
+    }
+  }
+
+  const findMatching = await matchingModel.find();
+
+  const salesDetails = await YarnSalesDetail.find();
+
+  const listOfOrders = [];
+  const findMatchings = await matchingModel.find();
+  for (const ele of findMatchings) {
+    for (const data of pendingNewArr) {
+      if (ele?.matchingId === data?.matchingId) {
+        listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
+      }
+    }
+  }
+
+  const findFeeders = listOfOrders;
+  const findColorYarn = await colorYarnModel.find();
+  const findPickByDesign = await designModel.find();
+  const denierSet1 = [];
+
+  for (const feeder of findFeeders) {
+    const denierSet = [];
+    for (const [key, colorCode] of Object.entries(feeder)) {
+      const matchingColorYarn = findColorYarn.find(
+        (yarn) => yarn.colorCode === colorCode
+      );
+      if (matchingColorYarn) {
+        const feederDenierInfo = {};
+        feederDenierInfo[key] = colorCode;
+        feederDenierInfo["denier"] = matchingColorYarn.denier;
+        feederDenierInfo["matchingId"] = feeder.matchingId;
+        denierSet.push(feederDenierInfo);
+      }
+    }
+    if (denierSet.length > 0) {
+      denierSet1.push(denierSet);
+    }
+  }
+  let mergedObjects1 = [];
+  const designArr = [];
+  for (const data of pendingNewArr) {
+    designArr.push(data.design);
+  }
+
+  for (let i = 0; i < denierSet1.length; i++) {
+    const ele = denierSet1[i];
+    const result = ele.map((eleObj, index) => {
+      const getMatchingId = findMatching.find(
+        (element) => element.matchingId === eleObj.matchingId
+      );
+      const findOrderToken = pendingNewArr.find(
+        (ele) => ele.matchingId === eleObj.matchingId
+      );
+      const findDesign = findPickByDesign.find(
+        (design) => design.name === getMatchingId.name
+      );
+      if (getMatchingId) {
+        const pickKey = `pick-${index + 1}`;
+        const pickValue = findDesign.feeders[index]
+          ? findDesign.feeders[index][pickKey]
+          : null;
+        const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+        const orderMatchingToken = findOrderToken.tokenId
+          ? findOrderToken.tokenId
+          : null;
+        return {
+          ...eleObj,
+          pick: pickValue,
+          finalCut: finalCut,
+          orderMatchingToken: orderMatchingToken,
+        };
+      } else {
+        return eleObj;
+      }
+    });
+    mergedObjects1.push(result);
+  }
+
+  mergedObjects1 = mergedObjects1
+    .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+    .filter((obj) => obj.hasOwnProperty("pick"));
+  const calculatYarnWeight = (denier, pick, order, finalCut) =>
+    (denier * pick * order * finalCut * 52 * 1) / 9000000;
+  const resultArray = [];
+  for (const data of mergedObjects1) {
+    const arrayWeight = 0;
+    const findOrder = pendingNewArr.find(
+      (order) => order.matchingId === data?.matchingId
+    );
+    const totalWeight =
+      arrayWeight +
+      calculatYarnWeight(
+        Number(data?.denier),
+        Number(data?.pick),
+        Number(findOrder.pcsOnMachine) +
+          Number(findOrder.completePcs) +
+          Number(findOrder.dispatch) +
+          Number(findOrder.settlePcs),
+        Number(data?.finalCut)
+      );
+    const calculatedObj = {
+      ...data,
+      weight: totalWeight,
+    };
+    resultArray.push(calculatedObj);
+  }
+  console.log("===resultArray===", resultArray);
+
+  const pageItems = resultArray.map((obj) => {
+    const keys = Object.keys(obj);
+    const firstKey = keys[0];
+    const feeders = firstKey.replace(/f\d+/, "feeders");
+    const newObj = { [feeders]: obj[firstKey] };
+
+    keys.slice(1).forEach((key) => {
+      newObj[key] = obj[key];
+    });
+
+    return newObj;
+  });
+  console.log("==pageItems===", pageItems);
+  for (const item of pageItems) {
+    const { feeders, weight, orderMatchingToken } = item;
+    for (let detail of salesDetails) {
+      if (
+        detail.orderToken === orderMatchingToken &&
+        detail.colorCode === feeders
+      ) {
+        detail.colorCode = feeders;
+        detail.weight = weight;
+        await detail.save();
+      }
+    }
+  }
+}

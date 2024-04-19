@@ -10,10 +10,18 @@ const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
 const moment = require("moment");
 const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
+const { findMatchingByMatchingId } = require("../../DBQuery/Master/matching");
+const {
+  findOrderByOrderId,
+  findMachinePcs,
+  findAllOrders,
+  generateNewOrder,
+  createIdOfOrder,
+} = require("../../DBQuery/Order/completeOrder");
 
 exports.createOrderId = async () => {
   try {
-    const createOrderIdDetail = new orderIdModel();
+    const createOrderIdDetail = await createIdOfOrder();
     const detail = await createOrderIdDetail.save();
 
     return {
@@ -33,7 +41,7 @@ exports.createOrderId = async () => {
 exports.createOrders = async (data, orderId) => {
   try {
     const sixDigitNumber = hashCode(orderId);
-    const matchingDetails = await matchingDetail.findOne({
+    const matchingDetails = await findMatchingByMatchingId({
       matchingId: data.matchingId,
     });
     const orderDetail = createOrderDetail(
@@ -42,7 +50,7 @@ exports.createOrders = async (data, orderId) => {
       matchingDetails
     );
 
-    const findOrder = await ordersModel.findOne({ orderId: orderId });
+    const findOrder = await findOrderByOrderId(orderId);
 
     if (!findOrder) {
       return createNewOrder(data, orderId, orderDetail, sixDigitNumber);
@@ -84,10 +92,7 @@ function createOrderDetail(data, sixDigitNumber, matchingDetails) {
 
 async function createNewOrder(data, orderId, orderDetail, sixDigitNumber) {
   try {
-    const createOrderDetail = new ordersModel({
-      orders: [orderDetail],
-      orderId: orderId,
-    });
+    const createOrderDetail = await generateNewOrder(orderDetail, orderId);
     const detail = await createOrderDetail.save();
     const findOrderById = await ordersModel.find({ orderId: orderId });
     for (const ele of detail?.orders) {
@@ -402,6 +407,12 @@ exports.findOrderById = async () => {
         return accumulator;
       }, 0);
 
+      const sumSettlePcsByDesign = ele.orders.reduce((accumulator, order) => {
+        let { settlePcs } = order;
+        accumulator += settlePcs;
+        return accumulator;
+      }, 0);
+
       ////////////////////matching//////////////////////////////////////////////////////////////
 
       if (!matchingDetails || !matchingDetails.length) {
@@ -443,6 +454,7 @@ exports.findOrderById = async () => {
         process: sumProcessPcsByDesign,
         completed: sumCompletedPcsByDesign,
         dispatch: sumDispatchPcsByDesign,
+        settlePcs: sumSettlePcsByDesign,
         orderId: ele.orderId,
         __v: ele.__v,
       };
@@ -915,11 +927,51 @@ async function processOrderDetail(
       return updatedObj;
     });
     let pendingOrderYarn = [];
+    const missingYarnInPurchase = pageItems.filter((item) => {
+      return !purchaseDetails.some(
+        (detail) => detail.colorCode === item.feeders
+      );
+    });
+    for (const items of missingYarnInPurchase) {
+      const getColorYarn = await findYarnColor();
+      const findColorYarn = getColorYarn.find(
+        (ele) => ele.colorCode === `${items.feeders}`
+      );
+      const yarnPurchaseData = {
+        invoiceNo: "ABCD",
+        lotNo: "ABCD",
+        party: "ABCD",
+        colorCode: `${items.feeders}`,
+        colorQuality: findColorYarn.colorQuality
+          ? findColorYarn.colorQuality
+          : "ABCD",
+        date: moment().format("DD/MM/YYYY"),
+        weight: items.weight,
+        denier: findColorYarn.denier ? findColorYarn.denier : 0,
+      };
+      const createYarnPurchaseDetail = new yarnPurchaseModel(yarnPurchaseData);
+      await createYarnPurchaseDetail.save();
+      const dummyYarnSalesData = {
+        invoiceNo: sixDigitNumber,
+        lotNo: sixDigitNumber,
+        party: data.party,
+        colorCode: `${items.feeders}`,
+        colorQuality: findColorYarn.colorQuality
+          ? findColorYarn.colorQuality
+          : "ABCD",
+        date: moment().format("DD/MM/YYYY"),
+        weight: items.weight,
+        denier: findColorYarn.denier ? findColorYarn.denier : 0,
+        price: 0,
+        orderToken: tokenId,
+      };
+      const createDummyYarnSalesDetail = new yarnSalesModel(dummyYarnSalesData);
+      await createDummyYarnSalesDetail.save();
+    }
+
     for (const item of pageItems) {
-      let colorFound = false;
       for (const ele of yarnStock) {
         if (item.feeders === ele.colorCode) {
-          colorFound = true;
           const yarnSalesData = {
             invoiceNo: sixDigitNumber,
             lotNo: sixDigitNumber,
@@ -934,49 +986,6 @@ async function processOrderDetail(
           };
           const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
           await createYarnSalesDetail.save();
-        }
-      }
-      if (!colorFound) {
-        const getYarnPurchase = await yarnPurchaseModel.find();
-        const getColorYarn = await findYarnColor();
-        const findColorYarn = getColorYarn.find(
-          (ele) => ele.colorCode === `${item.feeders}`
-        );
-        for (const data of getYarnPurchase) {
-          if (data.colorCode !== item.feeders) {
-            const yarnPurchaseData = {
-              invoiceNo: "ABCD",
-              lotNo: "ABCD",
-              party: "ABCD",
-              colorCode: `${item.feeders}`,
-              colorQuality: findColorYarn.colorQuality
-                ? findColorYarn.colorQuality
-                : "ABCD",
-              date: moment().format("DD/MM/YYYY"),
-              weight: 0,
-              denier: findColorYarn.denier ? findColorYarn.denier : 0,
-            };
-            const createYarnPurchaseDetail = new yarnPurchaseModel(
-              yarnPurchaseData
-            );
-            await createYarnPurchaseDetail.save();
-            const yarnSalesData = {
-              invoiceNo: sixDigitNumber,
-              lotNo: sixDigitNumber,
-              party: data.party,
-              colorCode: `${item.feeders}`,
-              colorQuality: findColorYarn.colorQuality
-                ? findColorYarn.colorQuality
-                : "ABCD",
-              date: moment().format("DD/MM/YYYY"),
-              weight: item.weight,
-              denier: findColorYarn.denier ? findColorYarn.denier : 0,
-              price: 0,
-              orderToken: tokenId,
-            };
-            const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
-            await createYarnSalesDetail.save();
-          }
         }
       }
     }
@@ -1143,7 +1152,10 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
         calculatYarnWeight(
           Number(item?.denier),
           Number(item?.pick),
-          findOrder?.pcsOnMachine,
+          Number(findOrder.pcsOnMachine) +
+            Number(findOrder.completePcs) +
+            Number(findOrder.dispatch) +
+            Number(findOrder.settlePcs),
           Number(item?.finalCut)
         );
       const calculatedObj = {

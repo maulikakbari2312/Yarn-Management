@@ -1,7 +1,4 @@
 const message = require("../../common/error.message");
-const matchingModel = require("../../model/Master/matching.model");
-const designModel = require("../../model/Master/design.model");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
 const { v4: uuidv4 } = require("uuid");
 const {
   findMatchings,
