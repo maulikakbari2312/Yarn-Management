@@ -485,15 +485,30 @@ async function YarnWeightCalculation(orderId) {
     return newObj;
   });
   console.log("==pageItems===", pageItems);
+
+  const accumulatedWeights = {};
   for (const item of pageItems) {
     const { feeders, weight, orderMatchingToken } = item;
-    for (let detail of salesDetails) {
+
+    const key = `${feeders}:${item.matchingId}:${orderMatchingToken}`;
+
+    if (!accumulatedWeights[key]) {
+      accumulatedWeights[key] = weight;
+    } else {
+      accumulatedWeights[key] += weight;
+    }
+  }
+
+  for (const key of Object.keys(accumulatedWeights)) {
+    const [feeders, matchingId, orderMatchingToken] = key.split(":");
+    const accumulatedWeight = accumulatedWeights[key];
+    for (const detail of salesDetails) {
       if (
         detail.orderToken === orderMatchingToken &&
         detail.colorCode === feeders
       ) {
         detail.colorCode = feeders;
-        detail.weight = weight;
+        detail.weight = accumulatedWeight;
         await detail.save();
       }
     }

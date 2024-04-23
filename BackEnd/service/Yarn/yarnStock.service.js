@@ -77,9 +77,9 @@ exports.findYarnStock = async () => {
       };
     });
 
-    const formattedData = result.map(item => ({
+    const formattedData = result.map((item) => ({
       ...item,
-      weight: parseFloat(item.weight.toFixed(4))
+      weight: parseFloat(item.weight.toFixed(4)),
     }));
 
     return formattedData;
@@ -238,34 +238,36 @@ exports.findRemainingYarnStock = async () => {
     const designArr = [];
     for (const data of pendingNewArr) {
       designArr.push(data.design);
-    }    
-      for (let i = 0; i < denierSet1.length; i++) {
-        const ele = denierSet1[i];
-        const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
-          const findDesign = findPickByDesign.find((design) => design.name === getMatchingId.name);
-          if (getMatchingId) {
-            const pickKey = `pick-${index + 1}`;
-            const pickValue = findDesign.feeders[index]
-              ? findDesign.feeders[index][pickKey]
-              : null;
-            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-            return { ...eleObj, pick: pickValue, finalCut: finalCut };
-          } else {
-            return eleObj;
-          }
-        });
-        mergedObjects1.push(result);
-      }
+    }
+    for (let i = 0; i < denierSet1.length; i++) {
+      const ele = denierSet1[i];
+      const result = ele.map((eleObj, index) => {
+        const getMatchingId = findMatching.find(
+          (element) => element.matchingId === eleObj.matchingId
+        );
+        const findDesign = findPickByDesign.find(
+          (design) => design.name === getMatchingId.name
+        );
+        if (getMatchingId) {
+          const pickKey = `pick-${index + 1}`;
+          const pickValue = findDesign.feeders[index]
+            ? findDesign.feeders[index][pickKey]
+            : null;
+          const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+          return { ...eleObj, pick: pickValue, finalCut: finalCut };
+        } else {
+          return eleObj;
+        }
+      });
+      mergedObjects1.push(result);
+    }
     // mergedObjects1 = mergedObjects1.flatMap((arr) =>
     //   arr.filter((obj) => obj.hasOwnProperty("pick"))
     // );
 
     mergedObjects1 = mergedObjects1
-        .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-        .filter((obj) => obj.hasOwnProperty("pick"));
+      .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+      .filter((obj) => obj.hasOwnProperty("pick"));
 
     const calculatYarnWeight = (denier, pick, order, finalCut) =>
       (denier * pick * order * finalCut * 52 * 1) / 9000000;
@@ -288,7 +290,7 @@ exports.findRemainingYarnStock = async () => {
         ...data,
         weight: totalWeight,
       };
-      console.log("==calculatedObj===",calculatedObj);
+      console.log("==calculatedObj===", calculatedObj);
       resultArray.push(calculatedObj);
     }
     const newArray = resultArray.map((obj) => {
