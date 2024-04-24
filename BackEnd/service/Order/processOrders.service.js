@@ -551,16 +551,16 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
     console.log("==pageItems===", pageItems);
     for (const item of pageItems) {
       const { feeders, weight, orderMatchingToken } = item;
-  
+
       const key = `${feeders}:${item.matchingId}:${orderMatchingToken}`;
-  
+
       if (!accumulatedWeights[key]) {
         accumulatedWeights[key] = weight;
       } else {
         accumulatedWeights[key] += weight;
       }
     }
-  
+
     for (const key of Object.keys(accumulatedWeights)) {
       const [feeders, matchingId, orderMatchingToken] = key.split(":");
       const accumulatedWeight = accumulatedWeights[key];
@@ -598,6 +598,10 @@ exports.editAllProcessOrder = async (
       };
     }
 
+    const updatedOrder = findOrders.orders.find(
+      (order) => order.tokenId === tokenId
+    );
+
     const findOrderOnMachine = await pcsOnMachineModel.findOne({
       orderId: orderId,
       tokenId: tokenId,
@@ -613,9 +617,31 @@ exports.editAllProcessOrder = async (
     const machineData = findOrderOnMachine.machinesInProcess.find(
       (machine) => machine.machineId === machineId
     );
-    const updatedOrder = findOrders.orders.find(
-      (order) => order.tokenId === tokenId
-    );
+
+    const findProcessOrderByToken = await pcsOnMachineModel.find({
+      orderId: orderId,
+      tokenId: tokenId,
+    });
+
+    let totalProcessOrder = 0;
+    for (const data of findProcessOrderByToken) {
+      for (const item of data.machinesInProcess) {
+        totalProcessOrder += item.pcsOnMachine;
+      }
+    }
+
+    const anotherMachinePcs = totalProcessOrder - machineData.pcsOnMachine;
+    const totalInProcess = anotherMachinePcs + updatedPcsOnMachine;
+    if (totalInProcess > updatedOrder.pcs) {
+      return {
+        status: 422,
+        message: `You are trying to add ${
+          totalInProcess - updatedOrder.pcs
+        } pieces more than total order.`,
+      };
+    }
+    machineData.pcsOnMachine = updatedPcsOnMachine;
+    await findOrderOnMachine.save();
 
     if (updatedOrder.pcs < updatedPcsOnMachine) {
       return {
@@ -623,22 +649,19 @@ exports.editAllProcessOrder = async (
         message: `Your order is ${updatedOrder.pcs} pcs. If you want to add more order in process, please update the main order.`,
       };
     }
-    
+
     let diffPcs = 0;
-    if (updatedOrder.pcsOnMachine > updatedPcsOnMachine) {
-      diffPcs = updatedOrder.pcsOnMachine - updatedPcsOnMachine;
+    if (updatedOrder.pcsOnMachine > totalInProcess) {
+      diffPcs = updatedOrder.pcsOnMachine - totalInProcess;
       updatedOrder.pendingPcs = updatedOrder.pendingPcs + diffPcs;
-      updatedOrder.pcsOnMachine = updatedPcsOnMachine;
+      updatedOrder.pcsOnMachine = totalInProcess;
     } else {
-      diffPcs = updatedPcsOnMachine - updatedOrder.pcsOnMachine;
+      diffPcs = totalInProcess - updatedOrder.pcsOnMachine;
       updatedOrder.pendingPcs = updatedOrder.pendingPcs - diffPcs;
-      updatedOrder.pcsOnMachine = updatedPcsOnMachine;
+      updatedOrder.pcsOnMachine = totalInProcess;
     }
 
-    machineData.pcsOnMachine = updatedPcsOnMachine;
-
     await findOrders.save();
-    await findOrderOnMachine.save();
     await YarnWeightCalculation(orderId);
     // const pendingOrderArr = [];
     // for (const order of findOrders?.orders) {
