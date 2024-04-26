@@ -209,7 +209,6 @@ exports.findMatchingFeeder = async (orderId) => {
       const resultArray = Array.from(uniqueObjects, JSON.parse);
       return resultArray;
     }
-    console.log("==result===", result);
     const pendingOrderArr = [];
 
     for (const ele of order?.orders) {
@@ -253,82 +252,63 @@ exports.findMatchingFeeder = async (orderId) => {
         denierSet1.push(denierSet);
       }
     }
-
     let mergedObjects1 = [];
 
-    for (const data of result) {
-      let findDesign = findPickByDesign.find((ele) => ele.name === data.design);
-
-      if (findDesign) {
-        for (let i = 0; i < denierSet1.length; i++) {
-          const ele = denierSet1[i];
-          const result = ele.map((eleObj, index) => {
-            const getMatchingId = findMatching.find(
-              (element) => element.matchingId === eleObj.matchingId
-            );
-            if (getMatchingId && getMatchingId.name === findDesign.name) {
-              const pickKey = `pick-${index + 1}`;
-              const pickValue = findDesign.feeders[index]
-                ? findDesign.feeders[index][pickKey]
-                : null;
-              const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-              return { ...eleObj, pick: pickValue, finalCut: finalCut };
-            } else {
-              return eleObj;
-            }
-          });
-          mergedObjects1.push(result);
-        }
-      } else {
-        console.error(`Design "${data.design}" not found in findPickByDesign`);
+    let findDesign = findPickByDesign.filter((design) => {
+      return pendingOrderArr.some((item) => item.design === design.name);
+    });
+    for (const data of findDesign) {
+      for (let i = 0; i < denierSet1.length; i++) {
+        const ele = denierSet1[i];
+        const result = ele.map((eleObj, index) => {
+          const getMatchingId = findMatching.find(
+            (element) => element.matchingId === eleObj.matchingId
+          );
+          if (data.name === getMatchingId.name) {
+            const pickKey = `pick-${index + 1}`;
+            const pickValue = data.feeders[index]
+              ? data.feeders[index][pickKey]
+              : null;
+            const finalCut = data.finalCut ? data.finalCut : null;
+            return { ...eleObj, pick: pickValue, finalCut: finalCut };
+          }
+        });
+        mergedObjects1.push(result);
       }
-      //   mergedObjects1 = mergedObjects1
-      //     .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-      //     .filter((obj) => obj.hasOwnProperty("pick"));
-      mergedObjects1 = Array.from(
-        new Set(mergedObjects1.map(JSON.stringify)),
-        JSON.parse
-      );
     }
+    mergedObjects1 = Array.from(
+      new Set(mergedObjects1.map(JSON.stringify)),
+      JSON.parse
+    );
+    mergedObjects1 = mergedObjects1.filter((array) =>
+      array.every((item) => item !== null)
+    );
 
-    let totalWeight = 0;
-    const resultArray = [];
-    const newArray = resultArray.map((obj) => {
-      const { denier, matchingId, pick, ...rest } = obj;
-      return rest;
-    });
+    const uniqueMatchingIds = new Set();
 
-    const calculateSareeWeight = (denier, pick, finalCut) =>
-      (denier * pick * finalCut * 52 * 1) / 9000000;
-
-    const mergedObjects = {};
-
-    newArray.forEach((obj) => {
-      const key = Object.values(obj)[0];
-      if (mergedObjects[key]) {
-        mergedObjects[key].weight += obj?.weight;
-      } else {
-        mergedObjects[key] = obj;
+    const uniqueArrays = mergedObjects1.filter((arr) => {
+      const matchingId = arr[0].matchingId;
+      if (!uniqueMatchingIds.has(matchingId)) {
+        uniqueMatchingIds.add(matchingId);
+        return true;
       }
+      return false;
     });
 
-    let pageItems = Object.values(mergedObjects);
+    const calculateSareeWeight = (denier, pick, finalCut) => {
+      if (
+        isNaN(Number(denier)) ||
+        isNaN(Number(pick)) ||
+        isNaN(Number(finalCut))
+      ) {
+        return 0;
+      }
 
-    pageItems = pageItems.map((obj) => {
-      const keys = Object.keys(obj);
-      const firstKey = keys[0];
-      const updatedObj = {};
-      const feederNumber = firstKey.replace(/f\d+/, "feeders");
-      updatedObj[feederNumber] = obj[firstKey];
-      keys.slice(1).forEach((key) => {
-        updatedObj[key] = obj[key];
-      });
-      updatedObj["weight"] = parseFloat(obj["weight"].toFixed(4));
-      return updatedObj;
-    });
-    console.log("==pageItems===", pageItems);
+      return (denier * pick * finalCut * 52 * 1) / 9000000;
+    };
+
     const obj = {};
-    for (const arr of mergedObjects1) {
+    for (const arr of uniqueArrays) {
       for (const data of arr) {
         const totalSareeWeight = calculateSareeWeight(
           Number(data?.denier),
@@ -354,12 +334,19 @@ exports.findMatchingFeeder = async (orderId) => {
         }
       }
     }
+    let maxLength = 0;
+    for (const item of matchingArra) {
+      const feeders = Object.keys(item).filter(key => key.startsWith('f') && item[key] !== undefined);
+      maxLength = Math.max(maxLength, feeders.length);
+    }
+    console.log("Length:", maxLength);
     const responce = {
       status: 200,
       message: message.MATCHING_FEEDER_SUCCESS,
       ground: designData.ground,
       pallu: designData.pallu,
       pageItems: matchingArra,
+      maxFeederLength:maxLength
     };
     return responce;
   } catch (error) {
