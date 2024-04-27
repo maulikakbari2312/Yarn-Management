@@ -283,7 +283,7 @@ exports.findMatchingFeeder = async (orderId) => {
     mergedObjects1 = mergedObjects1.filter((array) =>
       array.every((item) => item !== null)
     );
-
+console.log("==mergedObjects1===",mergedObjects1);
     const uniqueMatchingIds = new Set();
 
     const uniqueArrays = mergedObjects1.filter((arr) => {

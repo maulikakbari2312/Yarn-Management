@@ -266,10 +266,15 @@ const Orders = () => {
     ];
     try {
 
-        const numOfFields = (dataTable && dataTable.pageItems && dataTable.pageItems[0]) ? Object.keys(dataTable.pageItems[0]) : 6;
-        const filteredFields = numOfFields?.filter(field => field !== 'matchingId');
+        // const numOfFields = (dataTable && dataTable.pageItems && dataTable.pageItems[0]) ? Object.keys(dataTable.pageItems[0]) : 6;
+        // const filteredFields = numOfFields?.filter(field => field !== 'matchingId');
 
-        for (let i = 1; i <= filteredFields?.length - 2 || 0; i++) {
+        let numOfFields = 6; // Default value
+        if (dataTable && dataTable.maxFeederLength) {
+            numOfFields = dataTable.maxFeederLength;
+        }
+        // for (let i = 1; i <= filteredFields?.length - 2 || 0; i++) {
+            for (let i = 1; i <= numOfFields; i++) {
 
             let fieldName = `f${i} `;
 
