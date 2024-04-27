@@ -40,3 +40,25 @@ exports.getSareeStock = async (req, res) => {
     }
   }
 };
+
+exports.editSareeStock = async (req, res) => {
+  try {
+    const tokenId = req.params.tokenId;
+    const matchingId = req.params.matchingId;
+    const editSareeStock = await sareeStockService.editSareeStock(
+      tokenId,
+      matchingId,
+      req.body.returnPcs
+    );
+    res.status(editSareeStock.status).send(editSareeStock);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const errorMessages = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      res.status(400).json({ errorMessages });
+    } else {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+};
