@@ -15,7 +15,7 @@ import { useApi } from "network/api";
 import { parentSelectedData } from "redux/action/index.js";
 import { currentPageState } from "redux/action/index.js";
 import { pageSize } from "redux/action/index.js";
-const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProcess, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
+const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProcess, setIsReturnDialogOpen, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
     const { getApi, putApi, deleteApi, postApi } = useApi();
     const [filterText, setFilterText] = useState("");
     const textColor = useColorModeValue("gray.500", "white");
@@ -237,7 +237,20 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProce
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             }
         );
-    } else if (modelData?.page !== "DeliveredOrders" && modelData?.page !== "SareeStock" && modelData?.page !== "OrderStock" && modelData?.page !== "RemainingYarnStock" && modelData?.page !== "OrderPendingYarnStock" && modelData?.page !== "MachineReport" && modelData?.page !== "DesignReport" && modelData?.page !== "OrderProcessStockReport") {
+    } else if (modelData?.page === "DeliveredOrders") {
+        columns.push(
+            {
+                name: 'Return PCS',
+                cell: (row) => <button onClick={() => {
+                    dispatch(modelEdit(true));
+                    dispatch(modelDelete(false));
+                    dispatch(selectData(row));
+                    setIsReturnDialogOpen(true);
+                }}>Return PCS</button>,
+                id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
+            },
+        );
+    } else if (modelData?.page !== "SareeStock" && modelData?.page !== "OrderStock" && modelData?.page !== "RemainingYarnStock" && modelData?.page !== "OrderPendingYarnStock" && modelData?.page !== "MachineReport" && modelData?.page !== "DesignReport" && modelData?.page !== "OrderProcessStockReport") {
         columns.push(
             {
                 name: 'Edit',
