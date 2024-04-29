@@ -39,7 +39,7 @@ const SareeStock = () => {
                 type: "text",
             },
             {
-                name: "Complete Pcs",
+                name: "Stock",
                 type: "number",
             }
         ]

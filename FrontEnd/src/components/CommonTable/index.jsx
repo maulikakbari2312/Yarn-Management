@@ -246,7 +246,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProce
                     dispatch(modelDelete(false));
                     dispatch(selectData(row));
                     setIsReturnDialogOpen(true);
-                }}>Return PCS</button>,
+                }}>Return</button>,
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             },
         );

@@ -28,7 +28,7 @@ exports.getSareeStock = async () => {
 
     newArr.forEach((item) => {
       if (resultObject[item.matchingId]) {
-        resultObject[item.matchingId].completePcs += item.settlePcs;
+        resultObject[item.matchingId].stock += item.settlePcs;
       } else {
         resultObject[item.matchingId] = {
           matchingId: item.matchingId,
@@ -36,7 +36,7 @@ exports.getSareeStock = async () => {
           pallu: item.pallu,
           design: item.design,
           groundColor: item.groundColor,
-          completePcs: item.settlePcs,
+          stock: item.settlePcs,
         };
       }
     });
