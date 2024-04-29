@@ -105,7 +105,7 @@ const DeliveredOrders = () => {
         try {
             const apiUrl = `${process.env.REACT_APP_HOST}/api/stock/editSareeStock/${selected.selectData?.user?.tokenId}/${selected.selectData?.user?.matchingId}`;
             let body = { ...values };
-
+            body.returnPcs = parseFloat(body.returnPcs); 
             let headers = {};
             // Make the callback function inside .then() async
             putApi(apiUrl, body, headers)
@@ -135,7 +135,7 @@ const DeliveredOrders = () => {
     });
 
     const initialValues = {
-        returnPcs: "", // Initial value for pieces on machine
+        returnPcs: 0, 
     };
     return (
         <Flex direction="column" pt={["120px", "75px", "90px"]}>
