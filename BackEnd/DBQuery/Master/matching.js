@@ -1,6 +1,6 @@
 const matchingModel = require("../../model/Master/matching.model");
 
-exports.findMatchings = async () => {
+exports.findAllMatchings = async () => {
   const getMatching = await matchingModel.find();
   return getMatching;
 };
@@ -11,7 +11,7 @@ exports.createMatching = async (finalMatchingData) => {
 };
 
 exports.findMatchingsById = async (token) => {
-  const findMatchingById = await matchingModel.find({
+  const findMatchingById = await matchingModel.findOne({
     tokenId: token,
   });
   return findMatchingById;

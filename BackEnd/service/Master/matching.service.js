@@ -1,7 +1,7 @@
 const message = require("../../common/error.message");
 const { v4: uuidv4 } = require("uuid");
 const {
-  findMatchings,
+  findAllMatchings,
   createMatching,
   findMatchingsById,
   updateMatching,
@@ -9,6 +9,7 @@ const {
 } = require("../../DBQuery/Master/matching");
 const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
 const { findDesigns } = require("../../DBQuery/Master/design");
+const { findAllOrders } = require("../../DBQuery/Order/order");
 const uniqueMatchingId = () => uuidv4();
 
 exports.createMatchingDetail = async (matching) => {
@@ -32,14 +33,13 @@ exports.createMatchingDetail = async (matching) => {
       ground: matching.ground,
       feeder: matching.feeder,
     };
-
     const feeders = {};
 
     for (let i = 1; i <= matching.feeder; i++) {
       feeders[`f${i}`] = matching[`f${i}`];
     }
 
-    const findMatching = await findMatchings();
+    const findMatching = await findAllMatchings();
 
     const isEqual = (obj1, obj2) =>
       JSON.stringify(obj1) === JSON.stringify(obj2);
@@ -66,7 +66,7 @@ exports.createMatchingDetail = async (matching) => {
       data: detail,
     };
   } catch (error) {
-    console.log("==error===",error);
+    console.log("==error===", error);
     return {
       status: 500,
       message: "Internal Server Error",
@@ -95,7 +95,7 @@ exports.findColorMatching = async () => {
 
     return findColorYarn;
   } catch (error) {
-    console.log("==error===",error);
+    console.log("==error===", error);
     throw error;
   }
 };
@@ -122,14 +122,14 @@ exports.findDesign = async () => {
 
     return findDesignDetail;
   } catch (error) {
-    console.log("==error===",error);
+    console.log("==error===", error);
     throw error;
   }
 };
 
 exports.matchingList = async (matchingData) => {
   try {
-    const getMatching = await findMatchings();
+    const getMatching = await findAllMatchings();
 
     if (!getMatching) {
       return {
@@ -144,7 +144,7 @@ exports.matchingList = async (matchingData) => {
 
     return filteredMatching;
   } catch (error) {
-    console.log("==error===",error);
+    console.log("==error===", error);
     throw error;
   }
 };
@@ -154,10 +154,10 @@ exports.editMatchingDetail = async (data, token) => {
     const getMatching = await findMatchingsById(token);
     const feeders = {};
 
-    for (let i = 1; i <= getMatching[0].feeder; i++) {
+    for (let i = 1; i <= getMatching.feeder; i++) {
       feeders[`f${i}`] = data[`f${i}`];
     }
-    const findMatching = await findMatchings();
+    const findMatching = await findAllMatchings();
     const isEqual = (obj1, obj2) =>
       JSON.stringify(obj1) === JSON.stringify(obj2);
     for (const ele of findMatching) {
@@ -183,7 +183,7 @@ exports.editMatchingDetail = async (data, token) => {
       pageItems: updateMatchingDetail,
     };
   } catch (error) {
-    console.log("==error===",error);
+    console.log("==error===", error);
     return {
       status: 500,
       message: "Internal Server Error",
@@ -193,6 +193,25 @@ exports.editMatchingDetail = async (data, token) => {
 
 exports.deleteMatchingDetail = async (token) => {
   try {
+    const getMatching = await findMatchingsById(token);
+
+    const getAllOrders = await findAllOrders();
+    console.log("==getAllOrders===", getAllOrders);
+
+    for (const order of getAllOrders) {
+      for (const ele of order?.orders) {
+        if (ele.matchingId === getMatching.matchingId) {
+          if (ele.pcs !== ele.completePcs + ele.dispatch + ele.settlePcs) {
+            return {
+              status: 409, 
+              message: "Matching order is in process. After completing this order, you can delete it.",
+            };
+          }
+        }
+      }
+    }
+    
+
     const deleteMatching = await deleteMatchingInfo(token);
 
     if (!deleteMatching) {
@@ -207,7 +226,7 @@ exports.deleteMatchingDetail = async (token) => {
       data: deleteMatching,
     };
   } catch (error) {
-    console.log("==error===",error);
+    console.log("==error===", error);
     return {
       status: 500,
       message: "Internal Server Error",
@@ -217,7 +236,7 @@ exports.deleteMatchingDetail = async (token) => {
 
 exports.findGroundColor = async (design) => {
   try {
-    const getGroundColor = await findMatchings();
+    const getGroundColor = await findAllMatchings();
 
     const groundColorArr = [];
     for (let ele of getGroundColor) {

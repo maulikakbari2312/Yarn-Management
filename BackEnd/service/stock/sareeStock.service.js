@@ -1,4 +1,4 @@
-const { findAllOrders } = require("../../DBQuery/Order/completeOrder");
+const { findAllOrders } = require("../../DBQuery/Order/order");
 const ordersModel = require("../../model/Order/orders.model");
 
 exports.getSareeStock = async () => {

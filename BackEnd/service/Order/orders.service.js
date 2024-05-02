@@ -17,7 +17,8 @@ const {
   findAllOrders,
   generateNewOrder,
   createIdOfOrder,
-} = require("../../DBQuery/Order/completeOrder");
+} = require("../../DBQuery/Order/order");
+const { findDesigns } = require("../../DBQuery/Master/design");
 
 exports.createOrderId = async () => {
   try {
@@ -182,8 +183,6 @@ exports.findMatchingFeeder = async (orderId) => {
     }
     const matchingDetails = await matchingDetail.find();
 
-    const findDesign1 = order.orders[0].design;
-    const designData = await designModel.findOne({ name: findDesign1 });
     if (!matchingDetails || !matchingDetails.length) {
       return {
         status: 404,
@@ -283,7 +282,7 @@ exports.findMatchingFeeder = async (orderId) => {
     mergedObjects1 = mergedObjects1.filter((array) =>
       array.every((item) => item !== null)
     );
-console.log("==mergedObjects1===",mergedObjects1);
+    console.log("==mergedObjects1===", mergedObjects1);
     const uniqueMatchingIds = new Set();
 
     const uniqueArrays = mergedObjects1.filter((arr) => {
@@ -322,7 +321,7 @@ console.log("==mergedObjects1===",mergedObjects1);
       }
     }
     const matchingSareeWeight = obj;
-    const matchingArra = [];
+    let matchingArr = [];
     for (const [key, value] of Object.entries(matchingSareeWeight)) {
       for (const ele of result) {
         if (ele.matchingId === key.toString()) {
@@ -330,23 +329,52 @@ console.log("==mergedObjects1===",mergedObjects1);
             ...ele,
             weight: value.toFixed(4),
           };
-          matchingArra.push(match);
+          matchingArr.push(match);
         }
       }
     }
     let maxLength = 0;
-    for (const item of matchingArra) {
-      const feeders = Object.keys(item).filter(key => key.startsWith('f') && item[key] !== undefined);
+    for (const item of matchingArr) {
+      const feeders = Object.keys(item).filter(
+        (key) => key.startsWith("f") && item[key] !== undefined
+      );
       maxLength = Math.max(maxLength, feeders.length);
     }
     console.log("Length:", maxLength);
+    const designData = await findDesigns();
+
+    const findDesignDetail = designData.filter((ele) =>
+      matchingArr.some((item) => item.design === ele.name)
+    );
+
+    function updateMatchingArray(findDesignDetail, matchingArr) {
+      return matchingArr.map((match) => {
+        const designDetail = findDesignDetail.find(
+          (detail) => detail.name === match.design
+        );
+        if (!designDetail) return match;
+
+        const updatedMatch = { ...match };
+        updatedMatch[`f${designDetail.ground}`] =
+          updatedMatch[`f${designDetail.ground}`] + "(G)";
+        updatedMatch[`f${designDetail.pallu}`] =
+          updatedMatch[`f${designDetail.pallu}`] + "(P)";
+
+        return updatedMatch;
+      });
+    }
+
+    const updatedMatchingArr = updateMatchingArray(
+      findDesignDetail,
+      matchingArr
+    );
+
+    console.log(updatedMatchingArr);
     const responce = {
       status: 200,
       message: message.MATCHING_FEEDER_SUCCESS,
-      ground: designData.ground,
-      pallu: designData.pallu,
-      pageItems: matchingArra,
-      maxFeederLength:maxLength
+      pageItems: updatedMatchingArr,
+      maxFeederLength: maxLength,
     };
     return responce;
   } catch (error) {

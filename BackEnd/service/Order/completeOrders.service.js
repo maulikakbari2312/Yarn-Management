@@ -3,13 +3,14 @@ const {
   findOrderByOrderId,
   findMachinePcs,
   findAllOrders,
-} = require("../../DBQuery/Order/completeOrder");
+} = require("../../DBQuery/Order/order");
 const ordersModel = require("../../model/Order/orders.model");
-const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
 const matchingModel = require("../../model/Master/matching.model");
 const YarnSalesDetail = require("../../model/Yarn/yarnSales.model");
 const designModel = require("../../model/Master/design.model");
 const colorYarnModel = require("../../model/Master/colorYarn.model");
+const { findAllMatchings } = require("../../DBQuery/Master/matching");
+const { findAllSaleYarn } = require("../../DBQuery/Yarn/sales");
 
 exports.completeProcessOrder = async (
   orderId,
@@ -348,7 +349,8 @@ exports.getAllCompleteOrder = async () => {
 };
 
 async function YarnWeightCalculation(orderId) {
-  const findByOrderId = await ordersModel.findOne({ orderId: orderId });
+  const findByOrderId = await findOrderByOrderId(orderId);
+  // ordersModel.findOne({ orderId: orderId });
   const pendingOrderArr = [];
   for (const order of findByOrderId?.orders) {
     pendingOrderArr.push(order);
@@ -365,12 +367,11 @@ async function YarnWeightCalculation(orderId) {
     }
   }
 
-  const findMatching = await matchingModel.find();
-
-  const salesDetails = await YarnSalesDetail.find();
+  const salesDetails = await findAllSaleYarn();
+  // YarnSalesDetail.find();
 
   const listOfOrders = [];
-  const findMatchings = await matchingModel.find();
+  const findMatchings = await findAllMatchings();
   for (const ele of findMatchings) {
     for (const data of pendingNewArr) {
       if (ele?.matchingId === data?.matchingId) {
@@ -411,7 +412,7 @@ async function YarnWeightCalculation(orderId) {
   for (let i = 0; i < denierSet1.length; i++) {
     const ele = denierSet1[i];
     const result = ele.map((eleObj, index) => {
-      const getMatchingId = findMatching.find(
+      const getMatchingId = findMatchings.find(
         (element) => element.matchingId === eleObj.matchingId
       );
       const findOrderToken = pendingNewArr.find(
