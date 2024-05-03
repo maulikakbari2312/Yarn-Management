@@ -250,7 +250,15 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProce
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             },
         );
-    } else if (modelData?.page !== "SareeStock" && modelData?.page !== "OrderStock" && modelData?.page !== "RemainingYarnStock" && modelData?.page !== "OrderPendingYarnStock" && modelData?.page !== "MachineReport" && modelData?.page !== "DesignReport" && modelData?.page !== "OrderProcessStockReport") {
+    } else if (modelData?.page === "Matching") {
+        columns.push(
+            {
+                name: 'Edit',
+                cell: (row) => <button onClick={() => handleEdit(row)}>Edit</button>,
+                id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
+            },
+        );
+    } else if (modelData?.page !== "SareeStock" && modelData?.page !== "Matching" && modelData?.page !== "OrderStock" && modelData?.page !== "RemainingYarnStock" && modelData?.page !== "OrderPendingYarnStock" && modelData?.page !== "MachineReport" && modelData?.page !== "DesignReport" && modelData?.page !== "OrderProcessStockReport") {
         columns.push(
             {
                 name: 'Edit',
