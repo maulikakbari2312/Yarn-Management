@@ -69,13 +69,20 @@ exports.slaeSareeStock = async (req, res) => {
   try {
     const tokenId = req.params.tokenId;
     const matchingId = req.params.matchingId;
+    const currentDate = new Date();
+
+    const day = currentDate.getDate().toString().padStart(2, "0");
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, "0"); // January is 0!
+    const year = currentDate.getFullYear();
+
+    const formattedDate = `${day}/${month}/${year}`;
     const saleSareeDetails = {
-      date: new Date(),
+      date: formattedDate,
       party: req.body.party,
       design: req.body.design,
       pallu: req.body.pallu,
       groundColor: req.body.groundColor,
-      salePcs: req.body.salePcs,
+      stock: req.body.stock,
       matchingId: matchingId,
       tokenId: tokenId,
     };
@@ -85,6 +92,49 @@ exports.slaeSareeStock = async (req, res) => {
       saleSareeDetails
     );
     res.status(saleStock.status).send(saleStock);
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const errorMessages = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      res.status(400).json({ errorMessages });
+    } else {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+};
+
+exports.listSaleSaree = async (req, res) => {
+  try {
+    const findAllSareeStock = await sareeStockService.listSaleSaree();
+
+    if (!Array.isArray(findAllSareeStock)) {
+      return res.status(findAllSareeStock.status).send(findAllSareeStock);
+    }
+
+    const limit = parseInt(req.query.limit) || 1000;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const startIndex = offset * limit;
+    const endIndex = startIndex + limit;
+    const pageItems = findAllSareeStock.slice(startIndex, endIndex);
+
+    const totalItems = findAllSareeStock.length;
+    const totalPages = Math.ceil(totalItems / limit);
+    const status =
+      totalItems === 1
+        ? "sale saree is"
+        : "sale saree are.";
+
+    const response = {
+      page: offset + 1,
+      totalPages,
+      itemsPerPage: limit,
+      total: totalItems,
+      pageItems: pageItems,
+      message: `Total ${totalItems} ${status} available`,
+    };
+    res.status(200).send(response);
   } catch (error) {
     if (error.name === "ValidationError") {
       const errorMessages = Object.values(error.errors).map(
