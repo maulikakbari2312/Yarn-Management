@@ -39,7 +39,7 @@ const yarnPartySalesSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-});
+},{ timestamps: true });
 
 const YarnPartySalesDetail = mongoose.model(
   "YarnPartySalesDetail",

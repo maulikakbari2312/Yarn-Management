@@ -1,10 +1,9 @@
-const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
-const ordersModel = require("../../model/Order/orders.model");
 const message = require("../../common/error.message");
+const { findAllOrders } = require("../../DBQuery/Order/order");
 
 exports.getPartyOrder = async (party, design) => {
   try {
-    const findOrder = await ordersModel.find();
+    const findOrder = await findAllOrders();
 
     if (!findOrder) {
       return {
@@ -48,7 +47,7 @@ exports.getPartyOrder = async (party, design) => {
 
 exports.findPartyDesign = async (party) => {
   try {
-    const findOrder = await ordersModel.find();
+    const findOrder = await findAllOrders();
 
     if (!findOrder) {
       return {

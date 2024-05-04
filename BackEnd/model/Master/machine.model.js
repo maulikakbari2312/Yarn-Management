@@ -16,7 +16,7 @@ const machineSchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-});
+},{ timestamps: true });
 
 const machineDetail = new mongoose.model("MachineDetail", machineSchema);
 module.exports = machineDetail;

@@ -34,7 +34,7 @@ const yarnPurchaseSchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-});
+},{ timestamps: true });
 
 const YarnPurchaseDetail = mongoose.model(
   "YarnPurchaseDetail",

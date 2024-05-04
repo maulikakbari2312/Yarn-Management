@@ -41,7 +41,7 @@ const yarnSalesSchema = new mongoose.Schema({
     type: String,
     required: false,
   }
-});
+},{ timestamps: true });
 
 const YarnSalesDetail = mongoose.model("YarnSalesDetail", yarnSalesSchema);
 module.exports = YarnSalesDetail;

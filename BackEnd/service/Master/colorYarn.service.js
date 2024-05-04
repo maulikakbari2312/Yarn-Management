@@ -5,7 +5,10 @@ const {
   deleteYarnColor,
   findParticularYarnColor,
   createYarnColor,
+  findColorYarnById,
 } = require("../../DBQuery/Master/colorYarn");
+const { findAllMatchings } = require("../../DBQuery/Master/matching");
+const { findAllOrders } = require("../../DBQuery/Order/order");
 
 exports.createColorYarnDetail = async (colorYarn) => {
   try {
@@ -122,9 +125,41 @@ exports.editColorYarnDetail = async (data, token) => {
   }
 };
 
-exports.deleteColorYarnDetail = async (whereCondition) => {
+exports.deleteColorYarnDetail = async (token) => {
   try {
-    const deleteColorYarn = await deleteYarnColor(whereCondition);
+    const getAllOrders = await findAllOrders();
+    const orderArr = [];
+    for (const order of getAllOrders) {
+      for (const ele of order?.orders) {
+        if (ele?.pcs !== ele?.completePcs + ele?.dispatch + ele?.settlePcs + ele?.salePcs) {
+          orderArr.push(ele);
+        }
+      }
+    }
+    console.log("==orderArr==", orderArr);
+    const getMatch = await findAllMatchings();
+
+    const findMatchingData = getMatch.filter((ele) =>
+      orderArr.some((item) => item.matchingId === ele.matchingId)
+    );
+    const yarnCollect = [];
+    for (const data of findMatchingData) {
+      for (const [key, value] of Object.entries(data.feeders)) {
+        yarnCollect.push(value);
+      }
+    }
+    const getYarn = await findColorYarnById(token);
+
+    const matchYarn = yarnCollect.find((yarn) => yarn === getYarn?.colorCode);
+    if (matchYarn) {
+      return {
+        status: 409,
+        message:
+          "Color yarn order is in process. After completing this color yarn order, you can delete it.",
+      };
+    }
+
+    const deleteColorYarn = await deleteYarnColor(token);
     if (!deleteColorYarn) {
       return {
         status: 404,

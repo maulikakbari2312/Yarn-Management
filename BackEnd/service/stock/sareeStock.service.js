@@ -1,9 +1,9 @@
 const { findAllOrders } = require("../../DBQuery/Order/order");
-const ordersModel = require("../../model/Order/orders.model");
+const { createSaleSaree } = require("../../DBQuery/stock/saree");
 
 exports.getSareeStock = async () => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     if (!findOrders) {
       return {
         status: 404,
@@ -31,6 +31,7 @@ exports.getSareeStock = async () => {
         resultObject[item.matchingId].stock += item.settlePcs;
       } else {
         resultObject[item.matchingId] = {
+          tokenId: item.tokenId,
           matchingId: item.matchingId,
           party: item.party,
           pallu: item.pallu,
@@ -73,6 +74,39 @@ exports.editSareeStock = async (tokenId, matchingId, returnPcs) => {
     return {
       status: 200,
       message: "Return saree stock updated successfully.",
+    };
+  } catch (error) {
+    console.error("Error:", error);
+    throw error;
+  }
+};
+
+exports.saleSareeStock = async (tokenId, matchingId, saleSareeDetails) => {
+  try {
+    const findOrders = await findAllOrders();
+
+    if (!findOrders) {
+      return {
+        status: 404,
+        message: "Order not found",
+      };
+    }
+
+    for (const order of findOrders) {
+      for (const ele of order.orders) {
+        if (ele.tokenId === tokenId && ele.matchingId === matchingId) {
+          ele.settlePcs -= salePcs;
+          ele.salePcs += salePcs;
+          order.save();
+        }
+      }
+    }
+
+    const createSaleSareeDetail = await createSaleSaree(saleSareeDetails);
+    await createSaleSareeDetail.save();
+    return {
+      status: 200,
+      message: "Saree sale successfully.",
     };
   } catch (error) {
     console.error("Error:", error);

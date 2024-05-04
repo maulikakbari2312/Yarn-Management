@@ -1,15 +1,25 @@
 const message = require("../../common/error.message");
-const ordersModel = require("../../model/Order/orders.model");
-const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
-const matchingModel = require("../../model/Master/matching.model");
-const YarnSalesDetail = require("../../model/Yarn/yarnSales.model");
-const designModel = require("../../model/Master/design.model");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
+const {
+  findOrderByOrderId,
+  findAllOrders,
+} = require("../../DBQuery/Order/order");
+const {
+  findMachinePcs,
+  findOrderPcsWorking,
+  createPcsInProcess,
+  findOrderPcsById,
+  updatePcsOnMachine,
+  findOrderByAllId,
+} = require("../../DBQuery/Order/pcsOnMachine");
+const { findAllMatchings } = require("../../DBQuery/Master/matching");
+const { findAllSaleYarn } = require("../../DBQuery/Yarn/sales");
+const { findDesigns } = require("../../DBQuery/Master/design");
+const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
 
 exports.createProcessOrder = async (orderId, tokenId, data) => {
   try {
-    const findByOrderId = await ordersModel.findOne({ orderId: orderId });
-    const findOrderOnMachine = await pcsOnMachineModel.find();
+    const findByOrderId = await findOrderByOrderId(orderId);
+    const findOrderOnMachine = await findMachinePcs();
     if (!findByOrderId) {
       return {
         status: 404,
@@ -85,23 +95,15 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
 
     const updatedOrder = await findByOrderId.save();
 
-    const findOrderInProcess = await pcsOnMachineModel.findOne({
-      orderId: orderId,
-      tokenId: tokenId,
-    });
+    const findOrderInProcess = await findOrderPcsWorking(orderId, tokenId);
 
     if (!findOrderInProcess) {
-      const createOrderDetail = new pcsOnMachineModel({
-        machinesInProcess: [
-          {
-            machineNo: data.machineNo,
-            pcsOnMachine: data.pcsOnMachine,
-          },
-        ],
-        orderId: orderId,
-        tokenId: tokenId,
-      });
-
+      const createOrderDetail = await createPcsInProcess(
+        data.machineNo,
+        data.pcsOnMachine,
+        orderId,
+        tokenId
+      );
       await createOrderDetail.save();
     } else {
       let machineFound = false;
@@ -273,7 +275,7 @@ exports.createProcessOrder = async (orderId, tokenId, data) => {
 
 exports.getProcessOrder = async (orderId) => {
   try {
-    const findByOrderId = await ordersModel.findOne({ orderId: orderId });
+    const findByOrderId = await findOrderByOrderId(orderId);
 
     if (!findByOrderId) {
       return {
@@ -298,8 +300,8 @@ exports.getProcessOrder = async (orderId) => {
 
 exports.getAllProcessOrder = async () => {
   try {
-    const findOrders = await ordersModel.find();
-    const findOrderOnMachine = await pcsOnMachineModel.find();
+    const findOrders = await findAllOrders();
+    const findOrderOnMachine = await findMachinePcs();
 
     const processOrderArr = [];
 
@@ -339,7 +341,7 @@ exports.getAllProcessOrder = async () => {
 
 exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
   try {
-    const findOrders = await ordersModel.findOne({ orderId: orderId });
+    const findOrders = await findOrderByOrderId(orderId);
 
     if (!findOrders) {
       return {
@@ -348,9 +350,7 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
       };
     }
 
-    const findOrderOnMachine = await pcsOnMachineModel.find({
-      orderId: orderId,
-    });
+    const findOrderOnMachine = await findOrderPcsById(orderId);
 
     let processOrderArr = [];
 
@@ -397,7 +397,7 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
         },
       };
 
-      await pcsOnMachineModel.updateOne(filter, update);
+      await updatePcsOnMachine(filter, update);
 
       const removedObjectIndex = data.machinesInProcess.findIndex(
         (obj) => obj.machineId === machineId
@@ -428,11 +428,10 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
         pendingNewArr.push(ele);
       }
     }
-    const findMatching = await matchingModel.find();
-    const salesDetails = await YarnSalesDetail.find();
+    const salesDetails = await findAllSaleYarn();
 
     const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
+    const findMatchings = await findAllMatchings();
     for (const ele of findMatchings) {
       for (const data of pendingNewArr) {
         if (ele?.matchingId === data?.matchingId) {
@@ -442,8 +441,8 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
     }
 
     const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
+    const findColorYarn = await findYarnColor();
+    const findPickByDesign = await findDesigns();
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
@@ -473,7 +472,7 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
     for (let i = 0; i < denierSet1.length; i++) {
       const ele = denierSet1[i];
       const result = ele.map((eleObj, index) => {
-        const getMatchingId = findMatching.find(
+        const getMatchingId = findMatchings.find(
           (element) => element.matchingId === eleObj.matchingId
         );
         const findOrderToken = pendingNewArr.find(
@@ -524,7 +523,8 @@ exports.deleteAllProcessOrder = async (orderId, tokenId, machineId) => {
           Number(findOrder.pcsOnMachine) +
             Number(findOrder.completePcs) +
             Number(findOrder.dispatch) +
-            Number(findOrder.settlePcs),
+            Number(findOrder.settlePcs) +
+            Number(findOrder.salePcs),
           Number(data?.finalCut)
         );
       const calculatedObj = {
@@ -590,7 +590,7 @@ exports.editAllProcessOrder = async (
   updatedPcsOnMachine
 ) => {
   try {
-    const findOrders = await ordersModel.findOne({ orderId: orderId });
+    const findOrders = await findOrderByOrderId(orderId);
     if (!findOrders) {
       return {
         status: 404,
@@ -602,11 +602,12 @@ exports.editAllProcessOrder = async (
       (order) => order.tokenId === tokenId
     );
 
-    const findOrderOnMachine = await pcsOnMachineModel.findOne({
-      orderId: orderId,
-      tokenId: tokenId,
-      "machinesInProcess.machineId": machineId,
-    });
+    const findOrderOnMachine = await findOrderByAllId(
+      orderId,
+      tokenId,
+      machineId
+    );
+
     if (!findOrderOnMachine) {
       return {
         status: 404,
@@ -618,16 +619,12 @@ exports.editAllProcessOrder = async (
       (machine) => machine.machineId === machineId
     );
 
-    const findProcessOrderByToken = await pcsOnMachineModel.find({
-      orderId: orderId,
-      tokenId: tokenId,
-    });
+    const findProcessOrderByToken = await findOrderPcsWorking(orderId, tokenId);
 
     let totalProcessOrder = 0;
-    for (const data of findProcessOrderByToken) {
-      for (const item of data.machinesInProcess) {
-        totalProcessOrder += item.pcsOnMachine;
-      }
+
+    for (const item of findProcessOrderByToken.machinesInProcess) {
+      totalProcessOrder += item.pcsOnMachine;
     }
 
     const anotherMachinePcs = totalProcessOrder - machineData.pcsOnMachine;
@@ -810,7 +807,7 @@ exports.editAllProcessOrder = async (
 };
 
 async function YarnWeightCalculation(orderId) {
-  const findByOrderId = await ordersModel.findOne({ orderId: orderId });
+  const findByOrderId = await findOrderByOrderId(orderId);
   const pendingOrderArr = [];
   for (const order of findByOrderId?.orders) {
     pendingOrderArr.push(order);
@@ -821,18 +818,17 @@ async function YarnWeightCalculation(orderId) {
       ele.completePcs > 0 ||
       ele.pcsOnMachine > 0 ||
       ele.dispatch > 0 ||
-      ele.settlePcs > 0
+      ele.settlePcs > 0 ||
+      ele.salePcs > 0
     ) {
       pendingNewArr.push(ele);
     }
   }
 
-  const findMatching = await matchingModel.find();
-
-  const salesDetails = await YarnSalesDetail.find();
+  const salesDetails = await findAllSaleYarn();
 
   const listOfOrders = [];
-  const findMatchings = await matchingModel.find();
+  const findMatchings = await findAllMatchings();
   for (const ele of findMatchings) {
     for (const data of pendingNewArr) {
       if (ele?.matchingId === data?.matchingId) {
@@ -842,8 +838,8 @@ async function YarnWeightCalculation(orderId) {
   }
 
   const findFeeders = listOfOrders;
-  const findColorYarn = await colorYarnModel.find();
-  const findPickByDesign = await designModel.find();
+  const findColorYarn = await findYarnColor();
+  const findPickByDesign = await findDesigns();
   const denierSet1 = [];
 
   for (const feeder of findFeeders) {
@@ -873,7 +869,7 @@ async function YarnWeightCalculation(orderId) {
   for (let i = 0; i < denierSet1.length; i++) {
     const ele = denierSet1[i];
     const result = ele.map((eleObj, index) => {
-      const getMatchingId = findMatching.find(
+      const getMatchingId = findMatchings.find(
         (element) => element.matchingId === eleObj.matchingId
       );
       const findOrderToken = pendingNewArr.find(
@@ -923,7 +919,8 @@ async function YarnWeightCalculation(orderId) {
         Number(findOrder.pcsOnMachine) +
           Number(findOrder.completePcs) +
           Number(findOrder.dispatch) +
-          Number(findOrder.settlePcs),
+          Number(findOrder.settlePcs) +
+          Number(findOrder.salePcs),
         Number(data?.finalCut)
       );
     const calculatedObj = {

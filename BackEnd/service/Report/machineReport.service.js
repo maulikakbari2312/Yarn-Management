@@ -1,10 +1,10 @@
-const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
-const machineModel = require("../../model/Master/machine.model");
+const { findMachinePcs } = require("../../DBQuery/Order/pcsOnMachine");
+const { findMachines } = require("../../DBQuery/Master/machine");
 
 exports.findMachineReport = async () => {
   try {
-    const findMachine = await machineModel.find();
-    const findPcsOnMachine = await pcsOnMachineModel.find();
+    const findMachine = await findMachines();
+    const findPcsOnMachine = await findMachinePcs();
 
     let arr = [];
     for (const data of findPcsOnMachine) {

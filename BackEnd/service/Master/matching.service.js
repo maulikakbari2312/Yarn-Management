@@ -194,17 +194,15 @@ exports.editMatchingDetail = async (data, token) => {
 exports.deleteMatchingDetail = async (token) => {
   try {
     const getMatching = await findMatchingsById(token);
-
     const getAllOrders = await findAllOrders();
-    console.log("==getAllOrders===", getAllOrders);
 
     for (const order of getAllOrders) {
       for (const ele of order?.orders) {
         if (ele.matchingId === getMatching.matchingId) {
-          if (ele.pcs !== ele.completePcs + ele.dispatch + ele.settlePcs) {
+          if (ele.pcs !== ele.completePcs + ele.dispatch + ele.settlePcs + ele?.salePcs) {
             return {
               status: 409, 
-              message: "Matching order is in process. After completing this order, you can delete it.",
+              message: "Matching order is in process. After completing this matching order, you can delete it.",
             };
           }
         }

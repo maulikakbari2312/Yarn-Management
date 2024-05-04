@@ -27,10 +27,6 @@ const SareeStock = () => {
                 type: "text",
             },
             {
-                name: "Party",
-                type: "text"
-            },
-            {
                 name: "Pallu",
                 type: "text"
             },

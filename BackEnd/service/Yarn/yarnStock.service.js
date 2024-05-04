@@ -1,15 +1,15 @@
 const message = require("../../common/error.message");
-const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
-const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
-const ordersModel = require("../../model/Order/orders.model");
-const matchingModel = require("../../model/Master/matching.model");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
-const designModel = require("../../model/Master/design.model");
+const { findAllYarnPurchase } = require("../../DBQuery/Yarn/purchase");
+const { findAllSaleYarn } = require("../../DBQuery/Yarn/sales");
+const { findAllOrders } = require("../../DBQuery/Order/order");
+const { findAllMatchings } = require("../../DBQuery/Master/matching");
+const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
+const { findDesigns } = require("../../DBQuery/Master/design");
 
 exports.findYarnStock = async () => {
   try {
-    const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await yarnSalesModel.find();
+    const purchaseDetails = await findAllYarnPurchase();
+    const salesDetails = await findAllSaleYarn();
 
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -91,7 +91,7 @@ exports.findYarnStock = async () => {
 
 exports.findRemainingYarnStock = async () => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     if (!findOrders) {
       return {
         status: 404,
@@ -114,7 +114,7 @@ exports.findRemainingYarnStock = async () => {
     const matchingId = new Set(pendingNewArr.map((ele) => ele.matchingId));
     const matchingArray = Array.from(matchingId);
 
-    const findMatching = await matchingModel.find();
+    const findMatching = await findAllMatchings();
     let colorYarn = [];
     for (const ele of findMatching) {
       for (const matching of matchingArray) {
@@ -132,8 +132,8 @@ exports.findRemainingYarnStock = async () => {
     });
 
     const uniqueArray = [...uniqueValues];
-    const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await yarnSalesModel.find();
+    const purchaseDetails = await findAllYarnPurchase();
+    const salesDetails = await findAllSaleYarn();
 
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -201,7 +201,7 @@ exports.findRemainingYarnStock = async () => {
       };
     });
     const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
+    const findMatchings = await findAllMatchings();
     for (const ele of findMatchings) {
       for (const data of pendingNewArr) {
         if (ele?.matchingId === data?.matchingId) {
@@ -211,8 +211,8 @@ exports.findRemainingYarnStock = async () => {
     }
 
     const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
+    const findColorYarn = await findYarnColor();
+    const findPickByDesign = await findDesigns();
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {

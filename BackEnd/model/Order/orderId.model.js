@@ -8,7 +8,7 @@ const orderIdSchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   }
-});
+},{ timestamps: true });
 
 const orderIdDetail = mongoose.model("OrderIdDetail", orderIdSchema);
 module.exports = orderIdDetail;

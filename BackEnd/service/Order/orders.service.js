@@ -1,24 +1,27 @@
 const message = require("../../common/error.message");
-const ordersModel = require("../../model/Order/orders.model");
-const orderIdModel = require("../../model/Order/orderId.model");
-const matchingDetail = require("../../model/Master/matching.model");
-const designModel = require("../../model/Master/design.model");
-const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
-const matchingModel = require("../../model/Master/matching.model");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
-const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
-const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
 const moment = require("moment");
 const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
-const { findMatchingByMatchingId } = require("../../DBQuery/Master/matching");
+const {
+  findMatchingByMatchingId,
+  findAllMatchings,
+} = require("../../DBQuery/Master/matching");
 const {
   findOrderByOrderId,
-  findMachinePcs,
   findAllOrders,
   generateNewOrder,
   createIdOfOrder,
+  deleteOrderByOrderId,
 } = require("../../DBQuery/Order/order");
 const { findDesigns } = require("../../DBQuery/Master/design");
+const {
+  findAllYarnPurchase,
+  purchaseYarnCreate,
+} = require("../../DBQuery/Yarn/purchase");
+const {
+  findAllSaleYarn,
+  deleteYarn,
+  createSaleYarn,
+} = require("../../DBQuery/Yarn/sales");
 
 exports.createOrderId = async () => {
   try {
@@ -95,9 +98,9 @@ async function createNewOrder(data, orderId, orderDetail, sixDigitNumber) {
   try {
     const createOrderDetail = await generateNewOrder(orderDetail, orderId);
     const detail = await createOrderDetail.save();
-    const findOrderById = await ordersModel.find({ orderId: orderId });
+    const findOrderById = await findOrderByOrderId(orderId);
     for (const ele of detail?.orders) {
-      const findMyOrder = findOrderById[0].orders.find(
+      const findMyOrder = findOrderById.orders.find(
         (item) => item?.tokenId === ele?.tokenId
       );
       const { pageItems, pendingOrderYarn } = await processOrderDetail(
@@ -140,23 +143,22 @@ async function updateExistingOrder(
 
       const latestOrderIndex = detail.orders.length - 1;
       const latestOrder = detail.orders[latestOrderIndex];
-      for (const ele of detail?.orders) {
-        const { pageItems, pendingOrderYarn } = await processOrderDetail(
-          data,
-          orderDetail,
-          sixDigitNumber,
-          latestOrder?.tokenId,
-          latestOrder
-        );
 
-        return {
-          status: 200,
-          message: "Order Updated Successfully",
-          data: detail,
-          pageItems,
-          pendingOrderYarn,
-        };
-      }
+      const { pageItems, pendingOrderYarn } = await processOrderDetail(
+        data,
+        orderDetail,
+        sixDigitNumber,
+        latestOrder?.tokenId,
+        latestOrder
+      );
+
+      return {
+        status: 200,
+        message: "Order Updated Successfully",
+        data: detail,
+        pageItems,
+        pendingOrderYarn,
+      };
     } else {
       return {
         status: 400,
@@ -174,14 +176,14 @@ async function updateExistingOrder(
 
 exports.findMatchingFeeder = async (orderId) => {
   try {
-    const order = await ordersModel.findOne({ orderId: orderId });
+    const order = await findOrderByOrderId(orderId);
     if (!order) {
       return {
         status: 404,
         message: "Order not found",
       };
     }
-    const matchingDetails = await matchingDetail.find();
+    const matchingDetails = await findAllMatchings();
 
     if (!matchingDetails || !matchingDetails.length) {
       return {
@@ -218,7 +220,7 @@ exports.findMatchingFeeder = async (orderId) => {
 
     const listOfOrders = [];
 
-    const findMatching = await matchingModel.find();
+    const findMatching = await findAllMatchings();
 
     for (const ele of findMatching) {
       for (const data of pendingOrderArr) {
@@ -229,8 +231,8 @@ exports.findMatchingFeeder = async (orderId) => {
     }
 
     const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
+    const findColorYarn = await findYarnColor();
+    const findPickByDesign = await findDesigns();
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
@@ -385,8 +387,8 @@ exports.findMatchingFeeder = async (orderId) => {
 
 exports.findOrderById = async () => {
   try {
-    const findOrder = await ordersModel.find();
-    const matchingDetails = await matchingDetail.find();
+    const findOrder = await findAllOrders();
+    const matchingDetails = await findAllMatchings();
 
     const final = findOrder.map((ele) => {
       const sumPcsByDesign = ele.orders.reduce((accumulator, order) => {
@@ -484,7 +486,7 @@ exports.findOrderById = async () => {
 
 exports.findOrders = async (orderId) => {
   try {
-    const findOrder = await ordersModel.findOne({ orderId: orderId });
+    const findOrder = await findOrderByOrderId(orderId);
 
     if (!findOrder) {
       return {
@@ -533,7 +535,7 @@ exports.findOrders = async (orderId) => {
 
 exports.editOrdersDetail = async (data, orderId, tokenId) => {
   try {
-    const findOrders = await ordersModel.findOne({ orderId: orderId });
+    const findOrders = await findOrderByOrderId(orderId);
 
     if (!findOrders) {
       return {
@@ -589,7 +591,7 @@ exports.editOrdersDetail = async (data, orderId, tokenId) => {
 
 exports.deleteOrder = async (orderId, tokenId) => {
   try {
-    const findOrders = await ordersModel.findOne({ orderId: orderId });
+    const findOrders = await findOrderByOrderId(orderId);
     if (!findOrders) {
       return {
         status: 404,
@@ -614,8 +616,7 @@ exports.deleteOrder = async (orderId, tokenId) => {
     findOrders.orders = updatedOrders;
     await findOrders.save();
 
-    await yarnSalesModel.deleteMany({ orderToken: tokenId });
-
+    await deleteYarn(tokenId);
     // await pcsOnMachineModel.deleteMany({
     //   tokenId: tokenId,
     // });
@@ -635,7 +636,7 @@ exports.deleteOrder = async (orderId, tokenId) => {
 
 exports.deleteWholeOrder = async (orderId) => {
   try {
-    const findOrders = await ordersModel.findOne({ orderId: orderId });
+    const findOrders = await findOrderByOrderId(orderId);
     for (const ele of findOrders?.orders) {
       if (ele?.pcs !== ele?.pendingPcs) {
         return {
@@ -644,12 +645,10 @@ exports.deleteWholeOrder = async (orderId) => {
             "Order already in process. You cannot delete this order. you can edit it.",
         };
       }
-      await yarnSalesModel.deleteMany({ orderToken: ele?.tokenId });
+      await deleteYarn(ele?.tokenId);
     }
 
-    const deleteOrder = await ordersModel.deleteOne({
-      orderId: orderId,
-    });
+    const deleteOrder = await deleteOrderByOrderId(orderId);
 
     if (!deleteOrder) {
       return {
@@ -684,7 +683,7 @@ exports.deleteWholeOrder = async (orderId) => {
 
 exports.totalMatching = async (orderId) => {
   try {
-    const order = await ordersModel.findOne({ orderId: orderId });
+    const order = await findOrderByOrderId(orderId);
 
     const result = removeDuplicateObjects(order.orders);
     function removeDuplicateObjects(matchingFeeders) {
@@ -708,7 +707,7 @@ exports.totalMatching = async (orderId) => {
 
 exports.findMatching = async (design) => {
   try {
-    const getMatchingData = await matchingModel.find();
+    const getMatchingData = await findAllMatchings();
 
     const groundColorArr = [];
     for (let ele of getMatchingData) {
@@ -744,7 +743,7 @@ async function processOrderDetail(
   findMyOrder
 ) {
   try {
-    const findMatching = await matchingModel.find();
+    const findMatching = await findAllMatchings();
     let colorYarn = [];
     for (const ele of findMatching) {
       if (ele.matchingId === data.matchingId) {
@@ -759,8 +758,8 @@ async function processOrderDetail(
       });
     });
 
-    const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await yarnSalesModel.find();
+    const purchaseDetails = await findAllYarnPurchase();
+    const salesDetails = await findAllSaleYarn();
 
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -829,7 +828,7 @@ async function processOrderDetail(
     });
 
     const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
+    const findMatchings = await findAllMatchings();
     for (const ele of findMatchings) {
       if (ele?.matchingId === data?.matchingId) {
         listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
@@ -837,8 +836,8 @@ async function processOrderDetail(
     }
 
     const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
+    const findColorYarn = await findYarnColor();
+    const findPickByDesign = await findDesigns();
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
@@ -964,7 +963,9 @@ async function processOrderDetail(
         weight: items.weight,
         denier: findColorYarn.denier ? findColorYarn.denier : 0,
       };
-      const createYarnPurchaseDetail = new yarnPurchaseModel(yarnPurchaseData);
+      const createYarnPurchaseDetail = await purchaseYarnCreate(
+        yarnPurchaseData
+      );
       await createYarnPurchaseDetail.save();
       const dummyYarnSalesData = {
         invoiceNo: sixDigitNumber,
@@ -980,7 +981,9 @@ async function processOrderDetail(
         price: 0,
         orderToken: tokenId,
       };
-      const createDummyYarnSalesDetail = new yarnSalesModel(dummyYarnSalesData);
+      const createDummyYarnSalesDetail = await createSaleYarn(
+        dummyYarnSalesData
+      );
       await createDummyYarnSalesDetail.save();
     }
 
@@ -999,7 +1002,7 @@ async function processOrderDetail(
             price: 0,
             orderToken: tokenId,
           };
-          const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
+          const createYarnSalesDetail = await createSaleYarn(yarnSalesData);
           await createYarnSalesDetail.save();
         }
       }
@@ -1029,7 +1032,7 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
     // });
 
     // const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await yarnSalesModel.find();
+    const salesDetails = await findAllSaleYarn();
 
     // const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
     //   const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -1097,7 +1100,7 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
     //   };
     // });
     const listOfOrders = [];
-    const findMatchings = await matchingModel.find();
+    const findMatchings = await findAllMatchings();
     for (const ele of findMatchings) {
       if (ele?.matchingId === data?.matchingId) {
         listOfOrders.push({ ...ele?.feeders, matchingId: ele?.matchingId });
@@ -1105,8 +1108,8 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
     }
 
     const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
+    const findColorYarn = await findYarnColor();
+    const findPickByDesign = await findDesigns();
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
@@ -1170,7 +1173,8 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
           Number(findOrder.pcsOnMachine) +
             Number(findOrder.completePcs) +
             Number(findOrder.dispatch) +
-            Number(findOrder.settlePcs),
+            Number(findOrder.settlePcs) +
+            Number(findOrder.salePcs),
           Number(item?.finalCut)
         );
       const calculatedObj = {

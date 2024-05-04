@@ -1,13 +1,23 @@
 const message = require("../../common/error.message");
-const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
-const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 var moment = require("moment");
-const YarnPartySalesDetail = require("../../model/Yarn/yarnPartySales");
+const {
+  findAllSaleYarn,
+  createSaleYarn,
+  updateYarnSales,
+  deleteSalesYarn,
+} = require("../../DBQuery/Yarn/sales");
+const { findAllYarnPurchase } = require("../../DBQuery/Yarn/purchase");
+const {
+  createPartySale,
+  findAllPartySaleDetail,
+  updatePartySalesDetail,
+  deletePartySale,
+} = require("../../DBQuery/Yarn/yarnPartySale");
 
 exports.createYarnSales = async (yarnSales) => {
   try {
-    const salesDetails = await yarnSalesModel.find();
-    const purchaseDetails = await yarnPurchaseModel.find();
+    const salesDetails = await findAllSaleYarn();
+    const purchaseDetails = await findAllYarnPurchase();
 
     for (const ele of salesDetails) {
       if (ele.invoiceNo === yarnSales.invoiceNo) {
@@ -117,11 +127,11 @@ exports.createYarnSales = async (yarnSales) => {
       denier: yarnSales.denier,
       price: yarnSales.price,
     };
-    const createYarnSalesDetail = new yarnSalesModel(yarnSalesData);
+    const createYarnSalesDetail = createSaleYarn(yarnSalesData);
     const detail = await createYarnSalesDetail.save();
 
     yarnSalesData["tokenId"] = createYarnSalesDetail.tokenId;
-    const createYarnPartySalesDetail = new YarnPartySalesDetail(yarnSalesData);
+    const createYarnPartySalesDetail = await createPartySale(yarnSalesData);
     await createYarnPartySalesDetail.save();
 
     return {
@@ -140,7 +150,7 @@ exports.createYarnSales = async (yarnSales) => {
 
 exports.findYarnSales = async () => {
   try {
-    const salesDetails = await YarnPartySalesDetail.find();
+    const salesDetails = await findAllPartySaleDetail();
     if (!salesDetails) {
       return {
         status: 404,
@@ -155,8 +165,8 @@ exports.findYarnSales = async () => {
 
 exports.editYarnSalesDetail = async (data, token) => {
   try {
-    const salesDetails = await yarnSalesModel.find();
-    const purchaseDetails = await yarnPurchaseModel.find();
+    const salesDetails = await findAllSaleYarn();
+    const purchaseDetails = await findAllYarnPurchase();
 
     // const existingSalesInvoice = await yarnSalesModel.findOne({
     //   invoiceNo: data.invoiceNo,
@@ -273,17 +283,9 @@ exports.editYarnSalesDetail = async (data, token) => {
       price: data.price,
     };
 
-    const editYarnSales = await yarnSalesModel.findOneAndUpdate(
-      { tokenId: token },
-      YarnSalesData,
-      { new: true }
-    );
+    const editYarnSales = await updateYarnSales(token, YarnSalesData);
 
-    await YarnPartySalesDetail.findOneAndUpdate(
-      { tokenId: token },
-      YarnSalesData,
-      { new: true }
-    );
+    await updatePartySalesDetail(token, YarnSalesData);
 
     if (!editYarnSales) {
       return {
@@ -305,20 +307,17 @@ exports.editYarnSalesDetail = async (data, token) => {
   }
 };
 
-exports.deleteYarnSalesDetail = async (whereCondition) => {
+exports.deleteYarnSalesDetail = async (token) => {
   try {
-    const deleteYarnSales = await yarnSalesModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteYarnSales = await deleteSalesYarn(token);
+
     if (!deleteYarnSales) {
       return {
         status: 404,
         message: "Unable to delete YarnSales",
       };
     }
-    const deletePartyYarnSales = await YarnPartySalesDetail.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deletePartyYarnSales = await deletePartySale(token);
 
     if (!deletePartyYarnSales) {
       return {

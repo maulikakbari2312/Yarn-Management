@@ -9,6 +9,7 @@ const {
 } = require("../../DBQuery/Master/design");
 const fs = require("fs").promises;
 const path = require("path");
+const { findAllOrders } = require("../../DBQuery/Order/order");
 
 exports.createDesignDetail = async (design) => {
   try {
@@ -72,7 +73,9 @@ exports.editDesignDetail = async (data, token) => {
     const newImage = data.image;
 
     if (newImage) {
-      const existingDesign = await findDesignById(token);
+      const existingDesign = await findDesignById({
+        tokenId: token,
+      });
 
       if (!existingDesign) {
         return {
@@ -132,15 +135,32 @@ exports.editDesignDetail = async (data, token) => {
   }
 };
 
-exports.deleteDesignDetail = async (whereCondition) => {
+exports.deleteDesignDetail = async (token) => {
   try {
-    const findImage = await findDesignById(whereCondition);
-
+    const findImage = await findDesignById({
+      tokenId: token,
+    });
     if (!findImage) {
       return {
         status: 404,
         message: "Design not found",
       };
+    }
+
+    const getAllOrders = await findAllOrders();
+
+    for (const order of getAllOrders) {
+      for (const ele of order?.orders) {
+        if (ele?.design === findImage?.name) {
+          if (ele?.pcs !== ele?.completePcs + ele?.dispatch + ele?.settlePcs + ele?.salePcs) {
+            return {
+              status: 409,
+              message:
+                "Design order is in process. After completing this design order, you can delete it.",
+            };
+          }
+        }
+      }
     }
 
     const deleteDesign = await deleteDesignInfo(whereCondition);

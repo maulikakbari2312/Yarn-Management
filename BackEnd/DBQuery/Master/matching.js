@@ -1,7 +1,7 @@
 const matchingModel = require("../../model/Master/matching.model");
 
-exports.findAllMatchings = async () => {
-  const getMatching = await matchingModel.find();
+exports.findAllMatchings = async (data={}) => {
+  const getMatching = await matchingModel.find(data);
   return getMatching;
 };
 

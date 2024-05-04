@@ -1,14 +1,13 @@
-const ordersModel = require("../../model/Order/orders.model");
-const matchingModel = require("../../model/Master/matching.model");
-const message = require("../../common/error.message");
-const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
-const yarnSalesModel = require("../../model/Yarn/yarnSales.model");
-const designModel = require("../../model/Master/design.model");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
+const { findAllOrders } = require("../../DBQuery/Order/order");
+const { findAllMatchings } = require("../../DBQuery/Master/matching");
+const { findAllYarnPurchase } = require("../../DBQuery/Yarn/purchase");
+const { findAllSaleYarn } = require("../../DBQuery/Yarn/sales");
+const { findDesigns } = require("../../DBQuery/Master/design");
+const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
 
 exports.getOrderStock = async () => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     if (!findOrders) {
       return {
         status: 404,
@@ -32,7 +31,7 @@ exports.getOrderStock = async () => {
     const matchingId = new Set(newArr.map((ele) => ele.matchingId));
     const resultArray = Array.from(matchingId);
 
-    const findMatching = await matchingModel.find();
+    const findMatching = await findAllMatchings();
 
     let colorYarn = [];
     for (const ele of findMatching) {
@@ -52,8 +51,8 @@ exports.getOrderStock = async () => {
 
     const uniqueArray = [...uniqueValues];
 
-    const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await yarnSalesModel.find();
+    const purchaseDetails = await findAllYarnPurchase();
+    const salesDetails = await findAllSaleYarn();
 
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -134,7 +133,7 @@ exports.getOrderStock = async () => {
 
 exports.getListOfOrders = async () => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     if (!findOrders) {
       return {
         status: 404,
@@ -152,7 +151,6 @@ exports.getListOfOrders = async () => {
       }
     }
     return Array.from(listOfOrders);
-
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -161,7 +159,7 @@ exports.getListOfOrders = async () => {
 
 exports.getListOfOrderDesign = async (orderNo) => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     if (!findOrders) {
       return {
         status: 404,
@@ -186,7 +184,7 @@ exports.getListOfOrderDesign = async (orderNo) => {
 
 exports.getsareeYarn = async (orderNo, design) => {
   try {
-    const findOrders = await ordersModel.find();
+    const findOrders = await findAllOrders();
     if (!findOrders) {
       return {
         status: 404,
@@ -204,7 +202,7 @@ exports.getsareeYarn = async (orderNo, design) => {
 
     const listOfOrders = [];
 
-    const findMatching = await matchingModel.find();
+    const findMatching = await findAllMatchings();
 
     for (const ele of findMatching) {
       for (const data of pendingOrderArr) {
@@ -214,8 +212,8 @@ exports.getsareeYarn = async (orderNo, design) => {
       }
     }
 
-    const purchaseDetails = await yarnPurchaseModel.find();
-    const salesDetails = await yarnSalesModel.find();
+    const purchaseDetails = await findAllYarnPurchase();
+    const salesDetails = await findAllSaleYarn();
 
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
@@ -284,8 +282,8 @@ exports.getsareeYarn = async (orderNo, design) => {
     });
 
     const findFeeders = listOfOrders;
-    const findColorYarn = await colorYarnModel.find();
-    const findPickByDesign = await designModel.find();
+    const findColorYarn = await findYarnColor();
+    const findPickByDesign = await findDesigns();
 
     const denierSet1 = [];
 
@@ -310,62 +308,64 @@ exports.getsareeYarn = async (orderNo, design) => {
     let mergedObjects1 = [];
     let findDesign = findPickByDesign.find((ele) => ele.name === design);
 
-      if (findDesign) {
-        for (let i = 0; i < denierSet1.length; i++) {
-          const ele = denierSet1[i];
-          const result = ele.map((eleObj, index) => {
-            const getMatchingId = findMatching.find(
-              (element) => element.matchingId === eleObj.matchingId
-            );
-            if (getMatchingId) {
-              const pickKey = `pick-${index + 1}`;
-              const pickValue = findDesign.feeders[index]
-                ? findDesign.feeders[index][pickKey]
-                : null;
-              const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
-              return { ...eleObj, pick: pickValue, finalCut:finalCut };
-            } else {
-              return eleObj;
-            }
-          });
-          mergedObjects1.push(result);
-        }
-      } else {
-        console.error(`Design "${data.design}" not found in findPickByDesign`);
+    if (findDesign) {
+      for (let i = 0; i < denierSet1.length; i++) {
+        const ele = denierSet1[i];
+        const result = ele.map((eleObj, index) => {
+          const getMatchingId = findMatching.find(
+            (element) => element.matchingId === eleObj.matchingId
+          );
+          if (getMatchingId) {
+            const pickKey = `pick-${index + 1}`;
+            const pickValue = findDesign.feeders[index]
+              ? findDesign.feeders[index][pickKey]
+              : null;
+            const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
+            return { ...eleObj, pick: pickValue, finalCut: finalCut };
+          } else {
+            return eleObj;
+          }
+        });
+        mergedObjects1.push(result);
       }
-    
+    } else {
+      console.error(`Design "${data.design}" not found in findPickByDesign`);
+    }
+
     // mergedObjects1 = mergedObjects1.flatMap((arr) =>
     //   arr.filter((obj) => obj.hasOwnProperty("pick"))
     // );
 
     mergedObjects1 = mergedObjects1
-        .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
-        .filter((obj) => obj.hasOwnProperty("pick"));
+      .flatMap((arr) => (Array.isArray(arr) ? arr : [arr]))
+      .filter((obj) => obj.hasOwnProperty("pick"));
 
     const calculatYarnWeight = (denier, pick, order, finalCut) =>
-      (denier * pick * order *finalCut* 52 * 1) / 9000000;
+      (denier * pick * order * finalCut * 52 * 1) / 9000000;
 
     let totalWeight = 0;
     const resultArray = [];
     for (const data of mergedObjects1) {
       const arrayWeight = 0;
-        const findOrder = pendingOrderArr.find(
-          (order) => order.matchingId === data?.matchingId
-        );
-        const totalYarnWeight = arrayWeight + calculatYarnWeight(
+      const findOrder = pendingOrderArr.find(
+        (order) => order.matchingId === data?.matchingId
+      );
+      const totalYarnWeight =
+        arrayWeight +
+        calculatYarnWeight(
           Number(data?.denier),
           Number(data?.pick),
           findOrder.pendingPcs,
           Number(data?.finalCut)
         );
-        const calculatedObj = {
-          ...data,
-          weight: totalYarnWeight,
-        };
-        resultArray.push(calculatedObj);
+      const calculatedObj = {
+        ...data,
+        weight: totalYarnWeight,
+      };
+      resultArray.push(calculatedObj);
     }
     const newArray = resultArray.map((obj) => {
-      const { denier, matchingId, pick,finalCut, ...rest } = obj;
+      const { denier, matchingId, pick, finalCut, ...rest } = obj;
       return rest;
     });
 
@@ -398,45 +398,46 @@ exports.getsareeYarn = async (orderNo, design) => {
     let pendingOrderYarn = [];
     for (const data of pageItems) {
       for (const ele of yarnStock) {
-        const colorKey = Object.keys(data)[0]; 
-        const colorCode = data[colorKey]; 
-          if (colorCode === ele.colorCode) {
-            const remainYarn = {
-              color: ele.colorCode,
-              totalStock: ele.weight,
-              requiredYarn: data.weight,
-              // remainingStock: ele.weight - data.weight,
-            };
+        const colorKey = Object.keys(data)[0];
+        const colorCode = data[colorKey];
+        if (colorCode === ele.colorCode) {
+          const remainYarn = {
+            color: ele.colorCode,
+            totalStock: ele.weight,
+            requiredYarn: data.weight,
+            // remainingStock: ele.weight - data.weight,
+          };
 
-            remainYarn.totalStock = remainYarn.totalStock.toFixed(4);
-            remainYarn.requiredYarn = remainYarn.requiredYarn.toFixed(4);
-            // remainYarn.remainingStock = remainYarn.remainingStock.toFixed(4);
-            pendingOrderYarn.push(remainYarn);
-          }
+          remainYarn.totalStock = remainYarn.totalStock.toFixed(4);
+          remainYarn.requiredYarn = remainYarn.requiredYarn.toFixed(4);
+          // remainYarn.remainingStock = remainYarn.remainingStock.toFixed(4);
+          pendingOrderYarn.push(remainYarn);
+        }
       }
     }
-    const uniqueYarn = Array.from(new Set(pendingOrderYarn.map(JSON.stringify))).map(JSON.parse);
+    const uniqueYarn = Array.from(
+      new Set(pendingOrderYarn.map(JSON.stringify))
+    ).map(JSON.parse);
 
-  
     const obj = {};
     for (const data of mergedObjects1) {
       const arrayWeight = 0;
-        const totalSareeWeight = arrayWeight + calculateSareeWeight(
+      const totalSareeWeight =
+        arrayWeight +
+        calculateSareeWeight(
           Number(data?.denier),
           Number(data?.pick),
           Number(data?.finalCut)
         );
-        totalWeight += totalSareeWeight;
-        obj[data?.matchingId] = totalWeight;
+      totalWeight += totalSareeWeight;
+      obj[data?.matchingId] = totalWeight;
     }
     const matchingSareeWeight = obj;
     return {
       pageItems: uniqueYarn,
       matchingSareeWeight,
     };
-  }
- 
-   catch (error) {
+  } catch (error) {
     console.error("Error:", error);
     throw error;
   }

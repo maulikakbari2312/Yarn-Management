@@ -59,7 +59,7 @@ const designSchema = new mongoose.Schema({
     type: Array,
     default: [],
   },
-});
+},{ timestamps: true });
 
 const DesignDetail = mongoose.model("DesignDetail", designSchema);
 

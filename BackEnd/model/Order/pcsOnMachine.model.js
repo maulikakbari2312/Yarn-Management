@@ -27,7 +27,7 @@ const pcsInMachineSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-});
+},{ timestamps: true });
 
 const pcsInMachineDetail = mongoose.model(
   "PcsInMachineDetail",

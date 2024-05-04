@@ -1,10 +1,16 @@
 const message = require("../../common/error.message");
-const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 var moment = require("moment");
+const {
+  findAllYarnPurchase,
+  purchaseYarnCreate,
+  findYarnPurchaseByData,
+  updateYarnPurchase,
+  deletePurchaseYarn,
+} = require("../../DBQuery/Yarn/purchase");
 
 exports.createYarnPurchase = async (yarnPurchase) => {
   try {
-        const getYarnPurchase = await yarnPurchaseModel.find();
+    const getYarnPurchase = await findAllYarnPurchase();
 
     for (const ele of getYarnPurchase) {
       if (ele.invoiceNo === yarnPurchase.invoiceNo) {
@@ -12,8 +18,7 @@ exports.createYarnPurchase = async (yarnPurchase) => {
           status: 400,
           message: "yarnPurchase invoiceNo cannot be same!",
         };
-      }
-      else if (ele.lotNo === yarnPurchase.lotNo) {
+      } else if (ele.lotNo === yarnPurchase.lotNo) {
         return {
           status: 400,
           message: "yarnPurchase lotNo cannot be same!",
@@ -30,7 +35,7 @@ exports.createYarnPurchase = async (yarnPurchase) => {
       weight: yarnPurchase.weight,
       denier: yarnPurchase.denier,
     };
-    const createYarnPurchaseDetail = new yarnPurchaseModel(yarnPurchaseData);
+    const createYarnPurchaseDetail = await purchaseYarnCreate(yarnPurchaseData);
     const detail = await createYarnPurchaseDetail.save();
 
     return {
@@ -49,7 +54,7 @@ exports.createYarnPurchase = async (yarnPurchase) => {
 
 exports.findYarnPurchase = async () => {
   try {
-    const getYarnPurchase = await yarnPurchaseModel.find();
+    const getYarnPurchase = await findAllYarnPurchase();
     if (!getYarnPurchase) {
       return {
         status: 404,
@@ -64,40 +69,39 @@ exports.findYarnPurchase = async () => {
 
 exports.editYarnPurchaseDetail = async (data, token) => {
   try {
-    
-    const existingPurchaseInvoice = await yarnPurchaseModel.findOne({ invoiceNo: data.invoiceNo });
+    const existingPurchaseInvoice = await findYarnPurchaseByData({
+      invoiceNo: data.invoiceNo,
+    });
 
     if (existingPurchaseInvoice && existingPurchaseInvoice.tokenId !== token) {
       return {
         status: 400,
         message: "YarnPurchase invoiceNo cannot be the same!",
       };
-    } 
+    }
 
-    const existingPurchaseLotNo = await yarnPurchaseModel.findOne({ lotNo: data.lotNo });
+    const existingPurchaseLotNo = await findYarnPurchaseByData({
+      lotNo: data.lotNo,
+    });
 
     if (existingPurchaseLotNo && existingPurchaseLotNo.tokenId !== token) {
       return {
         status: 400,
         message: "YarnPurchase lotNo cannot be the same!",
       };
-    } 
+    }
     const YarnPurchaseData = {
       invoiceNo: data.invoiceNo,
       lotNo: data.lotNo,
       party: data.party,
       colorCode: data.colorCode,
       colorQuality: data.colorQuality,
-      date: moment(data.date,"DD/MM/YYYY").format("DD/MM/YYYY"),
+      date: moment(data.date, "DD/MM/YYYY").format("DD/MM/YYYY"),
       weight: data.weight,
       denier: data.denier,
     };
 
-    const editYarnPurchase = await yarnPurchaseModel.findOneAndUpdate(
-      { tokenId: token },
-      YarnPurchaseData,
-      { new: true }
-    );
+    const editYarnPurchase = await updateYarnPurchase(token, YarnPurchaseData);
 
     if (!editYarnPurchase) {
       return {
@@ -119,11 +123,10 @@ exports.editYarnPurchaseDetail = async (data, token) => {
   }
 };
 
-exports.deleteYarnPurchaseDetail = async (whereCondition) => {
+exports.deleteYarnPurchaseDetail = async (token) => {
   try {
-    const deleteYarnPurchase = await yarnPurchaseModel.deleteOne({
-      tokenId: whereCondition,
-    });
+    const deleteYarnPurchase = await deletePurchaseYarn(token);
+
     if (!deleteYarnPurchase) {
       return {
         status: 404,

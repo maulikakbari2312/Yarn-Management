@@ -1,16 +1,13 @@
 const message = require("../../common/error.message");
 const {
   findOrderByOrderId,
-  findMachinePcs,
   findAllOrders,
 } = require("../../DBQuery/Order/order");
-const ordersModel = require("../../model/Order/orders.model");
-const matchingModel = require("../../model/Master/matching.model");
-const YarnSalesDetail = require("../../model/Yarn/yarnSales.model");
-const designModel = require("../../model/Master/design.model");
-const colorYarnModel = require("../../model/Master/colorYarn.model");
 const { findAllMatchings } = require("../../DBQuery/Master/matching");
 const { findAllSaleYarn } = require("../../DBQuery/Yarn/sales");
+const { findDesigns } = require("../../DBQuery/Master/design");
+const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
+const { findMachinePcs } = require("../../DBQuery/Order/pcsOnMachine");
 
 exports.completeProcessOrder = async (
   orderId,
@@ -350,7 +347,6 @@ exports.getAllCompleteOrder = async () => {
 
 async function YarnWeightCalculation(orderId) {
   const findByOrderId = await findOrderByOrderId(orderId);
-  // ordersModel.findOne({ orderId: orderId });
   const pendingOrderArr = [];
   for (const order of findByOrderId?.orders) {
     pendingOrderArr.push(order);
@@ -361,14 +357,14 @@ async function YarnWeightCalculation(orderId) {
       ele.completePcs > 0 ||
       ele.pcsOnMachine > 0 ||
       ele.dispatch > 0 ||
-      ele.settlePcs > 0
+      ele.settlePcs > 0 ||
+      ele.salePcs > 0
     ) {
       pendingNewArr.push(ele);
     }
   }
 
   const salesDetails = await findAllSaleYarn();
-  // YarnSalesDetail.find();
 
   const listOfOrders = [];
   const findMatchings = await findAllMatchings();
@@ -381,8 +377,8 @@ async function YarnWeightCalculation(orderId) {
   }
 
   const findFeeders = listOfOrders;
-  const findColorYarn = await colorYarnModel.find();
-  const findPickByDesign = await designModel.find();
+  const findColorYarn = await findYarnColor();
+  const findPickByDesign = await findDesigns();
   const denierSet1 = [];
 
   for (const feeder of findFeeders) {
@@ -462,7 +458,8 @@ async function YarnWeightCalculation(orderId) {
         Number(findOrder.pcsOnMachine) +
           Number(findOrder.completePcs) +
           Number(findOrder.dispatch) +
-          Number(findOrder.settlePcs),
+          Number(findOrder.settlePcs) +
+          Number(findOrder.salePcs),
         Number(data?.finalCut)
       );
     const calculatedObj = {

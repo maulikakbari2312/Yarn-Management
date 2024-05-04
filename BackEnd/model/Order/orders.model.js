@@ -53,6 +53,11 @@ const orderItemSchema = new mongoose.Schema({
     required: [true, "Order settlePcs is required"],
     default: 0
   },
+  salePcs : {
+    type: Number,
+    required: false,
+    default: 0
+  },
   machineNo:{
     type: Number,
     default: 0
@@ -79,7 +84,7 @@ const orderSchema = new mongoose.Schema({
   orderId: {
     type: String
   }
-});
+},{ timestamps: true });
 
 const orderDetail = mongoose.model("OrderDetail", orderSchema);
 module.exports = orderDetail;

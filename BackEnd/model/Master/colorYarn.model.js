@@ -21,7 +21,7 @@ const colorYarnSchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-});
+},{ timestamps: true });
 
 const colorYarnDetail = new mongoose.model("ColorYarnDetail", colorYarnSchema);
 module.exports = colorYarnDetail;

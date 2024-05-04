@@ -5,6 +5,13 @@ exports.findYarnColor = async () => {
   return getColorYarn;
 };
 
+exports.findColorYarnById = async (token) => {
+  const findColorYarn = await colorYarnModel.findOne({
+    tokenId: token,
+  });
+  return findColorYarn;
+};
+
 exports.createYarnColor = async (colorYarnData) => {
   const createColorYarn = await new colorYarnModel(colorYarnData)
   return createColorYarn;

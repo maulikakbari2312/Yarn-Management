@@ -26,10 +26,8 @@ exports.updateDesign = async (token, designData) => {
   return updateDesigns;
 };
 
-exports.findDesignById = async (whereCondition) => {
-  const findDesigns = await designModel.findOne({
-    tokenId: whereCondition,
-  });
+exports.findDesignById = async (token) => {
+  const findDesigns = await designModel.findOne(token);
   return findDesigns;
 };
 

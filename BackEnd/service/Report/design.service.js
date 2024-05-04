@@ -1,17 +1,17 @@
-const matchingModel = require("../../model/Master/matching.model");
-const designModel = require("../../model/Master/design.model");
+const { findDesignById } = require("../../DBQuery/Master/design");
+const { findAllMatchings } = require("../../DBQuery/Master/matching");
 
-exports.findReportDesign = async (data) => {
+exports.findReportDesign = async (design) => {
   try {
-    const design = await designModel.findOne({ name: data });
-    if (!design) {
+    const findDesign = await findDesignById({ name: design });
+    if (!findDesign) {
       return {
         status: 404,
         message: message.DESIGN_NOT_FOUND,
       };
     }
 
-    const matchingData = await matchingModel.find({ name: data });
+    const matchingData = await findAllMatchings({ name: design });
 
     const uniqueObjects = [];
 
@@ -31,10 +31,11 @@ exports.findReportDesign = async (data) => {
     }
 
     return {
-      ...design.toObject(),
+      ...findDesign.toObject(),
       matching: uniqueObjects,
     };
   } catch (error) {
+    console.log("==error===", error);
     throw error;
   }
 };
