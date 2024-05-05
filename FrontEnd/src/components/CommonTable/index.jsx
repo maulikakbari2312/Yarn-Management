@@ -15,7 +15,7 @@ import { useApi } from "network/api";
 import { parentSelectedData } from "redux/action/index.js";
 import { currentPageState } from "redux/action/index.js";
 import { pageSize } from "redux/action/index.js";
-const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProcess, setIsReturnDialogOpen, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
+const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialogOpen, setIsDialogOpenProcess, setIsReturnDialogOpen, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
     const { getApi, putApi, deleteApi, postApi } = useApi();
     const [filterText, setFilterText] = useState("");
     const textColor = useColorModeValue("gray.500", "white");
@@ -47,7 +47,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProce
 
     if (isError) return <h1>{error?.message}</h1>;
     const handleEdit = (row, handleType = "") => {
-        if (modelData?.page !== "Design" && modelData?.page !== "Matching" && modelData?.page !== "ProcessOrder" && modelData?.page !== "Orders" && modelData?.page !== "EditOrder") {
+        if (modelData?.page !== "Design" && modelData?.page !== "Matching" && modelData?.page !== "SareeStock" && modelData?.page !== "ProcessOrder" && modelData?.page !== "Orders" && modelData?.page !== "EditOrder") {
             setIsDialogOpen(true);
             dispatch(modelEdit(true));
             dispatch(modelDelete(false));
@@ -79,6 +79,11 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProce
                 dispatch(selectData(row));
                 dispatch(modelDelete(false));
                 setIsDialogOpenProcess(true);
+            } else if (modelData?.page === "SareeStock") {
+                dispatch(modelEdit(true));
+                dispatch(selectData(row));
+                dispatch(modelDelete(false));
+                setIsSareeSaleDialogOpen(true);
             } else {
                 setIsAddPage(true);
             }
@@ -236,6 +241,14 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsDialogOpenProce
                 cell: (row) => <button onClick={() => handleDelete(row)}>Delete</button>,
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             }
+        );
+    } else if (modelData?.page === "SareeStock") {
+        columns.push(
+            {
+                name: 'Sale',
+                cell: (row) => <button onClick={() => handleEdit(row)}>Sale</button>,
+                id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
+            },
         );
     } else if (modelData?.page === "DeliveredOrders") {
         columns.push(

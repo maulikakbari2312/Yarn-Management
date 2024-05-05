@@ -51,6 +51,7 @@ import OrderProcessStockReport from './views/Report/OrderProcessStockReport.jsx'
 import DesignReport from './views/Report/DesignReport.jsx';
 import StockYarn from './views/Yarn/StockYarn.jsx';
 import Cookies from 'js-cookie';
+import SaleSareeReport from 'views/Report/SaleSareeReport.jsx';
 const DashboardRoutes = () => {
   const isAdminCookie = localStorage.getItem('isAdmin');
   var dashRoutes = [
@@ -237,6 +238,13 @@ const DashboardRoutes = () => {
         icon: <PendingOrderYarnIcon color='inherit' />,
         secondaryNavbar: true,
         component: OrderProcessStockReport,
+        layout: "/admin",
+      }, {
+        path: "/sale-saree-report",
+        name: "Sale Saree Report",
+        icon: <SaleIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: SaleSareeReport,
         layout: "/admin",
       },
       ]

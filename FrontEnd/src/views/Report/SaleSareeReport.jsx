@@ -1,6 +1,6 @@
-import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, useColorMode, useColorModeValue, Spinner } from "@chakra-ui/react";
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import * as Yup from "yup";
+import { Box, Flex, Spinner } from "@chakra-ui/react"
+import axios from "axios";
+import AddButton from "components/AddButton/AddButton"
 import CommonTable from "components/CommonTable"
 import { useApi } from "network/api";
 import { useEffect } from "react";
@@ -11,32 +11,33 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast, cssTransition } from "react-toastify";
 import { totalRowsCount } from "redux/action";
 import { setTableinitialState } from "redux/action";
-import SareeStockModel from "./SareeStockModel";
-const SareeStock = () => {
+const SaleSareeReport = () => {
     const { getApi } = useApi();
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState(null);
-    const [isFetch, setIsFetch] = useState(false);
     const pagination = useSelector((state) => state.pagination);
+    const [isFetch, setIsFetch] = useState(false);
     const dispatch = useDispatch();
-    const [party, setParty] = useState([]);
-    const [isSareeSaleDialogOpen, setIsSareeSaleDialogOpen] = useState(false);
     const model = {
         btnTitle: "",
-        page: "SareeStock",
+        page: "SaleSareeReport",
         fieldData: [
+            {
+                name: "Party",
+                type: "text",
+            },
             {
                 name: "Design",
                 type: "text",
             },
             {
-                name: "Pallu",
-                type: "text"
+                name: "Ground Color",
+                type: "text",
             },
             {
-                name: "Ground Color",
+                name: "Pallu",
                 type: "text",
             },
             {
@@ -45,22 +46,9 @@ const SareeStock = () => {
             }
         ]
     }
-    useEffect(() => {
-        (async () => {
-            try {
-                const url = `${process.env.REACT_APP_HOST}/api/party/findParty`;
-                const response = await getApi(url);
-                const extractedParty = response?.pageItems?.map(item => item.name);
-                setParty(extractedParty);
-            } catch (error) {
-                console.log(error);
-            }
-        })();
-    }, []);
-
     const fetchData = async () => {
         try {
-            const url = `${process.env.REACT_APP_HOST}/api/stock/getSareeStock?limit=${pagination?.pageSize}&offset=${pagination?.currentPage - 1}`
+            const url = `${process.env.REACT_APP_HOST}/api/stock/getSaleSaree?limit=${pagination?.pageSize}&offset=${pagination?.currentPage - 1}`
             const response = await getApi(url);
             setData(response?.pageItems);
             setIsLoading(false);
@@ -102,15 +90,11 @@ const SareeStock = () => {
                             isLoading={isLoading}
                             isError={isError}
                             error={error}
-                            page="SareeStock"
-                            tableTitle="Saree Stock"
+                            page="MachineReport"
+                            tableTitle="Machine Report"
                             toast={toast}
-                            setIsSareeSaleDialogOpen={setIsSareeSaleDialogOpen}
                         />
                     </Box>
-                    {
-                        isSareeSaleDialogOpen && <SareeStockModel toast={toast} setIsSareeSaleDialogOpen={setIsSareeSaleDialogOpen} party={party} isSareeSaleDialogOpen={isSareeSaleDialogOpen} setIsFetch={setIsFetch} fetchData={fetchData} />
-                    }
                     <ToastContainer autoClose={2000} />
                 </>
             }
@@ -118,4 +102,4 @@ const SareeStock = () => {
     )
 }
 
-export default SareeStock
+export default SaleSareeReport
