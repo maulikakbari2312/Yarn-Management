@@ -271,7 +271,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialog
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             },
         );
-    } else if (modelData?.page !== "SareeStock" && modelData?.page !== "Matching" && modelData?.page !== "OrderStock" && modelData?.page !== "RemainingYarnStock" && modelData?.page !== "OrderPendingYarnStock" && modelData?.page !== "MachineReport" && modelData?.page !== "DesignReport" && modelData?.page !== "OrderProcessStockReport") {
+    } else if (modelData?.page !== "SareeStock" && modelData?.page !== "SaleSareeReport" && modelData?.page !== "Matching" && modelData?.page !== "OrderStock" && modelData?.page !== "RemainingYarnStock" && modelData?.page !== "OrderPendingYarnStock" && modelData?.page !== "MachineReport" && modelData?.page !== "DesignReport" && modelData?.page !== "OrderProcessStockReport") {
         columns.push(
             {
                 name: 'Edit',
