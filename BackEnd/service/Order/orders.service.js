@@ -430,6 +430,12 @@ exports.findOrderById = async () => {
         return accumulator;
       }, 0);
 
+      const sumSalePcsByDesign = ele.orders.reduce((accumulator, order) => {
+        let { salePcs } = order;
+        accumulator += salePcs;
+        return accumulator;
+      }, 0);
+
       ////////////////////matching//////////////////////////////////////////////////////////////
 
       if (!matchingDetails || !matchingDetails.length) {
@@ -472,6 +478,7 @@ exports.findOrderById = async () => {
         completed: sumCompletedPcsByDesign,
         dispatch: sumDispatchPcsByDesign,
         settlePcs: sumSettlePcsByDesign,
+        salePcs: sumSalePcsByDesign,
         orderId: ele.orderId,
         __v: ele.__v,
       };

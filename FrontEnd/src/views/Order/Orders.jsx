@@ -102,6 +102,10 @@ const Orders = () => {
             {
                 name: "Settle Pcs",
                 type: "number",
+            },
+            {
+                name: "Sale Pcs",
+                type: "number"
             }
         ]
     }
