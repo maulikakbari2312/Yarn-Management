@@ -56,7 +56,7 @@ const logInSchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-},{ timestamps: true });
+});
 
 const logInDetail = new mongoose.model("LogInDetail", logInSchema);
 module.exports = logInDetail;

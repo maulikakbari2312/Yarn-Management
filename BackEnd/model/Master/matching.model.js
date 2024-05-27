@@ -34,7 +34,7 @@ const matchingSchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-},{ timestamps: true });
+});
 
 const matchingDetail = new mongoose.model("MatchingDetail", matchingSchema);
 module.exports = matchingDetail;

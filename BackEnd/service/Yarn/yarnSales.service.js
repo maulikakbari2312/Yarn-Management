@@ -62,7 +62,6 @@ exports.createYarnSales = async (yarnSales) => {
       }
 
       map[key].weight += detail.weight;
-      // map[key].denier += detail.denier;
 
       return map;
     }, {});
@@ -127,7 +126,7 @@ exports.createYarnSales = async (yarnSales) => {
       denier: yarnSales.denier,
       price: yarnSales.price,
     };
-    const createYarnSalesDetail = createSaleYarn(yarnSalesData);
+    const createYarnSalesDetail = await createSaleYarn(yarnSalesData);
     const detail = await createYarnSalesDetail.save();
 
     yarnSalesData["tokenId"] = createYarnSalesDetail.tokenId;

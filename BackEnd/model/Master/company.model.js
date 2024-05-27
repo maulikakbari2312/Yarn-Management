@@ -19,7 +19,7 @@ const companySchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-},{ timestamps: true });
+});
 
 const companyDetail = new mongoose.model("CompanyDetail", companySchema);
 module.exports = companyDetail;

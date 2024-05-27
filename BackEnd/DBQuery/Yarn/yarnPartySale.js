@@ -1,12 +1,12 @@
 const YarnPartySalesDetail = require("../../model/Yarn/yarnPartySales");
 
 exports.createPartySale = async (partySale) => {
-    const createpartySalesDetail = await new YarnPartySalesDetail(partySale);
+    const createpartySalesDetail = new YarnPartySalesDetail(partySale);
     return createpartySalesDetail;
   };
 
   exports.findAllPartySaleDetail = async () => {
-    const findPartySale = await YarnPartySalesDetail.find();
+    const findPartySale = await YarnPartySalesDetail.find().sort({ createdAt: -1 });
     return findPartySale;
   };
 

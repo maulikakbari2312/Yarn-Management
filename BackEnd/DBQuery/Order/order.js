@@ -14,7 +14,7 @@ exports.deleteOrderByOrderId = async (orderId) => {
 };
 
 exports.findAllOrders = async () => {
-  const getOrders = await ordersModel.find();
+  const getOrders = await ordersModel.find().sort({ createdAt: -1 });
   return getOrders;
 };
 

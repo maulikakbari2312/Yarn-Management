@@ -14,7 +14,7 @@ exports.findYarnStock = async () => {
     const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
       if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
+        map[key] = { weight: 0, denier: detail.denier, updatedAt:detail.updatedAt };
       }
 
       map[key].weight += detail.weight;
@@ -28,6 +28,7 @@ exports.findYarnStock = async () => {
           colorQuality,
           weight: values.weight,
           denier: values.denier,
+          updatedAt: values.updatedAt
         };
       }
     );
@@ -35,11 +36,10 @@ exports.findYarnStock = async () => {
     const salesAggregationMap = salesDetails.reduce((map, detail) => {
       const key = `${detail.colorCode}:${detail.colorQuality}`;
       if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
+        map[key] = { weight: 0, denier: detail.denier, updatedAt:detail.updatedAt };
       }
 
       map[key].weight += detail.weight;
-
       return map;
     }, {});
     const salesResult = Object.entries(salesAggregationMap).map(
@@ -50,6 +50,7 @@ exports.findYarnStock = async () => {
           colorQuality,
           weight: values.weight,
           denier: values.denier,
+          updatedAt: values.updatedAt
         };
       }
     );
@@ -68,19 +69,20 @@ exports.findYarnStock = async () => {
     const result = Object.keys(purchaseDictionary).map((key) => {
       const purchaseItem = purchaseDictionary[key] || { weight: 0 };
       const salesItem = salesDictionary[key] || { weight: 0 };
-
       return {
         colorCode: purchaseItem.colorCode,
         colorQuality: purchaseItem.colorQuality,
         weight: purchaseItem.weight.toFixed(4) - salesItem.weight.toFixed(4),
         denier: purchaseItem.denier,
+        updatedAt: salesItem?.updatedAt? salesItem?.updatedAt : purchaseItem?.updatedAt
       };
     });
-
-    const formattedData = result.map((item) => ({
+    let formattedData = result.map((item) => ({
       ...item,
       weight: parseFloat(item.weight.toFixed(4)),
     }));
+    formattedData.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    
 
     return formattedData;
   } catch (error) {

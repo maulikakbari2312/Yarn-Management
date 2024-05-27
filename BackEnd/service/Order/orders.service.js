@@ -464,14 +464,14 @@ exports.findOrderById = async () => {
         return resultArray;
       }
       return {
-        _id: ele._id,
-        party: ele.orders[0]?.party,
-        design: ele.orders[0]?.design,
+        _id: ele?._id,
+        party: ele?.orders[0]?.party,
+        design: ele?.orders[0]?.design,
         matching: `matchings`,
-        date: ele.orders[0]?.date,
-        rate: ele.orders[0]?.rate,
-        orderNo: ele.orders[0]?.orderNo,
-        orders: ele.orders,
+        date: ele?.orders[0]?.date,
+        rate: ele?.orders[0]?.rate,
+        orderNo: ele?.orders[0]?.orderNo,
+        orders: ele?.orders,
         total: sumPcsByDesign,
         pending: sumPendingPcsByDesign,
         process: sumProcessPcsByDesign,
@@ -479,11 +479,11 @@ exports.findOrderById = async () => {
         dispatch: sumDispatchPcsByDesign,
         settlePcs: sumSettlePcsByDesign,
         salePcs: sumSalePcsByDesign,
-        orderId: ele.orderId,
-        __v: ele.__v,
+        orderId: ele?.orderId,
+        createdAt: ele?.createdAt
       };
     });
-
+    final.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return final;
   } catch (error) {
     console.error("Error:", error);

@@ -1,7 +1,7 @@
 const pcsOnMachineModel = require("../../model/Order/pcsOnMachine.model");
 
 exports.findMachinePcs = async () => {
-  const getProcessPcs = await pcsOnMachineModel.find();
+  const getProcessPcs = await pcsOnMachineModel.find().sort({ createdAt: -1 });
   return getProcessPcs;
 };
 
@@ -35,7 +35,7 @@ exports.createPcsInProcess = async (
 exports.findOrderPcsById = async (orderId) => {
   const findPcsInMachineById = await pcsOnMachineModel.find({
     orderId: orderId,
-  });
+  }).sort({ createdAt: -1 });
   return findPcsInMachineById;
 };
 

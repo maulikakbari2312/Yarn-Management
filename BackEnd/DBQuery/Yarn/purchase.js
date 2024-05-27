@@ -1,12 +1,12 @@
 const yarnPurchaseModel = require("../../model/Yarn/yarnPurchase.model");
 
 exports.findAllYarnPurchase = async () => {
-  const yarnPurchase = await yarnPurchaseModel.find();
+  const yarnPurchase = await yarnPurchaseModel.find().sort({ createdAt: -1 });
   return yarnPurchase;
 };
 
 exports.purchaseYarnCreate = async (yarnPurchaseData) => {
-  const createYarnPurchase = await new yarnPurchaseModel(yarnPurchaseData);
+  const createYarnPurchase = new yarnPurchaseModel(yarnPurchaseData);
   return createYarnPurchase;
 };
 

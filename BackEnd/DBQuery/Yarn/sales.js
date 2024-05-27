@@ -1,7 +1,7 @@
 const YarnSalesDetail = require("../../model/Yarn/yarnSales.model");
 
 exports.findAllSaleYarn = async () => {
-  const findSaleYarn = await YarnSalesDetail.find();
+  const findSaleYarn = await YarnSalesDetail.find().sort({ createdAt: -1 });
   return findSaleYarn;
 };
 
@@ -13,7 +13,7 @@ exports.deleteYarn = async (tokenId) => {
 };
 
 exports.createSaleYarn = async (yarnData) => {
-  const createSaleYarn = await new YarnSalesDetail(yarnData);
+  const createSaleYarn = new YarnSalesDetail(yarnData);
   return createSaleYarn;
 };
 

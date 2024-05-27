@@ -23,7 +23,7 @@ const partySchema = new mongoose.Schema({
     default: () => uuidv4(),
     required: false,
   },
-},{ timestamps: true });
+});
 
 const partyDetail = new mongoose.model("PartyDetail", partySchema);
 module.exports = partyDetail;
