@@ -42,7 +42,8 @@ exports.getCompleteOrder = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllProcessOrders.slice(startIndex, endIndex);
+    const pageItems = findAllProcessOrders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllProcessOrders.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -108,7 +109,8 @@ exports.getDeliveredOrder = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllDeliveredOrders.slice(startIndex, endIndex);
+    const pageItems = findAllDeliveredOrders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllDeliveredOrders.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -152,7 +154,8 @@ exports.getAllCompleteOrder = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllCompleteOrders.slice(startIndex, endIndex);
+    const pageItems = findAllCompleteOrders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllCompleteOrders.length;
     const totalPages = Math.ceil(totalItems / limit);

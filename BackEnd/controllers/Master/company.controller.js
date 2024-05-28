@@ -33,7 +33,8 @@ exports.getCompany = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findCompany.slice(startIndex, endIndex);
+    const pageItems = findCompany
+    // .slice(startIndex, endIndex);
 
     const totalItems = findCompany.length;
     const totalPages = Math.ceil(totalItems / limit);

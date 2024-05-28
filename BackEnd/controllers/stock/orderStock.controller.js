@@ -13,7 +13,8 @@ exports.getOrderStock = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllOrderStock.slice(startIndex, endIndex);
+    const pageItems = findAllOrderStock;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllOrderStock.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -54,7 +55,8 @@ exports.getListOfOrders = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findListOfOrders.slice(startIndex, endIndex);
+    const pageItems = findListOfOrders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findListOfOrders.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -96,7 +98,8 @@ exports.getListOfOrderDesign = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findListOfOrderDesign.slice(startIndex, endIndex);
+    const pageItems = findListOfOrderDesign;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findListOfOrderDesign.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -138,7 +141,8 @@ exports.getsareeYarn = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = sareeYarn?.pageItems.slice(startIndex, endIndex);
+    const pageItems = sareeYarn?.pageItems;
+    // .slice(startIndex, endIndex);
 
     const totalItems = sareeYarn?.pageItems.length;
     const totalPages = Math.ceil(totalItems / limit);

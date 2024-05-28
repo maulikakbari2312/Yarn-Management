@@ -9,7 +9,7 @@ exports.signUp = async (req, res) => {
     const headers = req.headers["access_token"];
     const tokenData = await decodeToken(headers);
     if (!tokenData) {
-      const response = commonService.response(
+      const response = await commonService.response(
         0,
         message.INVALID_TOKEN,
         null,
@@ -60,7 +60,8 @@ exports.getUsers = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = userDetails.slice(startIndex, endIndex);
+    const pageItems = userDetails;
+    // .slice(startIndex, endIndex);
 
     const totalItems = userDetails.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -94,7 +95,7 @@ exports.logIn = async (req, res) => {
     let user = await loginData.findUser({ email });
 
     if (!user) {
-      const response = commonService.response(
+      const response = await commonService.response(
         0,
         message.USER_NOT_FOUND,
         null,
@@ -104,7 +105,7 @@ exports.logIn = async (req, res) => {
     }
 
     if (password !== user.password) {
-      const response = commonService.response(
+      const response = await commonService.response(
         0,
         message.MISMATCH_PASSWORD,
         null,

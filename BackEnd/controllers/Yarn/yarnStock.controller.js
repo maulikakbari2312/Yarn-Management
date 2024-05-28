@@ -13,7 +13,8 @@ exports.findYarnStock = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findYarnStock.slice(startIndex, endIndex);
+    const pageItems = findYarnStock;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findYarnStock.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -53,7 +54,8 @@ exports.findRemainingYarnStock = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findYarnStock.slice(startIndex, endIndex);
+    const pageItems = findYarnStock;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findYarnStock.length;
     const totalPages = Math.ceil(totalItems / limit);

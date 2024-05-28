@@ -51,7 +51,8 @@ exports.getDesign = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findDesign.slice(startIndex, endIndex);
+    const pageItems = findDesign;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findDesign.length;
     const totalPages = Math.ceil(totalItems / limit);

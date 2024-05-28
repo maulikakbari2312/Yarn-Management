@@ -33,7 +33,8 @@ exports.getParty = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findParty.slice(startIndex, endIndex);
+    const pageItems = findParty;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findParty.length;
     const totalPages = Math.ceil(totalItems / limit);

@@ -12,7 +12,8 @@ exports.getMachineReport = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findMachineReport.slice(startIndex, endIndex);
+    const pageItems = findMachineReport;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findMachineReport.length;
     const totalPages = Math.ceil(totalItems / limit);

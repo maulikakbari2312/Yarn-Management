@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const multer = require("multer");
 const path = require("path");
 
-const createOneTimeToken = (user, secretKey) => {
+const createOneTimeToken = async (user, secretKey) => {
   try {
     return jwt.sign(
       {
@@ -19,7 +19,7 @@ const createOneTimeToken = (user, secretKey) => {
   }
 };
 
-const decodeToken = (token) => {
+const decodeToken = async (token) => {
   try {
     const decode = jwt.verify(token, process.env.SECRET);
     return decode;
@@ -28,7 +28,7 @@ const decodeToken = (token) => {
   }
 };
 
-const response = (
+const response = async (
   responseCode,
   responseMessage,
   responseData,

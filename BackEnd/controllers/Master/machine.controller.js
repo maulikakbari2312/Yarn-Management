@@ -33,7 +33,8 @@ exports.getMachine = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findMachine.slice(startIndex, endIndex);
+    const pageItems = findMachine;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findMachine.length;
     const totalPages = Math.ceil(totalItems / limit);

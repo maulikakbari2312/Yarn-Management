@@ -37,7 +37,7 @@ exports.getColorYarn = async (req, res) => {
     const endIndex = startIndex + limit;
     const totalItems = findColorYarn.length;
 
-    const pageItems = findColorYarn.slice(startIndex, endIndex);
+    const pageItems = findColorYarn
 
     const totalPages = Math.ceil(totalItems / limit);
     const status = totalItems === 1 ? "colorYarn" : "colorYarns";

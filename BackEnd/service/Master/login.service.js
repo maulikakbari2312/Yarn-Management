@@ -34,7 +34,7 @@ exports.loginService = async (data, userToken) => {
     const createSuperAdmin = await createUser(detail);
     const createData = await createSuperAdmin.save();
     return {
-      status: 200,
+      status: 201,
       message: message.USER_CREATED,
       data: createData,
     };

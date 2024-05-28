@@ -13,7 +13,8 @@ exports.getSareeStock = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllSareeStock.slice(startIndex, endIndex);
+    const pageItems = findAllSareeStock;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllSareeStock.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -117,7 +118,8 @@ exports.listSaleSaree = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllSareeStock.slice(startIndex, endIndex);
+    const pageItems = findAllSareeStock;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllSareeStock.length;
     const totalPages = Math.ceil(totalItems / limit);

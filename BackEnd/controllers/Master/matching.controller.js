@@ -33,7 +33,8 @@ exports.getColorMatching = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findColorYarn.slice(startIndex, endIndex);
+    const pageItems = findColorYarn;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findColorYarn.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -74,7 +75,8 @@ exports.getDesignMatching = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findDesign.slice(startIndex, endIndex);
+    const pageItems = findDesign;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findDesign.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -118,7 +120,8 @@ exports.matchingList = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findMatching.slice(startIndex, endIndex);
+    const pageItems = findMatching;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findMatching.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -129,7 +132,7 @@ exports.matchingList = async (req, res) => {
       totalPages,
       itemsPerPage: limit,
       total: totalItems,
-      pageItems: pageItems,
+      pageItems,
       message: `Total ${totalItems} ${status} find successfully`,
     };
 
@@ -199,7 +202,8 @@ exports.findGroundColor = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findColorYarn.slice(startIndex, endIndex);
+    const pageItems = findColorYarn;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findColorYarn.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -210,7 +214,7 @@ exports.findGroundColor = async (req, res) => {
       totalPages,
       itemsPerPage: limit,
       total: totalItems,
-      pageItems: pageItems,
+      pageItems,
       message: `Total ${totalItems} ${status} available`,
     };
     res.status(200).send(response);

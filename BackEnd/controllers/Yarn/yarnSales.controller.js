@@ -34,7 +34,8 @@ exports.getYarnSales = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findYarnSales.slice(startIndex, endIndex);
+    const pageItems = findYarnSales;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findYarnSales.length;
     const totalPages = Math.ceil(totalItems / limit);

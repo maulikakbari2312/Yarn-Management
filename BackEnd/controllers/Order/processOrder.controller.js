@@ -37,7 +37,8 @@ exports.getProcessOrder = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllProcessOrders.slice(startIndex, endIndex);
+    const pageItems = findAllProcessOrders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllProcessOrders.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -78,7 +79,8 @@ exports.getAllProcessOrder = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findAllProcessOrders.slice(startIndex, endIndex);
+    const pageItems = findAllProcessOrders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findAllProcessOrders.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -125,7 +127,8 @@ exports.deleteAllProcessOrder = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = deleteProcessorders.slice(startIndex, endIndex);
+    const pageItems = deleteProcessorders;
+    // .slice(startIndex, endIndex);
 
     const totalItems = deleteProcessorders.length;
     const totalPages = Math.ceil(totalItems / limit);

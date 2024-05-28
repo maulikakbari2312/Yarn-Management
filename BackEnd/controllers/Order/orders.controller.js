@@ -74,7 +74,8 @@ exports.findOrderById = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findByOrderId.slice(startIndex, endIndex);
+    const pageItems = findByOrderId;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findByOrderId.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -208,7 +209,8 @@ exports.findMatching = async (req, res) => {
 
     const startIndex = offset * limit;
     const endIndex = startIndex + limit;
-    const pageItems = findMatchingByDesign.slice(startIndex, endIndex);
+    const pageItems = findMatchingByDesign;
+    // .slice(startIndex, endIndex);
 
     const totalItems = findMatchingByDesign.length;
     const totalPages = Math.ceil(totalItems / limit);
