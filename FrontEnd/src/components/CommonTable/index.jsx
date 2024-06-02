@@ -386,15 +386,6 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialog
         setIsDeleteOpen(false);
     }
 
-    const handlePageChange = (page) => {
-        dispatch(currentPageState(page));
-    };
-
-    const handlePerPageChange = (newPageSize, currentPage) => {
-        dispatch(pageSize(newPageSize));
-        dispatch(currentPageState(currentPage));
-    };
-
     return (
         <>
             <Card
@@ -431,13 +422,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialog
                         // ThemeContext={
                         //     {background: colorMode === "light" ? "" : "navy.900"}
                         // }
-                        paginationServer
                         paginationRowsPerPageOptions={[10, 25, 50, 100]}
-                        paginationTotalRows={pagination?.totalRowsCount} // Set the total count of rows
-                        paginationDefaultPage={pagination?.currentPage}
-                        paginationPerPage={pagination?.pageSize}
-                        onChangePage={handlePageChange}
-                        onChangeRowsPerPage={handlePerPageChange}
                     />
                 </CardBody>
             </Card>
