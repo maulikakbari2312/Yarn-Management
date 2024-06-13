@@ -18,7 +18,7 @@ import { pageSize } from "redux/action/index.js";
 const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialogOpen, setIsDialogOpenProcess, setIsReturnDialogOpen, tableTitle, url, setIsAddPage, setIsProcess, setIsFetch, deleteUrl, setIsMatchingTable, setIsEditApi, isPagination = true, handleEditOrderData, setIsStatusTable = false }) => {
     const { getApi, putApi, deleteApi, postApi } = useApi();
     const [filterText, setFilterText] = useState("");
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const dispatch = useDispatch();
@@ -226,7 +226,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialog
             },
             {
                 name: 'Delete',
-                cell: (row) => <button onClick={() => handleDelete(row)}>Delete</button>,
+                cell: (row) => <button className="delete-btn-color" onClick={() => handleDelete(row)}>Delete</button>,
             }
         );
     } else if (modelData?.page === "StockYarn") {
@@ -238,7 +238,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialog
             },
             {
                 name: 'Delete',
-                cell: (row) => <button onClick={() => handleDelete(row)}>Delete</button>,
+                cell: (row) => <button className="delete-btn-color" onClick={() => handleDelete(row)}>Delete</button>,
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             }
         );
@@ -280,7 +280,7 @@ const Filtering = ({ error, isError, isLoading, data, page, setIsSareeSaleDialog
             },
             {
                 name: 'Delete',
-                cell: (row) => <button onClick={() => handleDelete(row)}>Delete</button>,
+                cell: (row) => <button className="delete-btn-color" onClick={() => handleDelete(row)}>Delete</button>,
                 id: Date.now().toString(36) + Math.random(10000).toString(36).substr(2, 5),
             }
         );

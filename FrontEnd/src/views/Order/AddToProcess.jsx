@@ -30,7 +30,7 @@ const AddToProcess = ({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAd
     const selected = useSelector((state) => state.selected);
     const [isFetchMachine, setIsFetchMachine] = useState(false);
     const [filterText, setFilterText] = useState("");
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [machineOptions, setMachineOptions] = useState([]);
     const [btnDisable, setBtnDisable] = useState(false);

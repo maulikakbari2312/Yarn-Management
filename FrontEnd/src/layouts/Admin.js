@@ -111,8 +111,8 @@ export default function Dashboard(props) {
         minH='42vh'
         w='100%'
         position='absolute'
-        bgImage={colorMode === "light" ? bgAdmin : "none"}
-        bg={colorMode === "light" ? bgAdmin : "navy.900"}
+        bgImage={colorMode === "light" ? " #5eaba2" : "none"}
+        bg={colorMode === "light" ? "#5eaba2" : "navy.900"}
         bgSize='cover'
         top='0'
       >

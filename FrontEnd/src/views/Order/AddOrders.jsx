@@ -25,7 +25,7 @@ function AddOrders({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAddOr
     const { getApi, postApi, putApi, patchApi } = useApi();
     const dispatch = useDispatch();
     const selected = useSelector((state) => state.selected);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [isFetchOrder, setIsFetchOrder] = useState(false);
     const [data, setData] = useState(null);
     const [partyData, setPartyData] = useState(null);
@@ -602,7 +602,7 @@ function AddOrders({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAddOr
                                         }}
                                     >
                                         <Box>
-                                            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+                                            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                                                 Matching
                                             </FormLabel>
                                             <Button

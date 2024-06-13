@@ -40,7 +40,7 @@ function Design() {
     const [isError, setIsError] = useState(false);
     const [error, setError] = useState(null);
     const [isAddPage, setIsAddPage] = useState(false);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [tableData, setTableData] = useState([]);
     const [image, setIsImage] = useState(null);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -123,7 +123,7 @@ function Design() {
     };
 
     const btnSelected = {
-        background: "green",
+        background: "#5eaba2",
         height: "46px",
         justifyContent: "center",
         display: "flex",
@@ -156,7 +156,7 @@ function Design() {
                                 mb="2px"
                                 fontSize="1.1rem"
                                 fontWeight="700"
-                                color="#718096"
+                                color="#1f2733"
                             >
                                 {`Card ${row}`}
                             </FormLabel>
@@ -257,8 +257,8 @@ function Design() {
                         name={`pallu`}
                         render={({ field, form }) => (
                             <FormControl
-                                // isInvalid={form?.errors["pallu"] && form?.touched["pallu"]}
-                                // {...controlStyles}
+                            // isInvalid={form?.errors["pallu"] && form?.touched["pallu"]}
+                            // {...controlStyles}
                             >
                                 <Box
                                     style={form.values.pallu !== row ? btnColor : btnSelected}
@@ -496,7 +496,7 @@ function Design() {
     const handleGroundPallu = (form, name, row) => {
         if (form.values[name] === row) {
             form.setFieldValue(name, ''); // Deselect
-        } else if(form.values.ground !== row && form.values.pallu !== row){
+        } else if (form.values.ground !== row && form.values.pallu !== row) {
             form.setFieldValue(name, row); // Select
         }
     };
@@ -531,7 +531,7 @@ function Design() {
                         thickness='4px'
                         speed='0.65s'
                         emptyColor='gray.200'
-                        color='blue.500'
+                        color=' #5eaba2'
                         size='xl'
                     />
                 </Flex>
@@ -1113,7 +1113,7 @@ function Design() {
                                                                                                 mb="2px"
                                                                                                 fontSize="1.1rem"
                                                                                                 fontWeight="700"
-                                                                                                color="#718096"
+                                                                                                color="#1f2733"
                                                                                             >
                                                                                                 {`Card ${row}`}
                                                                                             </FormLabel>
@@ -1365,7 +1365,7 @@ function Design() {
                                             </Box>
                                         </Flex>
                                         {/* Add your submit button or other form elements here */}
-                                        <Button mt="10px" colorScheme="blue" type="submit">
+                                        <Button mt="10px" className="btn-set-active" sx={{ color: 'white' }} type="submit">
                                             Save Desing
                                         </Button>
                                     </form>

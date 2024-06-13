@@ -7,7 +7,7 @@ import React from "react";
 export default function FixedPlugin(props) {
   const { secondary, onChange, onSwitch, fixed, ...rest } = props;
   // Chakra Color Mode
-  let navbarIcon = useColorModeValue("gray.500", "gray.200");
+  let navbarIcon = useColorModeValue("gray.700", "gray.200");
   let bgButton = useColorModeValue("white", "gray.600");
   let fixedDisplay = "flex";
   if (props.secondary) {

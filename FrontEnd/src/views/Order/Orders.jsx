@@ -38,7 +38,7 @@ const Orders = () => {
     const [statusDataTable, setStatusDataTable] = useState(null);
     const [isMatchingTable, setIsMatchingTable] = useState(false);
     const [isStatusTable, setIsStatusTable] = useState(false);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const { colorMode } = useColorMode();
     const disabledButtonStyle = {
         fill: colorMode === "light" ? "var(--chakra-colors-gray-400)" : "var(--chakra-colors-gray-700)",
@@ -278,7 +278,7 @@ const Orders = () => {
             numOfFields = dataTable.maxFeederLength;
         }
         // for (let i = 1; i <= filteredFields?.length - 2 || 0; i++) {
-            for (let i = 1; i <= numOfFields; i++) {
+        for (let i = 1; i <= numOfFields; i++) {
 
             let fieldName = `f${i} `;
 
@@ -349,7 +349,7 @@ const Orders = () => {
                         thickness='4px'
                         speed='0.65s'
                         emptyColor='gray.200'
-                        color='blue.500'
+                        color=' #5eaba2'
                         size='xl'
                     />
                 </Flex>

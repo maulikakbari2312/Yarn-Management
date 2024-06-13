@@ -3,7 +3,7 @@
 }
 
 #multi-select ul {
-  color: #718096;
+  color: #1f2733;
   font-size: 1rem;
 }
 
@@ -98,6 +98,9 @@
 .common-table [role="row"] > *:nth-last-child(2) {
   min-width: 145px;
 }
+.ProcessOrder-btn-width .common-table [role="row"] > *:nth-last-child(2) {
+  min-width: 175px;
+}
 
 .common-table [role="row"] > *:nth-last-child(1) {
   min-width: 160px;
@@ -132,7 +135,7 @@
 
 .common-table [role="row"] {
   font-size: var(--chakra-fontSizes-md);
-  color: var(--chakra-colors-gray-500);
+  color: var(--chakra-colors-gray-600);
   font-weight: var(--chakra-fontWeights-bold);
   background-color: transparent;
 }
@@ -252,6 +255,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.common-table [role="row"]:hover [data-tag="allowRowEvents"] {
+  color: black;
+}
+.common-table [data-tag="allowRowEvents"] {
+  color: #444444;
+}
 .common-table [role="cell"]:hover > *:nth-child(1) {
   white-space: unset !important;
   overflow: unset !important;
@@ -261,6 +271,8 @@
   white-space: unset !important;
   overflow: unset !important;
   text-overflow: unset !important;
+  color: black;
+  font-size: 1.1rem;
 }
 
 .report-contener {
@@ -276,4 +288,28 @@
 }
 .order-stock .common-table [role="row"] > *:nth-child(1) {
   max-width: unset !important;
+}
+
+.submit-hover:hover {
+  background-color: #21887c !important;
+}
+
+.btn-set-active {
+  background-color: #21887c !important;
+}
+
+.delete-btn-color {
+  background-color: #bb2124 !important;
+}
+.btn-set-gray {
+  background-color: #edf2f7 !important;
+}
+
+.chakra-form-control .chakra-input {
+  color: #1f2733;
+  font-weight: 600;
+}
+.chakra-form-control .chakra-select {
+  color: #1f2733;
+  font-weight: 600;
 }

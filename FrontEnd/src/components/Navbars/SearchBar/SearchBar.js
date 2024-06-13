@@ -11,10 +11,10 @@ export function SearchBar(props) {
   // Pass the computed styles into the `__css` prop
   const { variant, children, setFilterText, value, ...rest } = props;
   // Chakra Color Mode
-  const searchIconColor = useColorModeValue("gray.700", "gray.200");
-  const inputBg = useColorModeValue("white", "navy.800");
+  const searchIconColor = useColorModeValue("white", "gray.200");
+  const inputBg = useColorModeValue("gray", "navy.800");
   return (
-    <InputGroup borderRadius='8px' w='200px' {...rest}>
+    <InputGroup borderRadius='8px' w='300px' {...rest}>
       <InputLeftElement
         children={
           <IconButton
@@ -36,9 +36,10 @@ export function SearchBar(props) {
       />
       <Input
         variant='search'
-        fontSize='xs'
+        fontSize='lg'
         bg={inputBg}
         value={value}
+        sx={{ color: 'white' }}
         autoComplete='off'
         onChange={(e) => {
           setFilterText(e.target.value)

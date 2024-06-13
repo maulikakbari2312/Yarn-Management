@@ -20,7 +20,7 @@ function OrderProcessStockReport() {
     const { getApi } = useApi();
     const dispatch = useDispatch();
     const selected = useSelector((state) => state.selected);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [data, setData] = useState(null);
     const [btnDisable, setBtnDisable] = useState(false);
     const [designData, setDesignData] = useState(null);
@@ -176,7 +176,7 @@ function OrderProcessStockReport() {
                         thickness='4px'
                         speed='0.65s'
                         emptyColor='gray.200'
-                        color='blue.500'
+                        color=' #5eaba2'
                         size='xl'
                     />
                 </Flex>

@@ -58,7 +58,7 @@ function Sidebar(props) {
   let activeBg = useColorModeValue("white", "navy.700");
   let inactiveBg = useColorModeValue("white", "navy.700");
   let activeColor = useColorModeValue("gray.700", "white");
-  let inactiveColor = useColorModeValue("gray.400", "gray.400");
+  let inactiveColor = useColorModeValue("gray.600", "gray.600");
   let sidebarActiveShadow = "0px 7px 11px rgba(0, 0, 0, 0.04)";
   const createLinks = (routes) => {
     // Chakra Color Mode
@@ -150,7 +150,7 @@ function Sidebar(props) {
                   <Icon>{prop.icon}</Icon>
                 ) : (
                   <IconBox
-                    bg="blue.500"
+                    bg=" #5eaba2"
                     color="white"
                     h="30px"
                     w="30px"
@@ -160,7 +160,7 @@ function Sidebar(props) {
                     {prop.icon}
                   </IconBox>
                 )}
-                <Text color={activeColor} my="auto" fontSize="sm">
+                <Text color={activeColor} my="auto" fontSize="lg" fontWeight='bold'>
                   {prop.name}
                 </Text>
               </Flex>
@@ -200,7 +200,7 @@ function Sidebar(props) {
                 ) : (
                   <IconBox
                     bg={inactiveBg}
-                    color="blue.500"
+                    color=" #5eaba2"
                     h="30px"
                     w="30px"
                     me="12px"
@@ -209,7 +209,7 @@ function Sidebar(props) {
                     {prop.icon}
                   </IconBox>
                 )}
-                <Text color={inactiveColor} my="auto" fontSize="sm">
+                <Text color={inactiveColor} my="auto" fontSize="lg" fontWeight='bold'>
                   {prop.name}
                 </Text>
               </Flex>
@@ -428,7 +428,7 @@ function SidebarResponsive(props) {
                   <Icon>{prop.icon}</Icon>
                 ) : (
                   <IconBox
-                    bg="blue.500"
+                    bg=" #5eaba2"
                     color="white"
                     h="30px"
                     w="30px"
@@ -478,7 +478,7 @@ function SidebarResponsive(props) {
                 ) : (
                   <IconBox
                     bg={inactiveBg}
-                    color="blue.500"
+                    color=" #5eaba2"
                     h="30px"
                     w="30px"
                     me="12px"

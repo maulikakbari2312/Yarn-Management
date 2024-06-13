@@ -20,7 +20,7 @@ function Profile() {
   const dispatch = useDispatch();
 
   const textColor = useColorModeValue("gray.700", "white");
-  const iconColor = useColorModeValue("blue.500", "white");
+  const iconColor = useColorModeValue(" #5eaba2", "white");
   const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
   const borderProfileColor = useColorModeValue("white", "transparent");
   const emailColor = useColorModeValue("gray.400", "gray.300");

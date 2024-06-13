@@ -13,7 +13,7 @@ import { FaEllipsisV } from "react-icons/fa";
 
 function DashboardTableRow(props) {
   const { logo, name, status, budget, progression, isLast } = props;
-  const textColor = useColorModeValue("gray.500", "white");
+  const textColor = useColorModeValue("gray.700", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
@@ -46,7 +46,7 @@ function DashboardTableRow(props) {
         <Flex direction="column">
           <Text
             fontSize="md"
-            color="blue.500"
+            color=" #5eaba2"
             fontWeight="bold"
             pb=".2rem"
           >{`${progression}%`}</Text>

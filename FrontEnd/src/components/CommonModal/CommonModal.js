@@ -255,9 +255,9 @@ function CommonModal({ isDialogOpen, setIsDialogOpen, url, setIsFetch }) {
                             </Button>
                             {
                                 selected.isEdit ?
-                                    <Button colorScheme='blue' type='submit' disabled={btnDisable}>{modelData?.page == "StockYarn" ? "Sale" : "Edit"}</Button>
+                                    <Button sx={{ background: '#5eaba2', color: 'white' }} className='submit-hover' type='submit' disabled={btnDisable}>{modelData?.page == "StockYarn" ? "Sale" : "Edit"}</Button>
                                     :
-                                    <Button colorScheme='blue' type='submit' disabled={btnDisable}>{userData?.btnTitle}</Button>
+                                    <Button sx={{ background: '#5eaba2', color: 'white' }} className='submit-hover' type='submit' disabled={btnDisable}>{userData?.btnTitle}</Button>
                             }
                         </ModalFooter>
                     </Form>

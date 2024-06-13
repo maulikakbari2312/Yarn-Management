@@ -177,7 +177,12 @@ export default function AdminNavbar(props) {
             routes={routes}
             {...rest}
           />
-          {brandText}
+          <div style={{
+            fontWeight: "600",
+            fontSize: "2.25rem",
+          }}>
+            {brandText}
+          </div>
         </Box>
         <Box ms="auto"
           height="100%"
@@ -193,6 +198,6 @@ export default function AdminNavbar(props) {
           />
         </Box>
       </Flex>
-    </Flex>
+    </Flex >
   );
 }

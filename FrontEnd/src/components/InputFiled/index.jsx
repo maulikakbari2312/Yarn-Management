@@ -73,7 +73,7 @@ export const InputField = ({
 
     return (
         <FormControl isInvalid={form?.errors[name] && form?.touched[name]} {...controlStyles} {...styles}>
-            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                 {label}
             </FormLabel>
             {!isManual ? (
@@ -147,7 +147,7 @@ export const InputDateField = ({
 
     return (
         <FormControl isInvalid={form?.errors[name] && form?.touched[name]} {...styles}>
-            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                 {label}
             </FormLabel>
             <Input
@@ -181,7 +181,7 @@ export const InputFiledNR = ({
 }) => {
     return (
         <FormControl isInvalid={isError} {...controlStyles} >
-            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                 {label}
             </FormLabel>
             <Input
@@ -257,7 +257,7 @@ export const InputRadioButton = ({ label, options, isError }) => {
     return (
         <FormControl isInvalid={isError} {...controlStyles}>
             <Flex>
-                <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+                <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                     {label}
                 </FormLabel>
                 <RadioGroup
@@ -302,7 +302,7 @@ export const InputButton = ({ label }) => {
 export const InputSelectBox = ({ name, disabled = false, placeholder, options, form, label, field, isManual = false, handleSelectChange }) => {
     return (
         <FormControl isInvalid={form.errors[name] && form.touched[name]} {...controlStyles}>
-            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                 {label}
             </FormLabel>
             <Field name={name}>
@@ -364,7 +364,7 @@ export const InputMultiSelect = ({
 }) => {
     return (
         <FormControl isInvalid={isError} {...controlStyles}>
-            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#718096">
+            <FormLabel ms="4px" mb="2px" fontSize="1.1rem" fontWeight="700" color="#1f2733">
                 {label}
             </FormLabel>
             <CUIAutoComplete

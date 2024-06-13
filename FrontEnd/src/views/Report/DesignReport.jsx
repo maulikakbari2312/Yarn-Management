@@ -16,7 +16,7 @@ function DesignReport() {
     const { getApi } = useApi();
     const dispatch = useDispatch();
     const selected = useSelector((state) => state.selected);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);

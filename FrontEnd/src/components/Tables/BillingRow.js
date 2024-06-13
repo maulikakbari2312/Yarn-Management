@@ -12,7 +12,7 @@ import { FaPencilAlt, FaTrashAlt } from "react-icons/fa";
 function BillingRow(props) {
   const textColor = useColorModeValue("gray.700", "white");
   const bgColor = useColorModeValue("#F8F9FA", "navy.900");
-  const nameColor = useColorModeValue("gray.500", "white");
+  const nameColor = useColorModeValue("gray.700", "white");
   const { name, company, email, number } = props;
 
   return (
@@ -61,7 +61,7 @@ function BillingRow(props) {
             </Flex>
           </Button>
           <Button p="0px" bg="transparent"
-          variant="no-effects">
+            variant="no-effects">
             <Flex color={textColor} cursor="pointer" align="center" p="12px">
               <Icon as={FaPencilAlt} me="4px" />
               <Text fontSize="sm" fontWeight="semibold">

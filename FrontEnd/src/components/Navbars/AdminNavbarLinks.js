@@ -50,7 +50,7 @@ export default function HeaderLinks(props) {
       alignItems='center'
       flexDirection='row'
     >
-      {colorMode === "light" ? <LightIcon
+      {/* {colorMode === "light" ? <LightIcon
         cursor='pointer'
         ms={{ base: "16px", xl: "0px" }}
         me='16px'
@@ -68,9 +68,9 @@ export default function HeaderLinks(props) {
         w='18px'
         h='18px'
         mt="2px"
-      />}
+      />} */}
 
-      <Menu>
+      {/* <Menu>
         <MenuButton>
           <BellIcon color={navbarIcon} w='18px' h='18px' />
         </MenuButton>
@@ -105,7 +105,7 @@ export default function HeaderLinks(props) {
             </MenuItem>
           </Flex>
         </MenuList>
-      </Menu>
+      </Menu> */}
     </Flex>
   );
 }

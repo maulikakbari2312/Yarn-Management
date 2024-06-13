@@ -4,7 +4,7 @@ import { ClockIcon } from "components/Icons/Icons";
 import React from "react";
 
 export function ItemContent(props) {
-  const navbarIcon = useColorModeValue("gray.500", "gray.200");
+  const navbarIcon = useColorModeValue("gray.700", "gray.200");
   const notificationColor = useColorModeValue("gray.700", "white");
   const spacing = " ";
   return (

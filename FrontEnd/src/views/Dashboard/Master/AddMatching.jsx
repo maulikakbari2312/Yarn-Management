@@ -22,7 +22,7 @@ function AddMatching({ setIsAddPage, setIsFetch, colorCode, setColorCode }) {
     const dispatch = useDispatch();
     const selected = useSelector((state) => state.selected);
     const pagination = useSelector((state) => state.pagination);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [isFetchMatching, setIsFetchMatching] = useState(false);
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -127,7 +127,7 @@ function AddMatching({ setIsAddPage, setIsFetch, colorCode, setColorCode }) {
                         thickness='4px'
                         speed='0.65s'
                         emptyColor='gray.200'
-                        color='blue.500'
+                        color=' #5eaba2'
                         size='xl'
                     />
                 </Flex>

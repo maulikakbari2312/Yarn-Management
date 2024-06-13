@@ -106,7 +106,7 @@ const Party = () => {
                         thickness='4px'
                         speed='0.65s'
                         emptyColor='gray.200'
-                        color='blue.500'
+                        color=' #5eaba2'
                         size='xl'
                     />
                 </Flex>
@@ -117,17 +117,17 @@ const Party = () => {
                             <AddButton url={postUrl} setIsFetch={setIsFetch} toast={toast} />
                         </Box>
                         <Flex gap="10px" mr={{ lg: "20px", md: '3px', sm: '0' }}>
-                            <Button onClick={() => filterData('All')} colorScheme={filterType === 'All' ? 'blue' : 'gray'}>
+                            <Button onClick={() => filterData('All')} className={filterType === 'All' ? 'btn-set-active' : 'btn-set-gray'}>
                                 All
                             </Button>
-                            <Button onClick={() => filterData('Debitor')} colorScheme={filterType === 'Debitor' ? 'blue' : 'gray'}>
+                            <Button onClick={() => filterData('Debitor')} className={filterType === 'Debitor' ? 'btn-set-active' : 'btn-set-gray'}>
                                 Debitor
                             </Button>
-                            <Button onClick={() => filterData('Creditor')} colorScheme={filterType === 'Creditor' ? 'blue' : 'gray'}>
+                            <Button onClick={() => filterData('Creditor')} className={filterType === 'Creditor' ? 'btn-set-active' : 'btn-set-gray'}>
                                 Creditor
                             </Button>
-                            <Button onClick={() => filterData('Manufacturer')} colorScheme={filterType === 'Manufacturer' ? 'blue' : 'gray'}>
-                            Manufacturer
+                            <Button onClick={() => filterData('Manufacturer')} className={filterType === 'Manufacturer' ? 'btn-set-active' : 'btn-set-gray'}>
+                                Manufacturer
                             </Button>
                         </Flex>
                     </Flex>

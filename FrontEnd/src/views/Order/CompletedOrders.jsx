@@ -33,7 +33,7 @@ const CompletedOrders = () => {
     const pagination = useSelector((state) => state.pagination);
     const [isFetch, setIsFetch] = useState(false);
     const [filterText, setFilterText] = useState("");
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isEvent, setIsEvent] = useState('dispatch');
     const { colorMode } = useColorMode();
@@ -237,13 +237,13 @@ const CompletedOrders = () => {
                     thickness='4px'
                     speed='0.65s'
                     emptyColor='gray.200'
-                    color='blue.500'
+                    color=' #5eaba2'
                     size='xl'
                 />
             </Flex>
             :
             <>
-                <Box mt="25px" className="ProcessOrder-wrapper">
+                <Box mt="25px" className="ProcessOrder-wrapper ProcessOrder-btn-width">
                     <Card
                         overflowX={{ sm: "scroll", xl: "hidden" }}
                         pb="0px"

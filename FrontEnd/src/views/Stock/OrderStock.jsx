@@ -24,7 +24,7 @@ function OrderStock() {
     const selected = useSelector((state) => state.selected);
     const pagination = useSelector((state) => state.pagination);
     const [isFetch, setIsFetch] = useState(false);
-    const textColor = useColorModeValue("gray.500", "white");
+    const textColor = useColorModeValue("gray.700", "white");
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(false);
@@ -169,7 +169,7 @@ function OrderStock() {
                         thickness='4px'
                         speed='0.65s'
                         emptyColor='gray.200'
-                        color='blue.500'
+                        color=' #5eaba2'
                         size='xl'
                     />
                 </Flex>
