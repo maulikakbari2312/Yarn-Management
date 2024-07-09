@@ -163,8 +163,7 @@ exports.deleteDesignDetail = async (token) => {
       }
     }
 
-    const deleteDesign = await deleteDesignInfo(whereCondition);
-
+    const deleteDesign = await deleteDesignInfo(token);
     if (deleteDesign.deletedCount === 0) {
       return {
         status: 404,
