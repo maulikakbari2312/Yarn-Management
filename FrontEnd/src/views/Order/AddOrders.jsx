@@ -167,7 +167,7 @@ function AddOrders({ setIsAddPage, setIsFetch, colorCode, isAddOrder, setIsAddOr
                         design: selected?.selectData?.user?.design
                     }
                     const headers = {
-                        'Content-Type': 'application/json' // Assuming you're sending JSON data
+                        'Content-Type': 'application/json'
                     };
                     const responseDesign = await postApi(urlDesign, bodyDesign, headers);
                     setColorData(responseDesign?.pageItems);
