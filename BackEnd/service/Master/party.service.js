@@ -10,16 +10,18 @@ const {
 exports.createPartyDetail = async (party) => {
   try {
     const getParty = await findParties();
-    for (const ele of getParty) {
-      if (
-        ele.name.toLowerCase() === party.name.toLowerCase() &&
-        ele.type.toLowerCase() === party.type.toLowerCase()
-      ) {
-        return {
-          status: 400,
-          message: "Party name cannot be the same!",
-        };
-      }
+    const incomingPartyName = party.name.toLowerCase();
+    const incomingPartyType = party.type.toLowerCase();
+    const hasDuplicateParty = getParty.some(
+      (ele) =>
+        ele.name.toLowerCase() === incomingPartyName &&
+        ele.type.toLowerCase() === incomingPartyType
+    );
+    if (hasDuplicateParty) {
+      return {
+        status: 400,
+        message: "Party name cannot be the same!",
+      };
     }
 
     const partyData = {
@@ -62,12 +64,14 @@ exports.findParty = async () => {
 exports.editPartyDetail = async (data, token) => {
   try {
     const getPartyName = await findParticularParty(data);
+    const incomingPartyName = data.name.toLowerCase();
+    const incomingPartyType = data.type.toLowerCase();
 
     if (
       getPartyName &&
       getPartyName.tokenId !== token &&
-      getPartyName.name.toLowerCase() === data.name.toLowerCase() &&
-      getPartyName.type.toLowerCase() === data.type.toLowerCase()
+      getPartyName.name.toLowerCase() === incomingPartyName &&
+      getPartyName.type.toLowerCase() === incomingPartyType
     ) {
       return {
         status: 400,

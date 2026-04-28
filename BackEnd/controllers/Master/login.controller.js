@@ -6,8 +6,7 @@ const commonService = require("../../common/utils");
 
 exports.signUp = async (req, res) => {
   try {
-    const headers = req.headers["access_token"];
-    const tokenData = await decodeToken(headers);
+    const tokenData = await decodeToken(req.headers["access_token"]);
     if (!tokenData) {
       const response = await commonService.response(
         0,
@@ -23,13 +22,11 @@ exports.signUp = async (req, res) => {
       process.env.SECRET
     );
 
-    async function createData(role, email) {
-      if (role === "Admin" && email === "Sanjay08_nr@yahoo.com") {
-        const createUser = await loginData.loginService(req.body, token);
-        return createUser;
-      }
+    let user;
+    if (tokenData.role === "Admin" && tokenData.email === "Sanjay08_nr@yahoo.com") {
+      user = await loginData.loginService(req.body, token);
     }
-    const user = await createData(tokenData.role, tokenData.email);
+
     res.status(user.status).send(user);
   } catch (error) {
     console.log("==error==", error);
@@ -49,19 +46,15 @@ exports.signUp = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    let userDetails = await loginData.findUserRoles();
+    const userDetails = await loginData.findUserRoles();
 
     if (!Array.isArray(userDetails)) {
       return res.status(userDetails.status).send(userDetails);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
+    const limit = parseInt(req.query.limit, 10) || 1000;
+    const offset = parseInt(req.query.offset, 10) || 0;
     const pageItems = userDetails;
-    // .slice(startIndex, endIndex);
 
     const totalItems = userDetails.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -91,8 +84,7 @@ exports.getUsers = async (req, res) => {
 exports.logIn = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    let user = await loginData.findUser({ email });
+    const user = await loginData.findUser({ email });
 
     if (!user) {
       const response = await commonService.response(
@@ -114,11 +106,12 @@ exports.logIn = async (req, res) => {
       return res.status(httpStatus.NOT_FOUND).json(response);
     }
 
+    const isAdmin = user.role === "Admin";
     let tokenData = {
       name: user["name"],
       email: user["email"],
       phoneNumber: user["phoneNumber"],
-      isAdmin: user["role"] === "Admin" ? true : false,
+      isAdmin,
     };
     const token = await commonService.createOneTimeToken(
       tokenData,
@@ -128,7 +121,7 @@ exports.logIn = async (req, res) => {
     const response = {
       message: message.USER_SUCCESS_LOGIN,
       token,
-      isAdmin: user.role === "Admin" ? true : false,
+      isAdmin,
     };
 
     res.status(200).send(response);

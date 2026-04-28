@@ -1,5 +1,31 @@
-const message = require("../../common/error.message");
 const matchingService = require("../../service/Master/matching.service");
+
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
+const getPagination = (req) => {
+  const limit = parseInt(req.query.limit, 10) || 1000;
+  const offset = parseInt(req.query.offset, 10) || 0;
+  return { limit, offset };
+};
+
+const buildPagedResponse = (items, limit, offset, messageText) => ({
+  page: offset + 1,
+  totalPages: Math.ceil(items.length / limit),
+  itemsPerPage: limit,
+  total: items.length,
+  pageItems: items,
+  message: messageText,
+});
+
 exports.createMatching = async (req, res) => {
   try {
     const matchingData = await matchingService.createMatchingDetail(req.body);
@@ -7,16 +33,9 @@ exports.createMatching = async (req, res) => {
       throw new Error("Please enter valid matching information!");
     }
 
-    res.status(matchingData.status).send(matchingData);
+    return res.status(matchingData.status).send(matchingData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -28,37 +47,21 @@ exports.getColorMatching = async (req, res) => {
       return res.status(findColorYarn.status).send(findColorYarn);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findColorYarn;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findColorYarn.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "color matching is" : "color matching are";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findColorYarn,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -70,37 +73,21 @@ exports.getDesignMatching = async (req, res) => {
       return res.status(findDesign.status).send(findDesign);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findDesign;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findDesign.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "color matching is" : "color matching are";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findDesign,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -115,37 +102,21 @@ exports.matchingList = async (req, res) => {
       return res.status(findMatching.status).send(findMatching);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findMatching;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findMatching.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status = totalItems === 1 ? "matching" : "matchings";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems,
-      message: `Total ${totalItems} ${status} find successfully`,
-    };
+    const response = buildPagedResponse(
+      findMatching,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} find successfully`
+    );
 
-    res.status(200).send(response);
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -157,16 +128,9 @@ exports.editMatching = async (req, res) => {
       token
     );
 
-    res.status(editMatchingData.status).send(editMatchingData);
+    return res.status(editMatchingData.status).send(editMatchingData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -175,16 +139,9 @@ exports.deleteMatching = async (req, res) => {
     const token = req.params.tokenId;
     const deleteCompanyData = await matchingService.deleteMatchingDetail(token);
 
-    res.status(deleteCompanyData.status).send(deleteCompanyData);
+    return res.status(deleteCompanyData.status).send(deleteCompanyData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -197,35 +154,19 @@ exports.findGroundColor = async (req, res) => {
       return res.status(findColorYarn.status).send(findColorYarn);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findColorYarn;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findColorYarn.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status = totalItems === 1 ? "groundColor" : "groundColors";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findColorYarn,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

@@ -1,5 +1,22 @@
 const yarnSalesService = require("../../service/Yarn/yarnSales.service");
 
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
+const getPagination = (req) => {
+  const limit = parseInt(req.query.limit, 10) || 1000;
+  const offset = parseInt(req.query.offset, 10) || 0;
+  return { limit, offset };
+};
+
 exports.createYarnSales = async (req, res) => {
   try {
     const yarnSalesData = await yarnSalesService.createYarnSales(req.body);
@@ -8,16 +25,9 @@ exports.createYarnSales = async (req, res) => {
       throw new Error("Please enter valid yarnSales information!");
     }
 
-    res.status(yarnSalesData.status).send(yarnSalesData);
+    return res.status(yarnSalesData.status).send(yarnSalesData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -29,13 +39,7 @@ exports.getYarnSales = async (req, res) => {
       return res.status(findYarnSales.status).send(findYarnSales);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findYarnSales;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findYarnSales.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -46,19 +50,12 @@ exports.getYarnSales = async (req, res) => {
       totalPages,
       itemsPerPage: limit,
       total: totalItems,
-      pageItems: pageItems,
+      pageItems: findYarnSales,
       message: `Total ${totalItems} ${status} available`,
     };
-    res.status(200).send(response);
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -70,16 +67,9 @@ exports.editYarnSales = async (req, res) => {
       token
     );
 
-    res.status(editYarnSalesData.status).send(editYarnSalesData);
+    return res.status(editYarnSalesData.status).send(editYarnSalesData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -90,15 +80,8 @@ exports.deleteYarnSales = async (req, res) => {
       token
     );
 
-    res.status(deleteYarnSalesData.status).send(deleteYarnSalesData);
+    return res.status(deleteYarnSalesData.status).send(deleteYarnSalesData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

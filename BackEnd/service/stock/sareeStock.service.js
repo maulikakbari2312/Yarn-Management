@@ -4,6 +4,55 @@ const {
   getAllSareeStock,
 } = require("../../DBQuery/stock/saree");
 
+const buildSettledStockSummary = (orders) => {
+  const settledOrders = orders.flatMap((order) =>
+    order.orders.filter((ele) => ele.settlePcs > 0)
+  );
+  const resultObject = {};
+
+  settledOrders.forEach((item) => {
+    const key = `${item.matchingId}:${item.tokenId}`;
+    if (resultObject[key]) {
+      resultObject[key].stock += item.settlePcs;
+    } else {
+      resultObject[key] = {
+        tokenId: item.tokenId,
+        matchingId: item.matchingId,
+        party: item.party,
+        pallu: item.pallu,
+        design: item.design,
+        groundColor: item.groundColor,
+        stock: item.settlePcs,
+      };
+    }
+  });
+
+  return Object.values(resultObject);
+};
+
+const buildSaleStockSummary = (saleSareeList) => {
+  const resultObject = {};
+
+  saleSareeList.forEach((item) => {
+    const key = `${item.matchingId}:${item.party}`;
+    if (resultObject[key]) {
+      resultObject[key].stock += item.stock;
+    } else {
+      resultObject[key] = {
+        tokenId: item.tokenId,
+        matchingId: item.matchingId,
+        party: item.party,
+        pallu: item.pallu,
+        design: item.design,
+        groundColor: item.groundColor,
+        stock: item.stock,
+      };
+    }
+  });
+
+  return Object.values(resultObject);
+};
+
 exports.getSareeStock = async () => {
   try {
     const findOrders = await findAllOrders();
@@ -14,37 +63,7 @@ exports.getSareeStock = async () => {
       };
     }
 
-    const newArr = [];
-    for (const order of findOrders) {
-      for (const ele of order.orders) {
-        if (ele.settlePcs > 0) {
-          newArr.push(ele);
-        }
-      }
-    }
-
-    const resultObject = {};
-
-    newArr.forEach((item) => {
-      if (resultObject[`${item.matchingId}:${item.tokenId}`]) {
-        resultObject[`${item.matchingId}:${item.tokenId}`].stock +=
-          item.settlePcs;
-      } else {
-        resultObject[`${item.matchingId}:${item.tokenId}`] = {
-          tokenId: item.tokenId,
-          matchingId: item.matchingId,
-          party: item.party,
-          pallu: item.pallu,
-          design: item.design,
-          groundColor: item.groundColor,
-          stock: item.settlePcs,
-        };
-      }
-    });
-
-    const resultArray = Object.values(resultObject);
-
-    return resultArray;
+    return buildSettledStockSummary(findOrders);
   } catch (error) {
     console.error("Error:", error);
     throw error;
@@ -92,35 +111,7 @@ exports.saleSareeStock = async (tokenId, matchingId, saleSareeDetails) => {
       };
     }
 
-    const newArr = [];
-    for (const order of findOrders) {
-      for (const ele of order.orders) {
-        if (ele.settlePcs > 0) {
-          newArr.push(ele);
-        }
-      }
-    }
-
-    const resultObject = {};
-
-    newArr.forEach((item) => {
-      if (resultObject[`${item.matchingId}:${item.tokenId}`]) {
-        resultObject[`${item.matchingId}:${item.tokenId}`].stock +=
-          item.settlePcs;
-      } else {
-        resultObject[`${item.matchingId}:${item.tokenId}`] = {
-          tokenId: item.tokenId,
-          matchingId: item.matchingId,
-          party: item.party,
-          pallu: item.pallu,
-          design: item.design,
-          groundColor: item.groundColor,
-          stock: item.settlePcs,
-        };
-      }
-    });
-
-    const resultArray = Object.values(resultObject);
+    const resultArray = buildSettledStockSummary(findOrders);
 
     if (isNaN(saleSareeDetails.stock) || saleSareeDetails.stock <= 0) {
       return {
@@ -176,25 +167,7 @@ exports.listSaleSaree = async () => {
       };
     }
 
-    const resultObject = {};
-
-    findSaleSaree.forEach((item) => {
-      if (resultObject[`${item.matchingId}:${item.party}`]) {
-        resultObject[`${item.matchingId}:${item.party}`].stock += item.stock;
-      } else {
-        resultObject[`${item.matchingId}:${item.party}`] = {
-          tokenId: item.tokenId,
-          matchingId: item.matchingId,
-          party: item.party,
-          pallu: item.pallu,
-          design: item.design,
-          groundColor: item.groundColor,
-          stock: item.stock,
-        };
-      }
-    });
-    const resultArray = Object.values(resultObject);
-    return resultArray;
+    return buildSaleStockSummary(findSaleSaree);
   } catch (error) {
     console.error("Error:", error);
     throw error;

@@ -5,19 +5,15 @@ exports.findMachineReport = async () => {
   try {
     const findMachine = await findMachines();
     const findPcsOnMachine = await findMachinePcs();
+    const machineByNo = new Map(
+      findMachine.map((machine) => [Number(machine.machine), machine])
+    );
 
-    let arr = [];
-    for (const data of findPcsOnMachine) {
-      if (data.machinesInProcess.length !== 0) {
-        arr.push(...data.machinesInProcess);
-      }
-    }
+    const arr = findPcsOnMachine.flatMap((data) => data.machinesInProcess || []);
 
     const machineReportArr = arr
       .map((ele) => {
-        const machineData = findMachine.find(
-          (data) => Number(data.machine) === ele.machineNo
-        );
+        const machineData = machineByNo.get(ele.machineNo);
         if (machineData) {
           const repeat = ele.pcsOnMachine / machineData.panna;
           return {

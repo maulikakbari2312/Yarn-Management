@@ -12,14 +12,9 @@ exports.getPartyOrder = async (party, design) => {
       };
     }
 
-    const arr = [];
-    for (const data of findOrder) {
-      for (const ele of data.orders) {
-        if (ele.party === party && ele.design === design) {
-          arr.push(ele);
-        }
-      }
-    }
+    const arr = findOrder.flatMap((data) =>
+      data.orders.filter((ele) => ele.party === party && ele.design === design)
+    );
 
     const sumPcsByDesign = arr.reduce((accumulator, order) => {
       let { pcs } = order;
@@ -56,16 +51,10 @@ exports.findPartyDesign = async (party) => {
       };
     }
 
-    const arr = [];
-    for (const data of findOrder) {
-      for (const ele of data.orders) {
-        if (ele.party === party) {
-          arr.push(ele);
-        }
-      }
-    }
-
-    let findDesign = arr.map((ele) => ele.design);
+    const arr = findOrder.flatMap((data) =>
+      data.orders.filter((ele) => ele.party === party)
+    );
+    const findDesign = arr.map((ele) => ele.design);
 
     const uniqueDesign = Array.from(new Set(findDesign));
 

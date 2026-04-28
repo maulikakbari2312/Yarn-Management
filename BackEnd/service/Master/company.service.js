@@ -10,13 +10,15 @@ const {
 exports.createCompanyDetail = async (company) => {
   try {
     const getCompany = await findCompanies();
-    for (const ele of getCompany) {
-      if (ele.name.toLowerCase() === company.name.toLowerCase()) {
-        return {
-          status: 400,
-          message: "Company name cannot be the same!",
-        };
-      }
+    const incomingCompanyName = company.name.toLowerCase();
+    const hasDuplicateCompany = getCompany.some(
+      (ele) => ele.name.toLowerCase() === incomingCompanyName
+    );
+    if (hasDuplicateCompany) {
+      return {
+        status: 400,
+        message: "Company name cannot be the same!",
+      };
     }
 
     const companyData = {
@@ -58,10 +60,11 @@ exports.findCompany = async () => {
 exports.editCompanyDetail = async (data, token) => {
   try {
     const existingCompany = await findParticularCompany(data);
+    const incomingCompanyName = data.name.toLowerCase();
     if (
       existingCompany &&
       existingCompany.tokenId !== token &&
-      existingCompany.name.toLowerCase() === data.name.toLowerCase()
+      existingCompany.name.toLowerCase() === incomingCompanyName
     ) {
       return {
         status: 400,
@@ -75,7 +78,7 @@ exports.editCompanyDetail = async (data, token) => {
       mobile: data.mobile,
     };
 
-    const editCompany = await updateCompany(token,companyData);
+    const editCompany = await updateCompany(token, companyData);
 
     if (!editCompany) {
       return {

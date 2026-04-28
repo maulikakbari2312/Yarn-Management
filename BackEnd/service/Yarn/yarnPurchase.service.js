@@ -69,9 +69,14 @@ exports.findYarnPurchase = async () => {
 
 exports.editYarnPurchaseDetail = async (data, token) => {
   try {
-    const existingPurchaseInvoice = await findYarnPurchaseByData({
-      invoiceNo: data.invoiceNo,
-    });
+    const [existingPurchaseInvoice, existingPurchaseLotNo] = await Promise.all([
+      findYarnPurchaseByData({
+        invoiceNo: data.invoiceNo,
+      }),
+      findYarnPurchaseByData({
+        lotNo: data.lotNo,
+      }),
+    ]);
 
     if (existingPurchaseInvoice && existingPurchaseInvoice.tokenId !== token) {
       return {
@@ -79,10 +84,6 @@ exports.editYarnPurchaseDetail = async (data, token) => {
         message: "YarnPurchase invoiceNo cannot be the same!",
       };
     }
-
-    const existingPurchaseLotNo = await findYarnPurchaseByData({
-      lotNo: data.lotNo,
-    });
 
     if (existingPurchaseLotNo && existingPurchaseLotNo.tokenId !== token) {
       return {

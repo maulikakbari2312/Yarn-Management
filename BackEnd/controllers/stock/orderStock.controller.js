@@ -1,5 +1,31 @@
 const orderStockService = require("../../service/stock/orderStock.service");
 
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
+const getPagination = (req) => {
+  const limit = parseInt(req.query.limit, 10) || 1000;
+  const offset = parseInt(req.query.offset, 10) || 0;
+  return { limit, offset };
+};
+
+const buildPagedResponse = (items, limit, offset, messageText) => ({
+  page: offset + 1,
+  totalPages: Math.ceil(items.length / limit),
+  itemsPerPage: limit,
+  total: items.length,
+  pageItems: items,
+  message: messageText,
+});
+
 exports.getOrderStock = async (req, res) => {
   try {
     const findAllOrderStock = await orderStockService.getOrderStock();
@@ -8,37 +34,21 @@ exports.getOrderStock = async (req, res) => {
       return res.status(findAllOrderStock.status).send(findAllOrderStock);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findAllOrderStock;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findAllOrderStock.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "matching saree stock is" : "matchings saree stocks are";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findAllOrderStock,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -50,37 +60,21 @@ exports.getListOfOrders = async (req, res) => {
       return res.status(findListOfOrders.status).send(findListOfOrders);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findListOfOrders;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findListOfOrders.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "order is" : "orders are";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findListOfOrders,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -93,80 +87,48 @@ exports.getListOfOrderDesign = async (req, res) => {
       return res.status(findListOfOrderDesign.status).send(findListOfOrderDesign);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findListOfOrderDesign;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findListOfOrderDesign.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "design is" : "designs are";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findListOfOrderDesign,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
 exports.getsareeYarn = async (req, res) => {
   try {
     const orderNo = req.query.orderNo;
-    const design = req.query.design
+    const design = req.query.design;
     const sareeYarn = await orderStockService.getsareeYarn(orderNo, design);
     if (!Array.isArray(sareeYarn?.pageItems)) {
       return res.status(sareeYarn?.pageItems.status).send(sareeYarn?.pageItems);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = sareeYarn?.pageItems;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = sareeYarn?.pageItems.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "design is" : "designs are";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status} available`,
-    };
+    const response = buildPagedResponse(
+      sareeYarn.pageItems,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} available`
+    );
 
-    res.status(200).send(response);
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

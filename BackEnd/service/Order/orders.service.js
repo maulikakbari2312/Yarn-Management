@@ -232,15 +232,15 @@ exports.findMatchingFeeder = async (orderId) => {
 
     const findFeeders = listOfOrders;
     const findColorYarn = await findYarnColor();
+    const colorYarnByCode = new Map(findColorYarn.map((yarn) => [yarn.colorCode, yarn]));
     const findPickByDesign = await findDesigns();
+    const matchingById = new Map(findMatching.map((matching) => [matching.matchingId, matching]));
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
       const denierSet = [];
       for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
+        const matchingColorYarn = colorYarnByCode.get(colorCode);
         if (matchingColorYarn) {
           const feederDenierInfo = {};
           feederDenierInfo[key] = colorCode;
@@ -262,9 +262,7 @@ exports.findMatchingFeeder = async (orderId) => {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
+          const getMatchingId = matchingById.get(eleObj.matchingId);
           if (data.name === getMatchingId.name) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = data.feeders[index]
@@ -284,7 +282,6 @@ exports.findMatchingFeeder = async (orderId) => {
     mergedObjects1 = mergedObjects1.filter((array) =>
       array.every((item) => item !== null)
     );
-    console.log("==mergedObjects1===", mergedObjects1);
     const uniqueMatchingIds = new Set();
 
     const uniqueArrays = mergedObjects1.filter((arr) => {
@@ -844,15 +841,15 @@ async function processOrderDetail(
 
     const findFeeders = listOfOrders;
     const findColorYarn = await findYarnColor();
+    const colorYarnByCode = new Map(findColorYarn.map((yarn) => [yarn.colorCode, yarn]));
     const findPickByDesign = await findDesigns();
+    const matchingById = new Map(findMatching.map((matching) => [matching.matchingId, matching]));
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
       const denierSet = [];
       for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
+        const matchingColorYarn = colorYarnByCode.get(colorCode);
         if (matchingColorYarn) {
           const feederDenierInfo = {};
           feederDenierInfo[key] = colorCode;
@@ -875,9 +872,7 @@ async function processOrderDetail(
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatching.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
+          const getMatchingId = matchingById.get(eleObj.matchingId);
           if (getMatchingId && getMatchingId.name === findDesign.name) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]
@@ -954,10 +949,7 @@ async function processOrderDetail(
       );
     });
     for (const items of missingYarnInPurchase) {
-      const getColorYarn = await findYarnColor();
-      const findColorYarn = getColorYarn.find(
-        (ele) => ele.colorCode === `${items.feeders}`
-      );
+      const findColorYarn = colorYarnByCode.get(`${items.feeders}`);
       const yarnPurchaseData = {
         invoiceNo: "ABCD",
         lotNo: "ABCD",
@@ -1116,15 +1108,15 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
 
     const findFeeders = listOfOrders;
     const findColorYarn = await findYarnColor();
+    const colorYarnByCode = new Map(findColorYarn.map((yarn) => [yarn.colorCode, yarn]));
     const findPickByDesign = await findDesigns();
+    const matchingById = new Map(findMatchings.map((matching) => [matching.matchingId, matching]));
     const denierSet1 = [];
 
     for (const feeder of findFeeders) {
       const denierSet = [];
       for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
+        const matchingColorYarn = colorYarnByCode.get(colorCode);
         if (matchingColorYarn) {
           const feederDenierInfo = {};
           feederDenierInfo[key] = colorCode;
@@ -1144,9 +1136,7 @@ async function editProcessOrderDetail(data, tokenId, findOrder) {
       for (let i = 0; i < denierSet1.length; i++) {
         const ele = denierSet1[i];
         const result = ele.map((eleObj, index) => {
-          const getMatchingId = findMatchings.find(
-            (element) => element.matchingId === eleObj.matchingId
-          );
+          const getMatchingId = matchingById.get(eleObj.matchingId);
           if (getMatchingId && getMatchingId.name === findDesign.name) {
             const pickKey = `pick-${index + 1}`;
             const pickValue = findDesign.feeders[index]

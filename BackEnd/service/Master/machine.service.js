@@ -5,13 +5,14 @@ exports.createMachineDetail = async (machine) => {
   try {
     const getMachine = await findMachines();
 
-    for (const ele of getMachine) {
-      if (ele.machine === machine.machine) {
-        return {
-          status: 400,
-          message: "Machine cannot be the same!",
-        };
-      }
+    const hasDuplicateMachine = getMachine.some(
+      (ele) => ele.machine === machine.machine
+    );
+    if (hasDuplicateMachine) {
+      return {
+        status: 400,
+        message: "Machine cannot be the same!",
+      };
     }
     const machineData = {
       machine: machine.machine,
@@ -76,7 +77,7 @@ exports.editMachineDetail = async (data, token) => {
         message: message.MACHINE_NOT_FOUND,
       };
     }
-    const editMachine = await updateMachine(token,machineData)
+    const editMachine = await updateMachine(token, machineData);
 
     if (!editMachine) {
       return {

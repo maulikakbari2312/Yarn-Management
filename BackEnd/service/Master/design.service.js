@@ -14,14 +14,16 @@ const { findAllOrders } = require("../../DBQuery/Order/order");
 exports.createDesignDetail = async (design) => {
   try {
     const getDesign = await findDesigns();
+    const incomingDesignName = design.name.toLocaleLowerCase();
 
-    for (const ele of getDesign) {
-      if (ele.name.toLocaleLowerCase() === design.name.toLocaleLowerCase()) {
-        return {
-          status: 400,
-          message: "Design name cannot be same!",
-        };
-      }
+    const hasDuplicateDesign = getDesign.some(
+      (ele) => ele.name.toLocaleLowerCase() === incomingDesignName
+    );
+    if (hasDuplicateDesign) {
+      return {
+        status: 400,
+        message: "Design name cannot be same!",
+      };
     }
 
     const createDesignDetail = await createDesign(design);
@@ -58,11 +60,12 @@ exports.findDesign = async () => {
 exports.editDesignDetail = async (data, token) => {
   try {
     const getDesign = await findParticularDesign(data);
+    const incomingDesignName = data.name.toLocaleLowerCase();
 
     if (
       getDesign &&
       getDesign.tokenId !== token &&
-      getDesign.name.toLocaleLowerCase() === data.name.toLocaleLowerCase()
+      getDesign.name.toLocaleLowerCase() === incomingDesignName
     ) {
       return {
         status: 400,
@@ -148,19 +151,20 @@ exports.deleteDesignDetail = async (token) => {
     }
 
     const getAllOrders = await findAllOrders();
+    const hasInProcessDesignOrder = getAllOrders.some((order) =>
+      order?.orders?.some(
+        (ele) =>
+          ele?.design === findImage?.name &&
+          ele?.pcs !== ele?.completePcs + ele?.dispatch + ele?.settlePcs + ele?.salePcs
+      )
+    );
 
-    for (const order of getAllOrders) {
-      for (const ele of order?.orders) {
-        if (ele?.design === findImage?.name) {
-          if (ele?.pcs !== ele?.completePcs + ele?.dispatch + ele?.settlePcs + ele?.salePcs) {
-            return {
-              status: 409,
-              message:
-                "Design order is in process. After completing this design order, you can delete it.",
-            };
-          }
-        }
-      }
+    if (hasInProcessDesignOrder) {
+      return {
+        status: 409,
+        message:
+          "Design order is in process. After completing this design order, you can delete it.",
+      };
     }
 
     const deleteDesign = await deleteDesignInfo(token);

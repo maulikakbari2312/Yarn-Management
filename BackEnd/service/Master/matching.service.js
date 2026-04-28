@@ -11,19 +11,26 @@ const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
 const { findDesigns } = require("../../DBQuery/Master/design");
 const { findAllOrders } = require("../../DBQuery/Order/order");
 const uniqueMatchingId = () => uuidv4();
+const hashCode = (str) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+  }
+  return Math.abs(hash) % 1000000;
+};
+const isEqualObject = (obj1, obj2) => JSON.stringify(obj1) === JSON.stringify(obj2);
+const buildFeeders = (source, feederCount) => {
+  const feeders = {};
+  for (let i = 1; i <= feederCount; i++) {
+    feeders[`f${i}`] = source[`f${i}`];
+  }
+  return feeders;
+};
 
 exports.createMatchingDetail = async (matching) => {
   try {
-    const uniqueId = uniqueMatchingId(); // Use uuidv4 directly
-
-    function hashCode(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = (hash << 5) - hash + char;
-      }
-      return Math.abs(hash) % 1000000; // 6-digit number
-    }
+    const uniqueId = uniqueMatchingId();
     const MatchingId = hashCode(uniqueId);
 
     const matchingData = {
@@ -33,28 +40,22 @@ exports.createMatchingDetail = async (matching) => {
       ground: matching.ground,
       feeder: matching.feeder,
     };
-    const feeders = {};
-
-    for (let i = 1; i <= matching.feeder; i++) {
-      feeders[`f${i}`] = matching[`f${i}`];
-    }
+    const feeders = buildFeeders(matching, matching.feeder);
 
     const findMatching = await findAllMatchings();
-
-    const isEqual = (obj1, obj2) =>
-      JSON.stringify(obj1) === JSON.stringify(obj2);
-    for (const ele of findMatching) {
-      if (isEqual(ele.feeders, feeders)) {
-        return {
-          status: 404,
-          message: message.IT_IS_SAME_FEEDERS,
-        };
-      }
+    const hasSameFeeders = findMatching.some((ele) =>
+      isEqualObject(ele.feeders, feeders)
+    );
+    if (hasSameFeeders) {
+      return {
+        status: 404,
+        message: message.IT_IS_SAME_FEEDERS,
+      };
     }
 
     const finalMatchingData = {
       ...matchingData,
-      feeders: feeders,
+      feeders,
       matchingId: MatchingId,
     };
     const createMatchingDetail = await createMatching(finalMatchingData);
@@ -152,21 +153,16 @@ exports.matchingList = async (matchingData) => {
 exports.editMatchingDetail = async (data, token) => {
   try {
     const getMatching = await findMatchingsById(token);
-    const feeders = {};
-
-    for (let i = 1; i <= getMatching.feeder; i++) {
-      feeders[`f${i}`] = data[`f${i}`];
-    }
+    const feeders = buildFeeders(data, getMatching.feeder);
     const findMatching = await findAllMatchings();
-    const isEqual = (obj1, obj2) =>
-      JSON.stringify(obj1) === JSON.stringify(obj2);
-    for (const ele of findMatching) {
-      if (isEqual(ele.feeders, feeders)) {
-        return {
-          status: 404,
-          message: message.IT_IS_SAME_FEEDERS,
-        };
-      }
+    const hasSameFeeders = findMatching.some((ele) =>
+      isEqualObject(ele.feeders, feeders)
+    );
+    if (hasSameFeeders) {
+      return {
+        status: 404,
+        message: message.IT_IS_SAME_FEEDERS,
+      };
     }
     const updateMatchingDetail = await updateMatching(token, feeders);
 
@@ -195,20 +191,20 @@ exports.deleteMatchingDetail = async (token) => {
   try {
     const getMatching = await findMatchingsById(token);
     const getAllOrders = await findAllOrders();
+    const hasInProcessMatchingOrder = getAllOrders.some((order) =>
+      order?.orders?.some(
+        (ele) =>
+          ele.matchingId === getMatching.matchingId &&
+          ele.pcs !== ele.completePcs + ele.dispatch + ele.settlePcs + ele?.salePcs
+      )
+    );
 
-    for (const order of getAllOrders) {
-      for (const ele of order?.orders) {
-        if (ele.matchingId === getMatching.matchingId) {
-          if (ele.pcs !== ele.completePcs + ele.dispatch + ele.settlePcs + ele?.salePcs) {
-            return {
-              status: 409, 
-              message: "Matching order is in process. After completing this matching order, you can delete it.",
-            };
-          }
-        }
-      }
+    if (hasInProcessMatchingOrder) {
+      return {
+        status: 409,
+        message: "Matching order is in process. After completing this matching order, you can delete it.",
+      };
     }
-    
 
     const deleteMatching = await deleteMatchingInfo(token);
 
@@ -235,13 +231,7 @@ exports.deleteMatchingDetail = async (token) => {
 exports.findGroundColor = async (design) => {
   try {
     const getGroundColor = await findAllMatchings();
-
-    const groundColorArr = [];
-    for (let ele of getGroundColor) {
-      if (ele.name === design) {
-        groundColorArr.push(ele);
-      }
-    }
+    const groundColorArr = getGroundColor.filter((ele) => ele.name === design);
 
     if (!groundColorArr.length) {
       return {

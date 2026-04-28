@@ -1,4 +1,16 @@
 const partyService = require("../../service/Master/party.service");
+
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
 exports.createParty = async (req, res) => {
   try {
     const partData = await partyService.createPartyDetail(req.body);
@@ -7,16 +19,9 @@ exports.createParty = async (req, res) => {
       throw new Error("Please enter valid party information!");
     }
 
-    res.status(partData.status).send(partData);
+    return res.status(partData.status).send(partData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -28,13 +33,10 @@ exports.getParty = async (req, res) => {
       return res.status(findParty.status).send(findParty);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit, 10) || 1000;
+    const offset = parseInt(req.query.offset, 10) || 0;
 
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
     const pageItems = findParty;
-    // .slice(startIndex, endIndex);
 
     const totalItems = findParty.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -48,16 +50,9 @@ exports.getParty = async (req, res) => {
       pageItems: pageItems,
       message: `Total ${totalItems} ${status} available`,
     };
-    res.status(200).send(response);
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -66,16 +61,9 @@ exports.editParty = async (req, res) => {
     const token = req.params.tokenId;
     const editPartyData = await partyService.editPartyDetail(req.body, token);
 
-    res.status(editPartyData.status).send(editPartyData);
+    return res.status(editPartyData.status).send(editPartyData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -84,15 +72,8 @@ exports.deleteParty = async (req, res) => {
     const token = req.params.tokenId;
     const deletePartyData = await partyService.deletePartyDetail(token);
 
-    res.status(deletePartyData.status).send(deletePartyData);
+    return res.status(deletePartyData.status).send(deletePartyData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

@@ -1,34 +1,29 @@
 const companyModel = require("../../model/Master/company.model");
 
 exports.findCompanies = async () => {
-  const getCompany = await companyModel.find();
-  return getCompany;
+  return companyModel.find();
 };
 
 exports.createCompany = async (companyData) => {
-  const createComp = await new companyModel(companyData)
-  return createComp;
+  return new companyModel(companyData);
 };
 
-exports.updateCompany = async (token,companyData) => {
-  const updateComp = await companyModel.findOneAndUpdate(
+exports.updateCompany = async (token, companyData) => {
+  return companyModel.findOneAndUpdate(
     { tokenId: token },
     companyData,
     { new: true }
   );
-  return updateComp;
 };
 
 exports.deleteCompanyInfo = async (whereCondition) => {
-  const deleteCompany = await companyModel.deleteOne({
+  return companyModel.deleteOne({
     tokenId: whereCondition,
   });
-  return deleteCompany;
 };
 
 exports.findParticularCompany = async (data) => {
-  const findCompany = await companyModel.findOne({
+  return companyModel.findOne({
     name: { $regex: new RegExp(data.name, "i") },
   });
-  return findCompany;
 };

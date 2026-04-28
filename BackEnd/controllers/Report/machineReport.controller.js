@@ -1,4 +1,22 @@
 const machineReportService = require("../../service/Report/machineReport.service");
+
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
+const getPagination = (req) => {
+  const limit = parseInt(req.query.limit, 10) || 1000;
+  const offset = parseInt(req.query.offset, 10) || 0;
+  return { limit, offset };
+};
+
 exports.getMachineReport = async (req, res) => {
   try {
     const findMachineReport = await machineReportService.findMachineReport();
@@ -7,13 +25,7 @@ exports.getMachineReport = async (req, res) => {
       return res.status(findMachineReport.status).send(findMachineReport);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findMachineReport;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findMachineReport.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -25,19 +37,12 @@ exports.getMachineReport = async (req, res) => {
       totalPages,
       itemsPerPage: limit,
       total: totalItems,
-      pageItems: pageItems,
+      pageItems: findMachineReport,
       message: `Total ${totalItems} ${status} available`,
     };
    
-    res.status(200).send(response);
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

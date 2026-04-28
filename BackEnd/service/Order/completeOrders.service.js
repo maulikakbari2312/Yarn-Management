@@ -108,12 +108,9 @@ exports.getCompleteOrder = async (orderId) => {
       };
     }
 
-    const completeOrderArr = [];
-    for (const ele of findByOrderId.orders) {
-      if (ele.completePcs > 0) {
-        completeOrderArr.push(ele);
-      }
-    }
+    const completeOrderArr = findByOrderId.orders.filter(
+      (ele) => ele.completePcs > 0
+    );
 
     return completeOrderArr;
   } catch (error) {
@@ -347,22 +344,15 @@ exports.getAllCompleteOrder = async () => {
 
 async function YarnWeightCalculation(orderId) {
   const findByOrderId = await findOrderByOrderId(orderId);
-  const pendingOrderArr = [];
-  for (const order of findByOrderId?.orders) {
-    pendingOrderArr.push(order);
-  }
-  const pendingNewArr = [];
-  for (const ele of pendingOrderArr) {
-    if (
+  const pendingOrderArr = findByOrderId?.orders || [];
+  const pendingNewArr = pendingOrderArr.filter(
+    (ele) =>
       ele.completePcs > 0 ||
       ele.pcsOnMachine > 0 ||
       ele.dispatch > 0 ||
       ele.settlePcs > 0 ||
       ele.salePcs > 0
-    ) {
-      pendingNewArr.push(ele);
-    }
-  }
+  );
 
   const salesDetails = await findAllSaleYarn();
 
@@ -379,14 +369,20 @@ async function YarnWeightCalculation(orderId) {
   const findFeeders = listOfOrders;
   const findColorYarn = await findYarnColor();
   const findPickByDesign = await findDesigns();
+  const matchingById = new Map(
+    findMatchings.map((matching) => [matching.matchingId, matching])
+  );
+  const pendingOrderByMatchingId = new Map(
+    pendingNewArr.map((order) => [order.matchingId, order])
+  );
+  const designByName = new Map(findPickByDesign.map((design) => [design.name, design]));
+  const colorYarnByCode = new Map(findColorYarn.map((yarn) => [yarn.colorCode, yarn]));
   const denierSet1 = [];
 
   for (const feeder of findFeeders) {
     const denierSet = [];
     for (const [key, colorCode] of Object.entries(feeder)) {
-      const matchingColorYarn = findColorYarn.find(
-        (yarn) => yarn.colorCode === colorCode
-      );
+      const matchingColorYarn = colorYarnByCode.get(colorCode);
       if (matchingColorYarn) {
         const feederDenierInfo = {};
         feederDenierInfo[key] = colorCode;
@@ -408,18 +404,14 @@ async function YarnWeightCalculation(orderId) {
   for (let i = 0; i < denierSet1.length; i++) {
     const ele = denierSet1[i];
     const result = ele.map((eleObj, index) => {
-      const getMatchingId = findMatchings.find(
-        (element) => element.matchingId === eleObj.matchingId
-      );
-      const findOrderToken = pendingNewArr.find(
-        (ele) => ele.matchingId === eleObj.matchingId
-      );
-      const findDesign = findPickByDesign.find(
-        (design) => design.name === getMatchingId.name
-      );
+      const getMatchingId = matchingById.get(eleObj.matchingId);
+      const findOrderToken = pendingOrderByMatchingId.get(eleObj.matchingId);
+      const findDesign = getMatchingId
+        ? designByName.get(getMatchingId.name)
+        : undefined;
       if (getMatchingId) {
         const pickKey = `pick-${index + 1}`;
-        const pickValue = findDesign.feeders[index]
+        const pickValue = findDesign?.feeders?.[index]
           ? findDesign.feeders[index][pickKey]
           : null;
         const finalCut = findDesign.finalCut ? findDesign.finalCut : null;
@@ -447,9 +439,7 @@ async function YarnWeightCalculation(orderId) {
   const resultArray = [];
   for (const data of mergedObjects1) {
     const arrayWeight = 0;
-    const findOrder = pendingNewArr.find(
-      (order) => order.matchingId === data?.matchingId
-    );
+    const findOrder = pendingOrderByMatchingId.get(data?.matchingId);
     const totalWeight =
       arrayWeight +
       calculatYarnWeight(

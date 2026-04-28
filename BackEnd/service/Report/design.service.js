@@ -14,18 +14,11 @@ exports.findReportDesign = async (design) => {
     const matchingData = await findAllMatchings({ name: design });
 
     const uniqueObjects = [];
-
+    const feederSignatures = new Set();
     for (const obj of matchingData) {
-      let isDuplicate = false;
-
-      for (const uniqueObj of uniqueObjects) {
-        if (JSON.stringify(obj.feeders) === JSON.stringify(uniqueObj.feeders)) {
-          isDuplicate = true;
-          break;
-        }
-      }
-
-      if (!isDuplicate) {
+      const feederSignature = JSON.stringify(obj.feeders);
+      if (!feederSignatures.has(feederSignature)) {
+        feederSignatures.add(feederSignature);
         uniqueObjects.push(obj);
       }
     }

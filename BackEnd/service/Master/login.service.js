@@ -12,14 +12,16 @@ const logInDetail = require("../../model/Master/login.model");
 exports.loginService = async (data, userToken) => {
   try {
     const getUser = await findUsers();
+    const incomingEmail = data.email.toLocaleLowerCase();
 
-    for (const ele of getUser) {
-      if (ele.email.toLocaleLowerCase() === data.email.toLocaleLowerCase()) {
-        return {
-          status: 400,
-          message: "User email cannot be the same!",
-        };
-      }
+    const hasDuplicateEmail = getUser.some(
+      (ele) => ele.email.toLocaleLowerCase() === incomingEmail
+    );
+    if (hasDuplicateEmail) {
+      return {
+        status: 400,
+        message: "User email cannot be the same!",
+      };
     }
 
     const detail = {
@@ -70,10 +72,11 @@ exports.findUserRoles = async () => {
 exports.editUserDetail = async (data, token) => {
   try {
     const getUserEmail = await findUserByEmail({ email: data.email });
+    const incomingEmail = data.email.toLocaleLowerCase();
     if (
       getUserEmail &&
       getUserEmail.tokenId !== token &&
-      getUserEmail.email.toLocaleLowerCase() === data.email.toLocaleLowerCase()
+      getUserEmail.email.toLocaleLowerCase() === incomingEmail
     ) {
       return {
         status: 400,

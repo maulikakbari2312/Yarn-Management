@@ -1,4 +1,16 @@
 const companyService = require("../../service/Master/company.service");
+
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
 exports.createCompany = async (req, res) => {
   try {
     const companyData = await companyService.createCompanyDetail(req.body);
@@ -7,16 +19,9 @@ exports.createCompany = async (req, res) => {
       throw new Error("Please enter valid company information!");
     }
     
-    res.status(companyData.status).send(companyData);
+    return res.status(companyData.status).send(companyData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -28,13 +33,10 @@ exports.getCompany = async (req, res) => {
       return res.status(findCompany.status).send(findCompany);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit, 10) || 1000;
+    const offset = parseInt(req.query.offset, 10) || 0;
 
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findCompany
-    // .slice(startIndex, endIndex);
+    const pageItems = findCompany;
 
     const totalItems = findCompany.length;
     const totalPages = Math.ceil(totalItems / limit);
@@ -48,16 +50,9 @@ exports.getCompany = async (req, res) => {
       pageItems: pageItems,
       message: `Total ${totalItems} ${status} available`,
     };
-    res.status(200).send(response);
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };  
 
@@ -69,16 +64,9 @@ exports.editCompany = async (req, res) => {
       token
     );  
 
-    res.status(editCompanyData.status).send(editCompanyData);
+    return res.status(editCompanyData.status).send(editCompanyData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -87,15 +75,8 @@ exports.deleteCompany = async (req, res) => {
     const token = req.params.tokenId;
     const deleteCompanyData = await companyService.deleteCompanyDetail(token);
 
-    res.status(deleteCompanyData.status).send(deleteCompanyData);
+    return res.status(deleteCompanyData.status).send(deleteCompanyData);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

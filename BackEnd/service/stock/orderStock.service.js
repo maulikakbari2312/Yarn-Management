@@ -5,6 +5,71 @@ const { findAllSaleYarn } = require("../../DBQuery/Yarn/sales");
 const { findDesigns } = require("../../DBQuery/Master/design");
 const { findYarnColor } = require("../../DBQuery/Master/colorYarn");
 
+const buildYarnStock = (purchaseDetails, salesDetails) => {
+  const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
+    const key = `${detail.colorCode}:${detail.colorQuality}`;
+    if (!map[key]) {
+      map[key] = { weight: 0, denier: detail.denier };
+    }
+    map[key].weight += detail.weight;
+    return map;
+  }, {});
+  const purchaseResult = Object.entries(purchaseAggregationMap).map(
+    ([key, values]) => {
+      const [colorCode, colorQuality] = key.split(":");
+      return {
+        Color: colorCode,
+        colorQuality,
+        weight: values.weight,
+        denier: values.denier,
+      };
+    }
+  );
+
+  const salesAggregationMap = salesDetails.reduce((map, detail) => {
+    const key = `${detail.colorCode}:${detail.colorQuality}`;
+    if (!map[key]) {
+      map[key] = { weight: 0, denier: detail.denier };
+    }
+    map[key].weight += detail.weight;
+    return map;
+  }, {});
+  const salesResult = Object.entries(salesAggregationMap).map(
+    ([key, values]) => {
+      const [colorCode, colorQuality] = key.split(":");
+      return {
+        Color: colorCode,
+        colorQuality,
+        weight: values.weight,
+        denier: values.denier,
+      };
+    }
+  );
+
+  const purchaseDictionary = purchaseResult.reduce((dict, item) => {
+    const key = `${item.Color}-${item.colorQuality}`;
+    dict[key] = item;
+    return dict;
+  }, {});
+  const salesDictionary = salesResult.reduce((dict, item) => {
+    const key = `${item.Color}-${item.colorQuality}`;
+    dict[key] = item;
+    return dict;
+  }, {});
+
+  return Object.keys(purchaseDictionary).map((key) => {
+    const purchaseItem = purchaseDictionary[key] || { weight: 0 };
+    const salesItem = salesDictionary[key] || { weight: 0 };
+
+    return {
+      colorCode: purchaseItem.Color,
+      colorQuality: purchaseItem.colorQuality,
+      weight: purchaseItem.weight - salesItem.weight,
+      denier: purchaseItem.denier,
+    };
+  });
+};
+
 exports.getOrderStock = async () => {
   try {
     const findOrders = await findAllOrders();
@@ -15,32 +80,18 @@ exports.getOrderStock = async () => {
       };
     }
 
-    const pendingOrderArr = [];
-    for (const order of findOrders) {
-      for (const ele of order.orders) {
-        pendingOrderArr.push(ele);
-      }
-    }
-    const newArr = [];
-    for (const ele of pendingOrderArr) {
-      if (ele.pendingPcs > 0) {
-        newArr.push(ele);
-      }
-    }
+    const pendingOrderArr = findOrders.flatMap((order) => order.orders);
+    const newArr = pendingOrderArr.filter((ele) => ele.pendingPcs > 0);
 
     const matchingId = new Set(newArr.map((ele) => ele.matchingId));
     const resultArray = Array.from(matchingId);
 
     const findMatching = await findAllMatchings();
 
-    let colorYarn = [];
-    for (const ele of findMatching) {
-      for (const matching of resultArray) {
-        if (ele.matchingId === matching) {
-          colorYarn.push(ele.feeders);
-        }
-      }
-    }
+    const matchingIdSet = new Set(resultArray);
+    const colorYarn = findMatching
+      .filter((ele) => matchingIdSet.has(ele.matchingId))
+      .map((ele) => ele.feeders);
     const uniqueValues = new Set();
 
     colorYarn.forEach((obj) => {
@@ -53,75 +104,12 @@ exports.getOrderStock = async () => {
 
     const purchaseDetails = await findAllYarnPurchase();
     const salesDetails = await findAllSaleYarn();
-
-    const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
-      const key = `${detail.colorCode}:${detail.colorQuality}`;
-      if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
-      }
-
-      map[key].weight += detail.weight;
-      return map;
-    }, {});
-    const purchaseResult = Object.entries(purchaseAggregationMap).map(
-      ([key, values]) => {
-        const [colorCode, colorQuality] = key.split(":");
-        return {
-          Color: colorCode,
-          colorQuality,
-          weight: values.weight,
-          denier: values.denier,
-        };
-      }
+    const yarnStock = buildYarnStock(purchaseDetails, salesDetails);
+    const yarnStockByCode = new Map(
+      yarnStock.map((item) => [item.colorCode, item.weight])
     );
-
-    const salesAggregationMap = salesDetails.reduce((map, detail) => {
-      const key = `${detail.colorCode}:${detail.colorQuality}`;
-      if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
-      }
-
-      map[key].weight += detail.weight;
-
-      return map;
-    }, {});
-    const salesResult = Object.entries(salesAggregationMap).map(
-      ([key, values]) => {
-        const [colorCode, colorQuality] = key.split(":");
-        return {
-          Color: colorCode,
-          colorQuality,
-          weight: values.weight,
-          denier: values.denier,
-        };
-      }
-    );
-
-    const purchaseDictionary = purchaseResult.reduce((dict, item) => {
-      const key = `${item.Color}-${item.colorQuality}`;
-      dict[key] = item;
-      return dict;
-    }, {});
-    const salesDictionary = salesResult.reduce((dict, item) => {
-      const key = `${item.Color}-${item.colorQuality}`;
-      dict[key] = item;
-      return dict;
-    }, {});
-
-    const yarnStock = Object.keys(purchaseDictionary).map((key) => {
-      const purchaseItem = purchaseDictionary[key] || { weight: 0 };
-      const salesItem = salesDictionary[key] || { weight: 0 };
-
-      return {
-        colorCode: purchaseItem.Color,
-        colorQuality: purchaseItem.colorQuality,
-        weight: purchaseItem.weight - salesItem.weight,
-        denier: purchaseItem.denier,
-      };
-    });
     const result = uniqueArray.map((color) => {
-      const stockItem = yarnStock.find((item) => item.colorCode === color);
-      const weight = stockItem ? stockItem.weight : 0;
+      const weight = yarnStockByCode.has(color) ? yarnStockByCode.get(color) : 0;
       return { color, weight };
     });
     return result;
@@ -214,75 +202,16 @@ exports.getsareeYarn = async (orderNo, design) => {
 
     const purchaseDetails = await findAllYarnPurchase();
     const salesDetails = await findAllSaleYarn();
-
-    const purchaseAggregationMap = purchaseDetails.reduce((map, detail) => {
-      const key = `${detail.colorCode}:${detail.colorQuality}`;
-      if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
-      }
-
-      map[key].weight += detail.weight;
-      return map;
-    }, {});
-    const purchaseResult = Object.entries(purchaseAggregationMap).map(
-      ([key, values]) => {
-        const [colorCode, colorQuality] = key.split(":");
-        return {
-          Color: colorCode,
-          colorQuality,
-          weight: values.weight,
-          denier: values.denier,
-        };
-      }
+    const yarnStock = buildYarnStock(purchaseDetails, salesDetails);
+    const yarnStockByCode = new Map(
+      yarnStock.map((item) => [item.colorCode, item])
     );
-
-    const salesAggregationMap = salesDetails.reduce((map, detail) => {
-      const key = `${detail.colorCode}:${detail.colorQuality}`;
-      if (!map[key]) {
-        map[key] = { weight: 0, denier: detail.denier };
-      }
-
-      map[key].weight += detail.weight;
-
-      return map;
-    }, {});
-    const salesResult = Object.entries(salesAggregationMap).map(
-      ([key, values]) => {
-        const [colorCode, colorQuality] = key.split(":");
-        return {
-          Color: colorCode,
-          colorQuality,
-          weight: values.weight,
-          denier: values.denier,
-        };
-      }
-    );
-
-    const purchaseDictionary = purchaseResult.reduce((dict, item) => {
-      const key = `${item.Color}-${item.colorQuality}`;
-      dict[key] = item;
-      return dict;
-    }, {});
-    const salesDictionary = salesResult.reduce((dict, item) => {
-      const key = `${item.Color}-${item.colorQuality}`;
-      dict[key] = item;
-      return dict;
-    }, {});
-
-    const yarnStock = Object.keys(purchaseDictionary).map((key) => {
-      const purchaseItem = purchaseDictionary[key] || { weight: 0 };
-      const salesItem = salesDictionary[key] || { weight: 0 };
-
-      return {
-        colorCode: purchaseItem.Color,
-        colorQuality: purchaseItem.colorQuality,
-        weight: purchaseItem.weight - salesItem.weight,
-        denier: purchaseItem.denier,
-      };
-    });
 
     const findFeeders = listOfOrders;
     const findColorYarn = await findYarnColor();
+    const colorYarnByCode = new Map(
+      findColorYarn.map((yarn) => [yarn.colorCode, yarn])
+    );
     const findPickByDesign = await findDesigns();
 
     const denierSet1 = [];
@@ -290,9 +219,7 @@ exports.getsareeYarn = async (orderNo, design) => {
     for (const feeder of findFeeders) {
       const denierSet = [];
       for (const [key, colorCode] of Object.entries(feeder)) {
-        const matchingColorYarn = findColorYarn.find(
-          (yarn) => yarn.colorCode === colorCode
-        );
+        const matchingColorYarn = colorYarnByCode.get(colorCode);
         if (matchingColorYarn) {
           const feederDenierInfo = {};
           feederDenierInfo[key] = colorCode;
@@ -397,22 +324,21 @@ exports.getsareeYarn = async (orderNo, design) => {
     });
     let pendingOrderYarn = [];
     for (const data of pageItems) {
-      for (const ele of yarnStock) {
-        const colorKey = Object.keys(data)[0];
-        const colorCode = data[colorKey];
-        if (colorCode === ele.colorCode) {
-          const remainYarn = {
-            color: ele.colorCode,
-            totalStock: ele.weight,
-            requiredYarn: data.weight,
-            // remainingStock: ele.weight - data.weight,
-          };
+      const colorKey = Object.keys(data)[0];
+      const colorCode = data[colorKey];
+      const ele = yarnStockByCode.get(colorCode);
+      if (ele) {
+        const remainYarn = {
+          color: ele.colorCode,
+          totalStock: ele.weight,
+          requiredYarn: data.weight,
+          // remainingStock: ele.weight - data.weight,
+        };
 
-          remainYarn.totalStock = remainYarn.totalStock.toFixed(4);
-          remainYarn.requiredYarn = remainYarn.requiredYarn.toFixed(4);
-          // remainYarn.remainingStock = remainYarn.remainingStock.toFixed(4);
-          pendingOrderYarn.push(remainYarn);
-        }
+        remainYarn.totalStock = remainYarn.totalStock.toFixed(4);
+        remainYarn.requiredYarn = remainYarn.requiredYarn.toFixed(4);
+        // remainYarn.remainingStock = remainYarn.remainingStock.toFixed(4);
+        pendingOrderYarn.push(remainYarn);
       }
     }
     const uniqueYarn = Array.from(

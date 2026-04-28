@@ -273,7 +273,6 @@ exports.findRemainingYarnStock = async () => {
 
     const calculatYarnWeight = (denier, pick, order, finalCut) =>
       (denier * pick * order * finalCut * 52 * 1) / 9000000;
-    console.log("===mergedObjects1===", mergedObjects1);
     const resultArray = [];
     for (const data of mergedObjects1) {
       const arrayWeight = 0;

@@ -1,5 +1,31 @@
 const completeOrdersService = require("../../service/Order/completeOrders.service");
 
+const handleControllerError = (error, res) => {
+  if (error.name === "ValidationError") {
+    const errorMessages = Object.values(error.errors).map(
+      (err) => err.message
+    );
+    return res.status(400).json({ errorMessages });
+  }
+
+  return res.status(500).json({ error: "Internal Server Error" });
+};
+
+const getPagination = (req) => {
+  const limit = parseInt(req.query.limit, 10) || 1000;
+  const offset = parseInt(req.query.offset, 10) || 0;
+  return { limit, offset };
+};
+
+const buildPagedResponse = (items, limit, offset, messageText) => ({
+  page: offset + 1,
+  totalPages: Math.ceil(items.length / limit),
+  itemsPerPage: limit,
+  total: items.length,
+  pageItems: items,
+  message: messageText,
+});
+
 exports.completeProcessOrder = async (req, res) => {
   try {
     const orderId = req.params.orderId;
@@ -12,16 +38,9 @@ exports.completeProcessOrder = async (req, res) => {
       machineId,
       complete
     );
-    res.status(makeOrderComplete.status).send(makeOrderComplete);
+    return res.status(makeOrderComplete.status).send(makeOrderComplete);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -37,37 +56,21 @@ exports.getCompleteOrder = async (req, res) => {
       return res.status(findAllProcessOrders.status).send(findAllProcessOrders);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findAllProcessOrders;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findAllProcessOrders.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "order is completed" : "orders are completed.";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status}`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findAllProcessOrders,
+      limit,
+      offset,
+      `Total ${totalItems} ${status}`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -80,16 +83,9 @@ exports.createCompleteOrder = async (req, res) => {
       tokenId,
       data
     );
-    res.status(completeOrder.status).send(completeOrder);
+    return res.status(completeOrder.status).send(completeOrder);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -104,37 +100,21 @@ exports.getDeliveredOrder = async (req, res) => {
         .send(findAllDeliveredOrders);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findAllDeliveredOrders;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findAllDeliveredOrders.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "order is delivered." : "orders are delivered";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status}`,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findAllDeliveredOrders,
+      limit,
+      offset,
+      `Total ${totalItems} ${status}`
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };
 
@@ -149,36 +129,20 @@ exports.getAllCompleteOrder = async (req, res) => {
         .send(findAllCompleteOrders);
     }
 
-    const limit = parseInt(req.query.limit) || 1000 ;
-    const offset = parseInt(req.query.offset) || 0;
-
-    const startIndex = offset * limit;
-    const endIndex = startIndex + limit;
-    const pageItems = findAllCompleteOrders;
-    // .slice(startIndex, endIndex);
+    const { limit, offset } = getPagination(req);
 
     const totalItems = findAllCompleteOrders.length;
-    const totalPages = Math.ceil(totalItems / limit);
     const status =
       totalItems === 1 ? "order is completed." : "orders are completed.";
 
-    const response = {
-      page: offset + 1,
-      totalPages,
-      itemsPerPage: limit,
-      total: totalItems,
-      pageItems: pageItems,
-      message: `Total ${totalItems} ${status} `,
-    };
-    res.status(200).send(response);
+    const response = buildPagedResponse(
+      findAllCompleteOrders,
+      limit,
+      offset,
+      `Total ${totalItems} ${status} `
+    );
+    return res.status(200).send(response);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errorMessages = Object.values(error.errors).map(
-        (err) => err.message
-      );
-      res.status(400).json({ errorMessages });
-    } else {
-      res.status(500).json({ error: "Internal Server Error" });
-    }
+    return handleControllerError(error, res);
   }
 };

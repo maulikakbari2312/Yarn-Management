@@ -13,14 +13,16 @@ const { findAllOrders } = require("../../DBQuery/Order/order");
 exports.createColorYarnDetail = async (colorYarn) => {
   try {
     const getColorYarn = await findYarnColor();
+    const incomingColorCode = colorYarn.colorCode.toLowerCase();
 
-    for (const ele of getColorYarn) {
-      if (ele.colorCode.toLowerCase() === colorYarn.colorCode.toLowerCase()) {
-        return {
-          status: 400,
-          message: "ColorYarn colorCode cannot be the same!",
-        };
-      }
+    const hasDuplicateColorCode = getColorYarn.some(
+      (ele) => ele.colorCode.toLowerCase() === incomingColorCode
+    );
+    if (hasDuplicateColorCode) {
+      return {
+        status: 400,
+        message: "ColorYarn colorCode cannot be the same!",
+      };
     }
 
     const colorYarnData = {
@@ -72,10 +74,11 @@ exports.findColorYarn = async () => {
 exports.editColorYarnDetail = async (data, token) => {
   try {
     const existingColorCode = await findParticularYarnColor(data);
+    const incomingColorCode = data.colorCode.toLowerCase();
     if (
       existingColorCode &&
       existingColorCode.tokenId !== token &&
-      existingColorCode.colorCode.toLowerCase() === data.colorCode.toLowerCase()
+      existingColorCode.colorCode.toLowerCase() === incomingColorCode
     ) {
       return {
         status: 400,
@@ -138,16 +141,14 @@ exports.deleteColorYarnDetail = async (token) => {
     }
     console.log("==orderArr==", orderArr);
     const getMatch = await findAllMatchings();
+    const processingMatchingIds = new Set(orderArr.map((item) => item.matchingId));
 
     const findMatchingData = getMatch.filter((ele) =>
-      orderArr.some((item) => item.matchingId === ele.matchingId)
+      processingMatchingIds.has(ele.matchingId)
     );
-    const yarnCollect = [];
-    for (const data of findMatchingData) {
-      for (const [key, value] of Object.entries(data.feeders)) {
-        yarnCollect.push(value);
-      }
-    }
+    const yarnCollect = findMatchingData.flatMap((data) =>
+      Object.values(data.feeders)
+    );
     const getYarn = await findColorYarnById(token);
 
     const matchYarn = yarnCollect.find((yarn) => yarn === getYarn?.colorCode);
